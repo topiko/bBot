@@ -162,7 +162,7 @@ module body(show_shell, disp){
 }
 
 //a = 15;
-body(0, 1);
+body(0, 0);
 //rein_up(0);
 //rein_low(0);
 

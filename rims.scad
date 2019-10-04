@@ -119,5 +119,7 @@ module lowerRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, A_out, t, bottom_thic
 //lowerRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, A_out, t, 2, 0, a);
 
 upRim(wx_head, wy_head, r_corner_head, sc_head, sc2_head, mid_head, w_rim_head, ni_head, A_out, t, heights_head, 0, a);
+upRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, A_out, t, heights_, 0, a);
+
 
 //shell(wall_t, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
