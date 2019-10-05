@@ -40,13 +40,32 @@ module stepper_slide(mode){
         }
     }
     module slid(add_t){
-        translate([axle_x + shift_x,0,H-h/2])cube([t_slid + 2*add_t, wy - w_rim*2 + 2*2, h], center = true);
         
+        n_h = 8;
+        module holes(r_h, d_h){
+            from_bottom = (h - d_h*(n_h-1))/2;
+            for (i=[0:1:n_h-1]){
+                translate([0,0,-h/2 + from_bottom + i*d_h]) rotate([0,90,0]) cylinder(r=r_h, h = 2*t_slid, $fn = 20, center = true);
+                }
+            translate([-t_slid/2, 0,0]) cube([t_slid, 2.5, (n_h-1)*d_h + 2], center = true);
+                echo(t_slid/4, t_slid/2, h);
+         }
+         
+         w_controller = 13;
+         hole_coord = [-29,-16,-14,-1,1,14,16,29];
+            
+         difference(){   
+            cube([t_slid + 2*add_t, wy - w_rim*2 + 2*2, h], center = true);
+            for (y=hole_coord) translate([0,y,0]) holes(.3, 2.54);   
+            
         }
+        
+        
+    }
     
     if (mode == 0) sups();
-    else if (mode == 1) slid(.1);
-        
+    else if (mode == 1) translate([axle_x + shift_x,0,H-h/2]) slid(.1);
+    else if (mode == 2) slid(.1);
 }
 
 
@@ -62,6 +81,9 @@ module motor_axle_reinforcement(z,alpha,L, w,t,mode){
     
     module cutout(){
         translate([axle_x, wy/2+A_out,z]) rotate([0, alpha,0]) mirror([0,0,1]) rotate([0, 0,90])linear_extrude(height = L) polygon(points = [[-t - w_rim, -nema_r_axle], [-t-w_rim, nema_r_axle], [-t/2, nema_r_axle], [-t/2, nema_r_axle + lip], [0, nema_r_axle + lip], [0, -nema_r_axle - lip], [-t/2, -nema_r_axle - lip], [-t/2, -nema_r_axle]]);
+        
+        
+        
         }
     
     if (mode == 0) rein();
@@ -187,8 +209,8 @@ module body(show_shell, disp){
 }
 
 //a = 15;
-body(0, 0);
+//body(0, 0);
 //rein_up(0);
 //rein_low(0);
 
-//stepper_slide(0);
+stepper_slide(1);
