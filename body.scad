@@ -118,7 +118,7 @@ module body(show_shell, disp){
             wheel_nema_mount_();
             mirror([0,1,0])wheel_nema_mount_();
             arduino_mount();
-            stepper_mount();
+            //stepper_mount();
             battery_mount();
             rein_up_();
         }

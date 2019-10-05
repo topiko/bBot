@@ -1,7 +1,7 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = .2;
+dt = .15;
 
 
 A = 1;
@@ -10,9 +10,9 @@ A_out = A; //A;
 wall_t = .66;
 t = 4;
 wx = 56;
-wy = 67;
+wy = 69;
 r_corner = wx/10;
-H_ = 130;
+H_ = 124;
 ni = floor(H_/t);
 H = t*ni;
 sc = 1.;
@@ -85,7 +85,7 @@ ni_hand = ceil(L_hand/t);
 mid_hand = .8;
 rot_hand = 0;
 //hand_axle_h = H - nema14_x/2 - 26;
-hand_axle_h = t + 3*nema14_x/2 + 32;
+hand_axle_h = t + 3*nema14_x/2 + 27;
 hand_z = hand_axle_h; // -ni_hand*t;
 t_motor_mount = 4;
 hand_shift = 6;
@@ -93,6 +93,8 @@ hand_y = wy/2 + wy_hand - 2*t_motor_mount;
 axle_x = wx/2 - 19.1;
 bolt_wall_t = .7;
 
+
+echo("Top h = ", H - hand_axle_h - nema14_x/2);
 
 // STEPPER CONTROLLERS
 x_hole_stepper = wx/2 - r_corner;
