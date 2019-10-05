@@ -20,18 +20,40 @@ module shifted_battery_mount(mode){
 
 
 module rein_up(mode){
-    motor_axle_reinforcement(hand_axle_h,0,3*nema14_x/2 + 5, mode);
+    motor_axle_reinforcement(hand_axle_h,0,3*nema14_x/2 + 5, 12, 2, mode);
 }
 
 module rein_low(mode){
-    motor_axle_reinforcement(nema14_x/2 + t,atan(w_rim/(nema14_x/2 + t)),3*nema14_x, mode);
+    motor_axle_reinforcement(nema14_x/2 + t,atan(w_rim/(nema14_x/2 + t)),3*nema14_x, 12, 2, mode);
+}
+
+module stepper_slide(mode){
+    
+    h = H-hand_axle_h-nema14_x/2;
+    t_slid = 1.5;
+    shift_x = (wx/2 - axle_x) - w_rim - 5 - t_slid/2;
+    
+    module sups(){
+        translate([shift_x, 0 ,0]) {
+            motor_axle_reinforcement(H,0,h + 3, 14, t_motor_mount, mode);
+            mirror([0,1,0])motor_axle_reinforcement(H,0,h+3, 14, t_motor_mount, mode);
+        }
+    }
+    module slid(add_t){
+        translate([axle_x + shift_x,0,H-h/2])cube([t_slid + 2*add_t, wy - w_rim*2 + 2*2, h], center = true);
+        
+        }
+    
+    if (mode == 0) sups();
+    else if (mode == 1) slid(.1);
+        
 }
 
 
-module motor_axle_reinforcement(z,alpha,L, mode){
+module motor_axle_reinforcement(z,alpha,L, w,t,mode){
     
-    w = 16;
-    t = 3;
+    //w = 16;
+    //t = 3;
     lip = .5;
     
     module rein(){
@@ -73,15 +95,8 @@ module body(show_shell, disp){
             }
         }
         
-        // STEPPER DRIVER MOUNTS:
-        module stepper_mount(){
-            intersection(){
-                shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
-                shifted_stepper_mount(0);
-            }
-        }
-        
-        module battery_mount(){
+        // BATTERY MOUNT
+        module battery_mount_(){
             intersection(){
                 shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
                 shifted_battery_mount(0);
@@ -97,11 +112,18 @@ module body(show_shell, disp){
         }
         
         // MOTRO AXLE REINFORCEMENT:
-        
         module rein_up_(){
             intersection(){
                 shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
                 rein_up(0);
+            }
+        }
+        
+        // STEPPER SLIDE:
+        module stepper_slide_(){
+            intersection(){
+                shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
+                stepper_slide(0);
             }
         }
         
@@ -118,8 +140,8 @@ module body(show_shell, disp){
             wheel_nema_mount_();
             mirror([0,1,0])wheel_nema_mount_();
             arduino_mount();
-            //stepper_mount();
-            battery_mount();
+            stepper_slide_();
+            battery_mount_();
             rein_up_();
         }
     }
@@ -154,6 +176,9 @@ module body(show_shell, disp){
             // Opening for motor AXle
             rein_up(1);
             rein_low(1);
+            
+            // STEPPER PLATE SLIDE
+            stepper_slide(1);
         }
         
     }
@@ -166,3 +191,4 @@ body(0, 0);
 //rein_up(0);
 //rein_low(0);
 
+//stepper_slide(0);

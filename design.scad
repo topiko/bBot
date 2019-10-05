@@ -1,7 +1,7 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = .15;
+dt = .2;
 
 
 A = 1;
@@ -10,18 +10,18 @@ A_out = A; //A;
 wall_t = .66;
 t = 4;
 wx = 56;
-wy = 69;
+wy = 70;
 r_corner = wx/10;
-H_ = 124;
+H_ = 120;
 ni = floor(H_/t);
-H = t*ni;
+H = t*(ni+1);
 sc = 1.;
 sc2 = 1.;
 mid = .65;
 w_rim = 4;     
 a = floor(t/dt);
 echo("a = ", a);
-echo("Height = ", ni*t);
+echo("Height = ", H);
 
 
     
@@ -101,7 +101,7 @@ x_hole_stepper = wx/2 - r_corner;
 stepper_z0 = t + nema14_x + t;
 stepper_z1 = hand_axle_h - nema14_x/2 - t;
 stepper_h = stepper_z1 - stepper_z0;
-echo(stepper_h + t + t);
+
 
 //hole_coord_step = [for (i=[-1,1]) for (j=[0,1]) [i*x_hole_stepper, stepper_z0 + j*stepper_h]];
 //bolt_coord_step = hole_coord_step;
