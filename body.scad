@@ -9,34 +9,25 @@ module shifted_due_mount(mode){
         translate([-wx/2 - A_out, 0, t]) rotate([90,0,90]) due_mount(el_mount_h, bolt_sink, mode, a*3);
 }
 
-/*
-module shifted_stepper_mount(mode){
-        translate([wx/2 + A_out, 0, 0]) rotate([90,0,-90]) stepper_mount(el_mount_h, bolt_sink, mode, a*3);
-}
-
-module shifted_battery_mount(mode){
-        translate([wx/2 + A_out, 0, 0]) rotate([90,0,-90]) battery_mount(el_mount_h, bolt_sink, mode, a*3);
-}*/
-
-
 module rein_up(mode){
-    motor_axle_reinforcement(hand_axle_h,-atan(w_rim/(nema14_x/2)),3*nema14_x, 12, 2, 0, mode);
-
+    translate([axle_x, 0,0])motor_axle_reinforcement(hand_axle_h,-atan(w_rim/(nema14_x/2)),3*nema14_x, 12, 2, 0, mode);
 }
 
 module rein_low(mode){
-    motor_axle_reinforcement(nema14_x/2 + t,atan(w_rim/(nema14_x/2)),3*nema14_x, 12, 2, 1, mode);
+    translate([axle_x, 0,0])motor_axle_reinforcement(nema14_x/2 + t,atan(w_rim/(nema14_x/2)),3*nema14_x, 12, 2, 1, mode);
 }
 
 module stepper_slide(mode){
     
-    h = 22; //H-hand_axle_h-nema14_x/2;
+    h = 22; 
     echo("Battery space = ", (hand_axle_h - nema14_x/2) - nema14_x - t - h);
     t_slid = 1.5;
     shift_x = (wx/2 - axle_x) - w_rim - 5 - t_slid/2;
-    t_support = 2.5;
+    t_support = 2.75;
+    
     module sups(x, z, H){
-        translate([(wx/2 - axle_x) - x - t_slid/2, 0 ,h]) {
+        //translate([(wx/2 - axle_x) - x - t_slid/2, 0 ,h])
+       translate([(wx/2) - x - t_slid/2, 0 ,h]) {
             motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode, 0);
             mirror([0,1,0])motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode,0);
         }
@@ -89,6 +80,7 @@ module motor_axle_reinforcement(z,alpha,L, w,t, up,mode){
     //w = 16;
     //t = 3;
     lip = .5;
+    axle_x = 0;
     //up = 1;
     module rein(){
         module rein_(){
