@@ -1,7 +1,7 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = 2;
+dt = -2;
 
 
 A = 1;
@@ -9,10 +9,10 @@ A_in = A; //A;
 A_out = A; //A;
 wall_t = .66;
 t = 4;
-wx = 56;
-wy = 70;
+wx = 57;
+wy = 65;
 r_corner = wx/10;
-H_ = 120;
+H_ = 124;
 ni = floor(H_/t);
 H = t*(ni+1);
 sc = 1.;
@@ -34,7 +34,7 @@ nema_spacing = .3;
 nema14_x = 35.2 + nema_spacing;
 nema14_y = 35.2 + nema_spacing;
 nema14_z = 23.0 + nema_spacing;
-corner_cut = 4  + nema_spacing;
+corner_cut = 2  + nema_spacing;
 nema_L_axle = 17;
 nema_r_axle = 5/2  + nema_spacing;
 nema_bolt_d = d3bolt;
@@ -85,7 +85,8 @@ ni_hand = ceil(L_hand/t);
 mid_hand = .8;
 rot_hand = 0;
 //hand_axle_h = H - nema14_x/2 - 26;
-hand_axle_h = t + 3*nema14_x/2 + 27;
+//hand_axle_h = t + 3*nema14_x/2 + 27;
+hand_axle_h = H - nema14_x/2 - t; 
 hand_z = hand_axle_h; // -ni_hand*t;
 t_motor_mount = 4;
 hand_shift = 6;

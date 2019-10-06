@@ -30,5 +30,5 @@ translate([head_x,0,thickness_bottom + add(heights_)]) show_head(45, 0);
 
 // EL MOUNTS
 shifted_due_mount(2);
-shifted_stepper_mount(2);
-shifted_battery_mount(2);
+//shifted_stepper_mount(2);
+//shifted_battery_mount(2);
