@@ -1,7 +1,7 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = -2;
+dt = .15;
 
 
 A = 1;
@@ -9,8 +9,9 @@ A_in = A; //A;
 A_out = A; //A;
 wall_t = .66;
 t = 4;
-wx = 57;
-wy = 65;
+
+wx = 57.5; //echo(15 + 35 + 1.5 + 2 + 4);
+wy = 69;
 r_corner = wx/10;
 H_ = 124;
 ni = floor(H_/t);
@@ -91,7 +92,7 @@ hand_z = hand_axle_h; // -ni_hand*t;
 t_motor_mount = 4;
 hand_shift = 6;
 hand_y = wy/2 + wy_hand - 2*t_motor_mount;
-axle_x = wx/2 - 19.1;
+axle_x = wx/2 - nema14_x/2 - 1.5;
 bolt_wall_t = .7;
 
 
