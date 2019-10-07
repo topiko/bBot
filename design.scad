@@ -175,4 +175,4 @@ lid_spacing = .3;
 // MISC PARAMS
 heights_ = heights(sc, sc2, mid, t, wx, ni);
 el_mount_h = 3.5;
-bolt_sink = 1.5;
+bolt_sink = 1.2;

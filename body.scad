@@ -21,13 +21,13 @@ module stepper_slide(mode){
     
     h = 22; 
     echo("Battery space = ", (hand_axle_h - nema14_x/2) - nema14_x - t - h);
-    t_slid = 1.5;
+    t_slid = 1.75;
     shift_x = (wx/2 - axle_x) - w_rim - 5 - t_slid/2;
     t_support = 2.75;
     
     module sups(x, z, H){
-        //translate([(wx/2 - axle_x) - x - t_slid/2, 0 ,h])
-       translate([(wx/2) - x - t_slid/2, 0 ,h]) {
+        
+       translate([(wx/2) - x - t_slid/2, 0, h]) {
             motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode, 0);
             mirror([0,1,0])motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode,0);
         }
