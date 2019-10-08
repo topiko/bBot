@@ -23,7 +23,7 @@ module stepper_slide(mode){
     echo("Battery space = ", (hand_axle_h - nema14_x/2) - nema14_x - t - h);
     t_slid = 1.75;
     shift_x = (wx/2 - axle_x) - w_rim - 5 - t_slid/2;
-    t_support = 2.75;
+    t_support = A_out + wall_t + t_slid/2;
     
     module sups(x, z, H){
         
@@ -47,7 +47,7 @@ module stepper_slide(mode){
          hole_coord = [-29,-16,-14,-1,1,14,16,29];
             
          difference(){   
-            cube([t_slid + 2*add_t, wy + 2*A_out - t_support, h], center = true);
+            cube([t_slid + 2*add_t, wy - 2*wall_t, h], center = true);
             for (y=hole_coord) translate([0,y,0]) holes(.3, 2.54);   
             
         }

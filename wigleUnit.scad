@@ -89,8 +89,8 @@ module wigle_square(wx, wy, r, theta, A_in, A_out, t, wall_t, cyl, a){
         // corner:
         translate([wx/2 - r, wy/2 - r, 0]) wigle_cyl(theta, A_in, A_out, t, wall_t, r, 0, 90, cyl, a);
         
-        
-        points = [[0, 8*wy], [wx, wy], [0, wy/2 - wx/2]];
+        x_ = wy/2 - wx/2;
+        points = [[0, 8*wy], [wy, x_ + wy], [0, wy/2 - wx/2]];
         //sides
         
         wall_t_y = min(wall_t, wy/2);
@@ -116,7 +116,4 @@ module wigle_square(wx, wy, r, theta, A_in, A_out, t, wall_t, cyl, a){
         mirror([1,0,0]) mirror([0,1,0])corner();
     }
 }
-
-
-
 
