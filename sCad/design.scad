@@ -155,7 +155,7 @@ heights_head = heights(sc_head, sc2_head, mid_head, t, wx_head, ni_head);
 // NECK PARAMS
 neck_t = 10;
 axle_wall_t = 6;
-neck_axle_d = 4;
+neck_axle_d = 3;
 r_pivot_circle = neck_axle_d/2 + axle_wall_t;
 
 neck_h = wx_head/2 + 3;
@@ -170,6 +170,7 @@ thickness_bottom = 2;
 bottom_rim_w = 1;
 //lid_spacing_scale = .0;
 lid_spacing = .3;
+switch_d = 5;
 
 
 // MISC PARAMS

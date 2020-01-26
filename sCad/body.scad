@@ -29,7 +29,7 @@ module stepper_slide(mode){
         
        translate([(wx/2) - x - t_slid/2, 0, h]) {
             motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode, 0);
-            mirror([0,1,0])motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode,0);
+            mirror([0,1,0]) motor_axle_reinforcement(z,0,H, 3*t_slid + 2*t_support, t_support, mode,0);
         }
     }
     module slid(add_t, h){
@@ -39,16 +39,18 @@ module stepper_slide(mode){
             for (i=[0:1:n_h-1]){
                 translate([0,0,-h/2 + from_bottom + i*d_h]) rotate([0,90,0]) cylinder(r=r_h, h = 2*t_slid, $fn = 20, center = true);
                 }
-            translate([-t_slid/2, 0,0]) cube([t_slid, 2.5, (n_h-1)*d_h + 2], center = true);
+            translate([-t_slid/2, 0,0]) cube([t_slid, 3, (n_h-1)*d_h + 2.6], center = true);
                 
          }
          
+         d_h = 2.54;
          w_controller = 13;
-         hole_coord = [-29,-16,-14,-1,1,14,16,29];
+         hole_coord_pos = [d_h/2, d_h/2 + w_controller,d_h*3/2 + w_controller, d_h*3/2 + 2*w_controller];
+         hole_coord = concat(hole_coord_pos, -hole_coord_pos);
             
          difference(){   
             cube([t_slid + 2*add_t, wy - 2*wall_t, h], center = true);
-            for (y=hole_coord) translate([0,y,0]) holes(.3, 2.54);   
+            for (y=hole_coord) translate([0,y,0]) holes(.5, 2.54);   
             
         }
         
@@ -71,7 +73,7 @@ module stepper_slide(mode){
         translate([wx/2-x_[2]-t_slid/2, 0, H/2]) 
         slid(.1, H-2*t);
     }
-    else if (mode == 2) slid(.1);
+    else if (mode == 2) slid(-.05, h);
 }
 
 
@@ -226,8 +228,9 @@ module body(show_shell, disp){
 }
 
 //a = 15;
-body(0, 0);
+//body(0, 0);
 //rein_up(0);
 //rein_low(0);
 
+stepper_slide(2);
 //stepper_slide(1);

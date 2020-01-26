@@ -42,14 +42,20 @@ module topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, h
 module top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, mode, a){
     difference(){
         topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 1, a);
+        // Necj bolts:
         translate([head_x,0, thickness_bottom + add(heights_)]) show_head(25, 1);
+        // cable hole:
         translate([3 + neck_width + head_x, 0, thickness_bottom + add(heights_)])
         intersection() {
            cylinder(r = neck_t/2, h = 20, center = true, $fn = 40);
            translate([10,0,0]) cube(20, center = true);
         }
+        // switch hole
+        translate([wx/2 - switch_d/2 - w_rim - .5, wy/2  - switch_d/2 - w_rim - 5,add(heights_) - 1]) cylinder(r = switch_d/2, h = 2*thickness_bottom, $fn = 40);
     }
     if (mode==2) translate([head_x,0, thickness_bottom + add(heights_)]) show_head(60, mode);
+
+
     
 }
 
@@ -60,7 +66,7 @@ module bottom_cover_w_mpu(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, h
     echo(height);
     difference() {
         bottomCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, height, bottom_rim_w, wall_t, move, a);
-        translate([axle_x,0,shift + height + .45]) cube([16,21,height*2], center = true);
+        translate([axle_x,0,shift + height + .6]) cube([16,21,height*2], center = true);
         //translate([0,0,shift]) mpu_mount(mpu_mount_t, .2, 2, 40);
     }
     
@@ -105,10 +111,11 @@ module bottomCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_
     
 }
 
-//top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, lid_spacing_scale, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 2, a);
-a = 10;
-dt = .02;
 
-bottom_cover_w_mpu(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom+1, bottom_rim_w, wall_t, 1, a);
+a = 20;
+dt = .02;
+//top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 0, a);
+
+bottom_cover_w_mpu(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 1, a);
 
 //bottomCover(wx, wy, r_corner, sc, sc2, mid, lid_spacing_scale, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 1, a);
