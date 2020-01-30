@@ -19,6 +19,8 @@
 */
 
 int inInt = 0;
+int command[3] = {0, 0, 0};
+int countSer = 0;
 boolean report = false;  // whether the string is complete
 
 void setup() {
@@ -28,11 +30,21 @@ void setup() {
 
 void loop() {
   // print the int when newInt
-  if (report) {
+  if (countSer == 1) {
     inInt += 1;
-    Serial3.print(inInt);
-    //Serial3.write(inInt);
-    report = false;
+    commnad[0] = inInt;
+  }
+  else if (countSer == 2) {
+    inInt += 2;
+    commnad[1] = inInt;
+  }
+  else if (countSer == 3) {
+    inInt += 3;
+    commnad[2] = inInt;
+    counter = 0;
+    Serial3.print(command[0]);
+    Serial3.print(command[1]);
+    Serial3.print(command[2]);
   }
 }
 
@@ -43,7 +55,9 @@ void loop() {
 */
 void serialEvent3() {
   inInt = (int)Serial3.read();
-  report = true;
+  countSer += 1;
+  //report = true;
+  
   /*
   while (Serial3.available()) {
     // get the new byte:
