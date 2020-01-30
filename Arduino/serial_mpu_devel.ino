@@ -136,9 +136,8 @@ int inInt = 0;
 // rpi counter for serial communication
 int countSer = 0;
 // coomand given by rpi
-unsigned char command[2] = {0, 0};
+unsigned char command[3] = {0, 0, 0};
 int pitchInt;
-int badCom = 0;
 boolean inSer = false;
 
 // orientation/motion vars
@@ -209,12 +208,11 @@ void setup() {
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
     // wait for ready
-    //Serial.println(F("\nSend any character to begin DMP programming and demo: "));
+    Serial.println(F("\nSend any character to begin DMP programming and demo: "));
     //while (Serial.available() && Serial.read()); // empty buffer
     //while (!Serial.available());                 // wait for data
     //while (Serial.available() && Serial.read()); // empty buffer again
-    
-    
+
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
@@ -270,6 +268,7 @@ void loop() {
     // wait for MPU interrupt or extra packet(s) available
     //while (!mpuInterrupt && fifoCount < packetSize) {}
 
+    // This if statement is to mimic the above while wait... 
     if (mpuInterrupt || fifoCount >= packetSize){
       // reset interrupt flag and get INT_STATUS byte
       mpuInterrupt = false;
@@ -296,7 +295,10 @@ void loop() {
         // track FIFO count here in case there is > 1 packet available
         // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
-
+        
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
       }
     }
     
@@ -322,42 +324,28 @@ void loop() {
     }
     */
     if (inSer) {
-      inSer = false;
       
-      // Only calculate the ypr if it is requested
-      mpu.dmpGetQuaternion(&q, fifoBuffer);
-      mpu.dmpGetGravity(&gravity, &q);
-      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+
+      inSer = false;
 
       int comIdx = 0;
-      badCom -= 2;
-      while (comIdx < 2){
+      while (comIdx < 3){
         while (Serial3.available() > 0){
           command[comIdx] = Serial3.read();
           comIdx++;
         }
-        badCom++;
       }
-
-      if (comIdx == 2){
-
-        int commandNumber = (command[0]<<8) | command[1];
-        
-        pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
-
-        Serial3.write(pitchInt >> 8);
-        Serial3.write(pitchInt & 0xff);
-        Serial.print("pitch\t");
-        Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
-        Serial.print("\tcommand\t");
-        Serial.print(command[0]);
-        Serial.print("\t");
-        Serial.println(command[1]);
-      }
-      else {
-        badCom++;
-        Serial3.print("Shitty input count: ");
-        Serial3.println(badCom);
-      }
+      
+      //int commandNumber = (command[0]<<8) | command[1];
+      
+      pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
+      Serial3.write(pitchInt >> 8);
+      Serial3.write(pitchInt & 0xff);
+      /*Serial.print("pitch\t");
+      Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
+      Serial.print("\tcommand\t");
+      Serial.print(command[0]);
+      Serial.print("\t");
+      Serial.println(command[2]);*/
     }
 }
