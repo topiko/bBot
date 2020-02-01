@@ -183,6 +183,11 @@ void setup() {
         Fastwire::setup(400, true);
     #endif
 
+    // Wait for raspberry to start
+    for (int t; t < 90; t++){
+      delay(1000);
+    }  
+    
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
@@ -302,30 +307,7 @@ void loop() {
       }
     }
     
-    // Serial communication: 
-    /*
-    if (countSer == 1) {
-      command[0] = inInt;
-    }
-    else if (countSer == 2) {
-      command[1] = inInt;
-      countSer = 0;
-
-      pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
-      Serial3.write(pitchInt >> 8);
-      Serial3.write(pitchInt & 0xff);
-      
-      Serial.print("pitch\t");
-      Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
-      Serial.print("\tcommand\t");
-      Serial.print(command[0]);
-      Serial.print("\t");
-      Serial.println(command[1]);
-    }
-    */
     if (inSer) {
-      
-
       inSer = false;
 
       int comIdx = 0;
@@ -336,16 +318,21 @@ void loop() {
         }
       }
       
-      //int commandNumber = (command[0]<<8) | command[1];
-      
+      int n1 = command[0] >> 6;
+      int n2 = (((command[0] & 63)<<5) | (command[1]>>3)) - 1024;
+      int n3 = ((command[1] & 7)<<8 | command[2]) - 1024; 
+  
       pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
+      
       Serial3.write(pitchInt >> 8);
       Serial3.write(pitchInt & 0xff);
-      /*Serial.print("pitch\t");
+      Serial.print("pitch\t");
       Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
       Serial.print("\tcommand\t");
-      Serial.print(command[0]);
+      Serial.print(n1);
       Serial.print("\t");
-      Serial.println(command[2]);*/
+      Serial.print(n2);
+      Serial.print("\t");
+      Serial.println(n3);
     }
 }
