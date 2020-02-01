@@ -1,8 +1,7 @@
 
 import time
 import serial
-import struct
-
+from communication import talk, listen #get_talk_bytes_from_cmd
 
 ser = serial.Serial(
         port='/dev/serial0',
@@ -15,62 +14,37 @@ ser = serial.Serial(
 
 angle_factor = 20000.
 pi = 3.14159267
-report = True 
-
-def make_bytes(control_cmd):
-
-  return bytearray([3,1,2])
-
-def talk(control_cmd):
-  
-  sendbytes = make_bytes(control_cmd)
-  ser.write(sendbytes)
-
-def listen():
-  
-  t0 = time.time()
-  while ser.in_waiting<1: pass
-  t1 = time.time()
-
-  s = ser.read(2)
- 
-  orient = int.from_bytes(s, byteorder='big', signed = True)
-  if report:
-    print('Time spent = {:.3f}ms'.format((t1-t0)*1000))
-
-  return orient/angle_factor/pi*180, t1 - t0
+report = False #True 
   
 
-def act(i):
-  a = i >> 8
-  b = i & 0xff
-
-  time.sleep(.001)
-
-
-
-
-  return a, b
+def act(orient):
+    
+  time.sleep(.0015)
+  a = int(-(orient/90)*1024)
+  return [0,a,a]
 
 i = 0
-orient = 10
+orient = 0 
 wait_sum = 0
-t0 = time.time()
+ni = 20
+cmd = [0,1,1]
+t0 = 0
 while True: #:orient not in [0, 1023]:
 
-  a ,b = act(i)
-  talk(1)
-  act(i)
-  orient, wait = listen()
+  talk(ser, cmd)
+
+  cmd = act(orient)
+  orient, wait = listen(ser)
+  orient = orient/angle_factor/pi*180
 
   wait_sum += wait
 
-  if report:
-    print(orient)
-    print() 
   i+=1
-  if i%100 == 0:
+  if i%ni == 0:
     t1 = time.time()
-    print('Pitch = {:.2f}deg, Freq: {}'.format(orient, i/(t1-t0)))
+    print('Time per 1 loop: {:.03f}ms'.format((t1-t0)*1000/ni))
+    print('Pitch = {:.2f}deg, Freq: {}'.format(orient, ni/(t1-t0)))
     print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t1-t0)))
   
+    wait_sum = 0
+    t0 = time.time()
