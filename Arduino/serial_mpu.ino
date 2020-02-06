@@ -46,6 +46,13 @@ THE SOFTWARE.
 #include "I2Cdev.h"
 
 #include "MPU6050_6Axis_MotionApps20.h"
+
+// stepper library
+#include <AccelStepper.h>
+
+// use servos:
+#include <Servo.h>
+
 //#include "MPU6050.h" // not necessary if using MotionApps include file
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
@@ -117,10 +124,6 @@ MPU6050 mpu;
 //#define OUTPUT_TEAPOT
 
 
-
-#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
-bool blinkState = false;
-
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
@@ -135,13 +138,46 @@ int inInt = 0;
 // rpi report flag
 // rpi counter for serial communication
 // int countSer = 0;
-// coomand given by rpi
+// command given by rpi
 unsigned char command[3] = {0, 0, 0};
 int pitchInt;
 boolean inSer = false;
 unsigned long time_read_imu = 0;
-unsigned long imu_previous = 0;
-unsigned int time_between_imu_reads;
+//unsigned long imu_previous = 0;
+//unsigned int time_between_imu_reads;
+int comIdx = 0;
+int n1;
+int n2;
+int n3;
+boolean newOrient = false;
+
+// Stepper motor variables:
+// leg pins:
+#define dirPin_Lleg 50
+#define stepPin_Lleg 48
+#define dirPin_Rleg 42
+#define stepPin_Rleg 40
+// hand pins:
+#define dirPin_Lhand 34
+#define stepPin_Lhand 32
+#define dirPin_Rhand 26
+#define stepPin_Rhand 24
+
+// This tels that we have a driver for the stepper:
+#define motorInterfaceType 1
+
+// Max speed and acc:
+#define maxStepperSpeed 1024 //2048
+#define maxStepperAcc 8192
+
+AccelStepper lLeg = AccelStepper(motorInterfaceType, stepPin_Lleg, dirPin_Lleg);
+AccelStepper rLeg = AccelStepper(motorInterfaceType, stepPin_Rleg, dirPin_Rleg);
+AccelStepper lHand = AccelStepper(motorInterfaceType, stepPin_Lhand, dirPin_Lhand);
+AccelStepper rHand = AccelStepper(motorInterfaceType, stepPin_Lhand, dirPin_Lhand);
+
+// Head tilt servo:
+# define servoPin 11
+Servo headServo;  // create servo object to control a servo
 
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
@@ -260,8 +296,24 @@ void setup() {
         Serial.println(F(")"));
     }
 
-    // configure LED for output
-    pinMode(LED_PIN, OUTPUT);
+    // Stepper configurations:
+    // speeds:
+    lLeg.setMaxSpeed(maxStepperSpeed);
+    rLeg.setMaxSpeed(maxStepperSpeed);
+    lHand.setMaxSpeed(maxStepperSpeed);
+    rHand.setMaxSpeed(maxStepperSpeed);
+    // acccels:
+    lLeg.setAcceleration(maxStepperAcc);
+    rLeg.setAcceleration(maxStepperAcc);
+    lHand.setAcceleration(maxStepperAcc);
+    rHand.setAcceleration(maxStepperAcc);
+
+    lHand.setCurrentPosition(0);
+    rHand.setCurrentPosition(0);
+    //stepper.setCurrentPosition(0);
+
+    //servo:
+    headServo.attach(servoPin);
 }
 
 
@@ -277,47 +329,52 @@ void loop() {
     //while (!mpuInterrupt && fifoCount < packetSize) {}
 
     // This if statement is to mimic the above while wait... 
-    if (mpuInterrupt || fifoCount >= packetSize){
-      // reset interrupt flag and get INT_STATUS byte
-      mpuInterrupt = false;
-      mpuIntStatus = mpu.getIntStatus();
-
-      // get current FIFO count
-      fifoCount = mpu.getFIFOCount();
-
-      // check for overflow (this should never happen unless our code is too inefficient)
-      if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
-
-      // otherwise, check for DMP data ready interrupt (this should happen frequently)
-      } 
-      else if (mpuIntStatus & 0x02) {
-        // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-
-        
-        time_read_imu = micros();
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
-        fifoCount -= packetSize;
-        
-        mpu.dmpGetQuaternion(&q, fifoBuffer);
-        mpu.dmpGetGravity(&gravity, &q);
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-
-        
-      }
-    }
-    
     if (inSer) {
       inSer = false;
+      newOrient = false;
+      
+      // only read imu if serial request received:
+      while (not newOrient){
+        if (mpuInterrupt || fifoCount >= packetSize){
+          // reset interrupt flag and get INT_STATUS byte
+          mpuInterrupt = false;
+          mpuIntStatus = mpu.getIntStatus();
+    
+          // get current FIFO count
+          fifoCount = mpu.getFIFOCount();
+    
+          // check for overflow (this should never happen unless our code is too inefficient)
+          if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+            // reset so we can continue cleanly
+            mpu.resetFIFO();
+            Serial.println(F("FIFO overflow!"));
+    
+          // otherwise, check for DMP data ready interrupt (this should happen frequently)
+          } 
+          else if (mpuIntStatus & 0x02) {
+            // wait for correct available data length, should be a VERY short wait
+            while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+    
+            // read a packet from FIFO
+            mpu.getFIFOBytes(fifoBuffer, packetSize);
+    
+            
+            time_read_imu = micros();
+            // track FIFO count here in case there is > 1 packet available
+            // (this lets us immediately read more without waiting for an interrupt)
+            fifoCount -= packetSize;
+            
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    
+            newOrient = true;
+          }
+        }
+      }
+    
 
-      int comIdx = 0;
+      comIdx = 0;
       while (comIdx < 3){
         while (Serial3.available() > 0){
           command[comIdx] = Serial3.read();
@@ -325,16 +382,16 @@ void loop() {
         }
       }
       
-      int n1 = command[0] >> 6;
-      int n2 = (((command[0] & 63)<<5) | (command[1]>>3)) - 1024;
-      int n3 = ((command[1] & 7)<<8 | command[2]) - 1024; 
+      n1 = command[0] >> 6;
+      n2 = (((command[0] & 63)<<5) | (command[1]>>3)) - 1024;
+      n3 = ((command[1] & 7)<<8 | command[2]) - 1024; 
 
       if (n1 == 3 & n2 == 1){
         Serial3.print(micros());  
-        }
+      }
         
-      time_between_imu_reads = ((time_read_imu - imu_previous) & 65535);
-      imu_previous = time_read_imu;
+      //time_between_imu_reads = ((time_read_imu - imu_previous) & 65535);
+      //imu_previous = time_read_imu;
       pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
       
       Serial3.write(pitchInt >> 8);
@@ -348,9 +405,9 @@ void loop() {
       Serial.print("Pitch int: ");
       Serial.print(pitchInt);
       Serial.print("\t");
-      Serial.print("Time imu: ");
-      Serial.print(time_between_imu_reads);
-      Serial.print("\t");
+      //Serial.print("Time imu: ");
+      //Serial.print(time_between_imu_reads);
+      //Serial.print("\t");
       Serial.print("pitch\t");
       Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
       Serial.print("\tcommand\t");
@@ -359,5 +416,28 @@ void loop() {
       Serial.print(n2);
       Serial.print("\t");
       Serial.println(n3);
+
+      // 
+      if (n1 == 0){
+        lLeg.setSpeed(-n2);
+        rLeg.setSpeed(n3);
+      }
+      else if (n1 == 1){
+        lHand.setSpeed(-n2);
+        rHand.setSpeed(n3);
+        
+      }
+      else if (n1 == 2){
+        // note 0 <= n2 < 256:
+        headServo.write(n2);
+      }
+      
     }
+
+    // run the motors
+    lLeg.runSpeed();
+    rLeg.runSpeed();
+    lHand.runSpeed();
+    rHand.runSpeed();
+
 }
