@@ -53,7 +53,6 @@ THE SOFTWARE.
 // use servos:
 #include <Servo.h>
 
-//#include "MPU6050.h" // not necessary if using MotionApps include file
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
@@ -66,7 +65,7 @@ THE SOFTWARE.
 // AD0 low = 0x68 (default for SparkFun breakout and InvenSense evaluation board)
 // AD0 high = 0x69
 MPU6050 mpu;
-//MPU6050 mpu(0x69); // <-- use for AD0 high
+
 
 /* =========================================================================
    NOTE: In addition to connection 3.3v, GND, SDA, and SCL, this sketch
@@ -74,54 +73,6 @@ MPU6050 mpu;
    external interrupt #0 pin. On the Arduino Uno and Mega 2560, this is
    digital I/O pin 2.
  * ========================================================================= */
-
-/* =========================================================================
-   NOTE: Arduino v1.0.1 with the Leonardo board generates a compile error
-   when using Serial.write(buf, len). The Teapot output uses this method.
-   The solution requires a modification to the Arduino USBAPI.h file, which
-   is fortunately simple, but annoying. This will be fixed in the next IDE
-   release. For more info, see these links:
-
-   http://arduino.cc/forum/index.php/topic,109987.0.html
-   http://code.google.com/p/arduino/issues/detail?id=958
- * ========================================================================= */
-
-
-
-// uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
-// quaternion components in a [w, x, y, z] format (not best for parsing
-// on a remote host such as Processing or something though)
-//#define OUTPUT_READABLE_QUATERNION
-
-// uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
-// (in degrees) calculated from the quaternions coming from the FIFO.
-// Note that Euler angles suffer from gimbal lock (for more info, see
-// http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_EULER
-
-// uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
-// pitch/roll angles (in degrees) calculated from the quaternions coming
-// from the FIFO. Note this also requires gravity vector calculations.
-// Also note that yaw/pitch/roll angles suffer from gimbal lock (for
-// more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
-// #define OUTPUT_READABLE_YAWPITCHROLL
-
-// uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
-// components with gravity removed. This acceleration reference frame is
-// not compensated for orientation, so +X is always +X according to the
-// sensor, just without the effects of gravity. If you want acceleration
-// compensated for orientation, us OUTPUT_READABLE_WORLDACCEL instead.
-//#define OUTPUT_READABLE_REALACCEL
-
-// uncomment "OUTPUT_READABLE_WORLDACCEL" if you want to see acceleration
-// components with gravity removed and adjusted for the world frame of
-// reference (yaw is relative to initial orientation, since no magnetometer
-// is present in this case). Could be quite handy in some cases.
-//#define OUTPUT_READABLE_WORLDACCEL
-
-// uncomment "OUTPUT_TEAPOT" if you want output that matches the
-// format used for the InvenSense teapot demo
-//#define OUTPUT_TEAPOT
 
 
 // MPU control/status vars
@@ -133,23 +84,15 @@ uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 
-// RPI serial integer
-int inInt = 0;
-// rpi report flag
-// rpi counter for serial communication
-// int countSer = 0;
 // command given by rpi
 unsigned char command[3] = {0, 0, 0};
 int pitchInt;
 boolean inSer = false;
 unsigned long time_read_imu = 0;
-//unsigned long imu_previous = 0;
-//unsigned int time_between_imu_reads;
 int comIdx = 0;
-int n1;
-int n2;
-int n3;
-boolean newOrient = false;
+int n1 = 0;
+int n2 = 0;
+int n3 = 0;
 
 // Stepper motor variables:
 // leg pins:
@@ -168,7 +111,7 @@ boolean newOrient = false;
 
 // Max speed and acc:
 #define maxStepperSpeed 1024 //2048
-#define maxStepperAcc 8192
+#define maxStepperAcc 16384
 
 AccelStepper lLeg = AccelStepper(motorInterfaceType, stepPin_Lleg, dirPin_Lleg);
 AccelStepper rLeg = AccelStepper(motorInterfaceType, stepPin_Rleg, dirPin_Rleg);
@@ -196,15 +139,13 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
 void dmpDataReady() {
-    mpuInterrupt = true;
+  mpuInterrupt = true;
 }
 
 // RPI serial interrupt:
 // =========================
 void serialEvent3() {
-  //inInt = (int)Serial3.read();
   inSer = true;
-  //countSer += 1;
 }
 // =========================
 
@@ -314,6 +255,7 @@ void setup() {
 
     //servo:
     headServo.attach(servoPin);
+    headServo.write(128);
 }
 
 
@@ -325,55 +267,61 @@ void loop() {
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
 
+
+    while (!mpuInterrupt && fifoCount < packetSize) {
+        // other program behavior stuff here
+        // run the motors
+        lLeg.runSpeed();
+        rLeg.runSpeed();
+        lHand.runSpeed();
+        rHand.runSpeed();
+    }
+    
+    
     // wait for MPU interrupt or extra packet(s) available
     //while (!mpuInterrupt && fifoCount < packetSize) {}
+    //if (mpuInterrupt || fifoCount >= packetSize){
+    
+    // reset interrupt flag and get INT_STATUS byte
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+    
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
 
-    // This if statement is to mimic the above while wait... 
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+      // reset so we can continue cleanly
+      mpu.resetFIFO();
+      Serial.println(F("FIFO overflow!"));
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } 
+    else if (mpuIntStatus & 0x02) {
+      // wait for correct available data length, should be a VERY short wait
+      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+      // read a packet from FIFO
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+      
+      time_read_imu = micros();
+      // track FIFO count here in case there is > 1 packet available
+      // (this lets us immediately read more without waiting for an interrupt)
+      fifoCount -= packetSize;
+      Serial.println("read_FIFO");
+    }
+
+    
     if (inSer) {
       inSer = false;
-      newOrient = false;
       
-      // only read imu if serial request received:
-      while (not newOrient){
-        if (mpuInterrupt || fifoCount >= packetSize){
-          // reset interrupt flag and get INT_STATUS byte
-          mpuInterrupt = false;
-          mpuIntStatus = mpu.getIntStatus();
-    
-          // get current FIFO count
-          fifoCount = mpu.getFIFOCount();
-    
-          // check for overflow (this should never happen unless our code is too inefficient)
-          if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-            // reset so we can continue cleanly
-            mpu.resetFIFO();
-            Serial.println(F("FIFO overflow!"));
-    
-          // otherwise, check for DMP data ready interrupt (this should happen frequently)
-          } 
-          else if (mpuIntStatus & 0x02) {
-            // wait for correct available data length, should be a VERY short wait
-            while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-    
-            // read a packet from FIFO
-            mpu.getFIFOBytes(fifoBuffer, packetSize);
-    
-            
-            time_read_imu = micros();
-            // track FIFO count here in case there is > 1 packet available
-            // (this lets us immediately read more without waiting for an interrupt)
-            fifoCount -= packetSize;
-            
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    
-            newOrient = true;
-          }
-        }
-      }
-    
 
+      // only compute if requested:
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      
       comIdx = 0;
       while (comIdx < 3){
         while (Serial3.available() > 0){
@@ -386,12 +334,6 @@ void loop() {
       n2 = (((command[0] & 63)<<5) | (command[1]>>3)) - 1024;
       n3 = ((command[1] & 7)<<8 | command[2]) - 1024; 
 
-      if (n1 == 3 & n2 == 1){
-        Serial3.print(micros());  
-      }
-        
-      //time_between_imu_reads = ((time_read_imu - imu_previous) & 65535);
-      //imu_previous = time_read_imu;
       pitchInt = (int)(20000*ypr[1]); // * 180/M_PI)
       
       Serial3.write(pitchInt >> 8);
@@ -400,14 +342,13 @@ void loop() {
       Serial3.write(time_read_imu >> 16);
       Serial3.write(time_read_imu >> 8);
       Serial3.write(time_read_imu & 0xff);
-      //Serial3.write(time_between_imu_reads >> 8);
-      //Serial3.write(time_between_imu_reads & 0xff);
+      
       Serial.print("Pitch int: ");
       Serial.print(pitchInt);
       Serial.print("\t");
-      //Serial.print("Time imu: ");
-      //Serial.print(time_between_imu_reads);
-      //Serial.print("\t");
+      Serial.print("FiFO count ");
+      Serial.print(mpu.getFIFOCount());
+      Serial.print("\t");
       Serial.print("pitch\t");
       Serial.print(ypr[1] * 180/M_PI); //ypr[1] * 180/M_PI);
       Serial.print("\tcommand\t");
@@ -431,13 +372,5 @@ void loop() {
         // note 0 <= n2 < 256:
         headServo.write(n2);
       }
-      
     }
-
-    // run the motors
-    lLeg.runSpeed();
-    rLeg.runSpeed();
-    lHand.runSpeed();
-    rHand.runSpeed();
-
 }
