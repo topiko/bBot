@@ -29,7 +29,6 @@ def get_talk_bytes_from_command(cmd):
 
 
 def talk(ser, cmd):
-  
   sendbytes = get_talk_bytes_from_command(cmd)
   ser.write(sendbytes)
 
