@@ -1,7 +1,7 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = .2;
+dt = .3;
 
 
 A = 1;
@@ -153,9 +153,9 @@ w_rim_head = w_rim;
 heights_head = heights(sc_head, sc2_head, mid_head, t, wx_head, ni_head);
 
 // NECK PARAMS
-neck_t = 10;
+neck_t = 16;
 axle_wall_t = 6;
-neck_axle_d = 3;
+neck_axle_d = 3.15;
 r_pivot_circle = neck_axle_d/2 + axle_wall_t;
 
 neck_h = wx_head/2 + 3;

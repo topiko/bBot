@@ -29,6 +29,28 @@ module el_mount(hole_coord, bolt_coord, h, bolt_sink, mode, a){
 
 }
 
+module servo_mount(){
+    
+    servo_h = 25;
+    servo_w = 10;
+    servo_L = 24;
+    t_flange = 5.5;
+    z_flange = 19;
+    h_flange = 2.4;
+    add_bottom = 5;
+    module side_(){
+        difference() {
+            translate([t_flange, 0,0]) linear_extrude(height = servo_h + 4*add_bottom) polygon(points = [[0,0], [servo_w, 0], [0,servo_w], [-t_flange,servo_w], [-t_flange, 0]]);
+            translate([0, 0, z_flange + add_bottom]) cube([t_flange, servo_w, h_flange]);
+        }
+    }
+    
+    //translate([servo_h/2, 0, 0]) 
+    color("Silver") translate([add_bottom, 0 ,0]) rotate([90,0,-90]) side_();
+    //translate([servo_h/2, servo_L, 0]) mirror([0,1,0]) rotate([90,0,-90]) side_();
+    
+    }
+
 
 
 module rpi_mount(h, bolt_sink, mode, a){
@@ -54,4 +76,5 @@ if (false){
     due_mount(4, 4, 2, 40);
 }
 //stepper_mount(4, bolt_sink, 2, a);
-due_mount(1, 4, 0, 40);
+//due_mount(1, 4, 0, 40);
+servo_mount();

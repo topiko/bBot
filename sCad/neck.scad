@@ -70,14 +70,31 @@ module neck_pivot(neck_h, axle_d_from_wall, pivot_angle_min, pivot_angle_max, mo
     }
     
     
-    color("DarkGrey")   
-    if (move==0){
-        translate(-pivot_point) rotate([-90,0,0]) neck_();
-    }
-    else if (move == 0){
-        translate(move_xyz) neck_();
+    // horn for servo
+    module horn(){
+        horn_h = wx_head/2 - w_rim_head - 2;
+        horn_x = -r_pivot_circle + 1.5;
+        horn_t = 4;
+        difference() {
+        hull(){
+            
+            translate([horn_x, horn_h, -neck_t/2])cylinder(r = 2, h = horn_t, $fn = 3*a);
+            translate([0, 0, -neck_t/2]) cylinder(r = r_pivot_circle*.99, h = horn_t, $fn = a);
+        }
+        translate([horn_x, horn_h, -neck_t/2]) cylinder(r = .75, h = 10, $fn = 3*a, center = true);
+        cylinder(r = neck_axle_d, h = 20, $fn = 3*a, center = true);
+        }
     }
     
+        color("DarkGrey")   
+    if (move==0){
+        translate(-pivot_point) rotate([-90,0,0]) neck_();
+        horn();
+    }
+    /*else if (move == 0){
+        translate(move_xyz) neck_();
+    }*/
+
 }
 
 
