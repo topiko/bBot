@@ -121,6 +121,16 @@ AccelStepper rLeg = AccelStepper(motorInterfaceType, stepPin_Rleg, dirPin_Rleg);
 AccelStepper lHand = AccelStepper(motorInterfaceType, stepPin_Lhand, dirPin_Lhand);
 AccelStepper rHand = AccelStepper(motorInterfaceType, stepPin_Rhand, dirPin_Rhand);
 
+// stepper setup pins:
+#define enablePin 52
+#define stepModeCOM0Hand 38
+#define stepModeCOM1Hand 36
+#define stepModeCOM0Leg 44 
+#define stepModeCOM1Leg 46 
+#define enablePinHands 28
+#define enablePinLegs 30
+
+
 int lLeg_speed = 0;
 int rLeg_speed = 0;
 int lHand_speed = 0;
@@ -165,6 +175,31 @@ void serialEvent3() {
 
 void setup() {
 
+    // Setup stepper pins:
+    pinMode(stepModeCOM0Leg, OUTPUT);
+    pinMode(stepModeCOM1Leg, OUTPUT);
+    pinMode(stepModeCOM0Hand, OUTPUT);
+    pinMode(stepModeCOM1Hand, OUTPUT);
+    pinMode(enablePin, OUTPUT); 
+    pinMode(enablePinHands, OUTPUT); 
+    pinMode(enablePinLegs, OUTPUT); 
+
+    // pulls drivers from sleep mode:
+    digitalWrite(enablePin, HIGH);
+    
+    // disables steppers
+    digitalWrite(enablePinLegs, HIGH);
+    digitalWrite(enablePinHands, HIGH);
+
+    // full step
+    digitalWrite(stepModeCOM0Leg, LOW);
+    digitalWrite(stepModeCOM1Leg, LOW);
+
+    // 1/8 microstepping
+    digitalWrite(stepModeCOM0Hand, HIGH);
+    digitalWrite(stepModeCOM1Hand, HIGH);
+
+    
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
@@ -266,6 +301,7 @@ void setup() {
     headServo.attach(servoPin);
     headServo.write(128);
 
+    // Signal if dmp initialize was succesfull by nodding head:
     if (!dmpReady){
       for (int i=0;i<200;i++){
         if (i%2 == 0) headServo.write(0);
@@ -293,6 +329,11 @@ void setup() {
       else if (i%2 == 1) headServo.write(128);
       delay(100);  
     }
+
+    // enables steppers
+    // digitalWrite(enablePinLegs, LOW);
+    // digitalWrite(enablePinHands, LOW);
+
 
    
 }
@@ -374,14 +415,32 @@ void loop() {
           
         }
         else if (n1 == 1){
-          lHand_speed = -n2;
-          rHand_speed = -n3;
-          lHand.moveTo(lHand.currentPosition() - 2*n2);
-          rHand.moveTo(rHand.currentPosition() - 2*n3);          
+          lHand_speed = n2;
+          lHand.moveTo(lHand.currentPosition() + n3);
+          
         }
         else if (n1 == 2){
-          // note 0 <= n2 < 256:
-          headServo.write(n2);
+          rHand_speed = n2;
+          rHand.moveTo(rHand.currentPosition() + n3);
+        }
+        else if (n1 == 3){
+          if (n2 == 0) {
+            // disable motors
+            digitalWrite(enablePinLegs, HIGH);
+            digitalWrite(enablePinHands, HIGH);
+          }
+          else if (n2 == 1) {
+            // enable Legs
+            digitalWrite(enablePinLegs, LOW);
+          }
+          else if (n2 == 2) {
+            // enable hannds
+            digitalWrite(enablePinHands, LOW);
+          }
+          else if (n2 == 3){
+            // note 0 <= n2 < 256:
+            headServo.write(n3);
+          }
         }
       }    
     }
