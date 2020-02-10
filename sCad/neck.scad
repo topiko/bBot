@@ -18,9 +18,9 @@ module neck(neck_h, pivot_point, pivot_angle_min, pivot_angle_max, axle_d_from_w
     
     // This amount of angle needs to be added to the contact angle due to the 
     // bottom thickness.
-    add_angle = asin(axle_d_from_wall/r_pivot_circle);
+    add_angle = asin((axle_d_from_wall + neck_axle_d/2 + .4)/r_pivot_circle);
     phi_up = pivot_angle_max + add_angle;
-    phi_low = pivot_angle_min + add_angle;
+    phi_low = -pivot_angle_min + add_angle;
     alpha_up = 90 - phi_up;
     alpha_low = 90 - phi_low;
     neck_contact_point_up = pivot_point + [r_pivot_circle*cos(alpha_up), r_pivot_circle*sin(alpha_up), 0];
@@ -40,19 +40,21 @@ module neck(neck_h, pivot_point, pivot_angle_min, pivot_angle_max, axle_d_from_w
     
     function y2_(y) = [a*pow(y,2) + b*y + c, y];
     
-    points = [for (y=[y1:-dt:0]) y2_(y), [x0, 0], [x1l,0], [x1l, y1l]];
+    points = [for (y=[y1:-dt:0]) y2_(y), [x0, 0], [x1l-y1l*tan(pivot_angle_min),0], [x1l, y1l]];
     
     module bolts_(){
-        for (x=[x1l+3, x0-8]){
-            translate([x, -1, neck_t/2]) rotate([90,0,0])bolt_new(neck_h/2, 1.4, 20);
+        for (x=[x1l+3.5, x0-8]){
+            translate([x, -.5, neck_t/2]) rotate([90,0,0]) bolt_new(7, 1.4, 20);
         }
     }
     
     difference(){
         linear_extrude(height = neck_t) polygon(points = points);
         bolts_();
+        translate([x1l + 7, y1l - 6, 0]) rotate([0,0,30]) cube([1.75,4.5,100]);
     }
     
+    //bolts_();
     if (mode == 1) bolts_();
 }
 
@@ -72,17 +74,21 @@ module neck_pivot(neck_h, axle_d_from_wall, pivot_angle_min, pivot_angle_max, mo
     
     // horn for servo
     module horn(){
-        horn_h = wx_head/2 - w_rim_head - 2;
-        horn_x = -r_pivot_circle + 1.5;
-        horn_t = 4;
+        
+        horn_t = 5;
+        r_horn = (r_pivot_circle - (thickness_bottom - axle_d_from_wall) - t  - .75)/2;
+        horn_x = -r_pivot_circle + r_horn; //- t - 2;
+        horn_h = wx_head/2 - r_horn - 2;
+        
+        translate([horn_x, 0, 0])
+        rotate([0,0,-pivot_angle_min])
         difference() {
         hull(){
-            
-            translate([horn_x, horn_h, -neck_t/2])cylinder(r = 2, h = horn_t, $fn = 3*a);
-            translate([0, 0, -neck_t/2]) cylinder(r = r_pivot_circle*.99, h = horn_t, $fn = a);
+            translate([0, horn_h, -neck_t/2]) cylinder(r = r_horn, h = horn_t, $fn = 3*a);
+            translate([r_horn, 0, -neck_t/2]) cylinder(r = 2*r_horn, h = horn_t, $fn = a);
         }
-        translate([horn_x, horn_h, -neck_t/2]) cylinder(r = .75, h = 10, $fn = 3*a, center = true);
-        cylinder(r = neck_axle_d, h = 20, $fn = 3*a, center = true);
+        translate([0, horn_h, -neck_t/2]) cylinder(r = .75, h = 100, $fn = 3*a, center = true);
+        //cylinder(r = neck_axle_d, h = 20, $fn = 3*a, center = true);
         }
     }
     

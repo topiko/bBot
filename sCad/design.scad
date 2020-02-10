@@ -153,17 +153,17 @@ w_rim_head = w_rim;
 heights_head = heights(sc_head, sc2_head, mid_head, t, wx_head, ni_head);
 
 // NECK PARAMS
-neck_t = 16;
-axle_wall_t = 6;
+neck_t = 18;
+axle_wall_t = 8;
 neck_axle_d = 3.15;
 r_pivot_circle = neck_axle_d/2 + axle_wall_t;
 
-neck_h = wx_head/2 + 3;
+neck_h = wx_head/2 + A_out + 4;
 axle_d_from_wall = 1;
-neck_width = 17.5;
+neck_width = 23.5;
 
-neck_pivot_angle_min = 0;
-neck_pivot_angle_max = 80;
+neck_pivot_angle_min = -5;
+neck_pivot_angle_max = 60;
 
 // COVER PARAMS
 thickness_bottom = 2;

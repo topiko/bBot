@@ -38,7 +38,7 @@ module topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, h
 
 
 module top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, mode, a){
-    w_charge_cable = 10.5;
+    w_charge_cable = 11.;
     difference(){
         topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 1, a);
         // Necj bolts:
@@ -49,7 +49,7 @@ module top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, hei
         // switch hole
         translate([wx/2 - switch_d/2 - w_rim - .5, wy/2  - switch_d/2 - w_rim - 5,add(heights_) - 1]) cylinder(r = switch_d/2, h = 2*thickness_bottom, $fn = 40);
         // charging cable hole
-        translate([wx/2 - 2 - w_rim - .5, -wy/2 + w_rim + 2.5,add(heights_) - 1]) cube([2.5, w_charge_cable, 20]);
+        translate([wx/2 - w_rim - 2.75, -wy/2 + w_rim + 3,add(heights_) - 1]) cube([2.75, w_charge_cable, 20]);
     }
     if (mode==2) translate([head_x,0, thickness_bottom + add(heights_)]) show_head(60, mode);
 
@@ -108,7 +108,7 @@ module bottomCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_
 }
 
 
-a = 10;
+a = 6; //10;
 dt = .75;
 top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 0, a);
 

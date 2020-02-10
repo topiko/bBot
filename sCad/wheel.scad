@@ -1,18 +1,23 @@
 
 
 Pi = 3.141592653589793;
-r0 = 5;
-r_tube = 3;
-t_rim = 5;
-D_wheel = 90;
+
+r_tube = 2;
+t_rim = 3;
+D_wheel = 91;
 dist_tube = sqrt(pow(r_tube,2) - pow(t_rim/2,2));
+echo(D_wheel);
 echo(dist_tube);
 R = D_wheel/2 - dist_tube - r_tube;
 wRim = 20;
 maxPhi = 270;
 wall_t = 10;
-t_hub = 10;
-a = 15;
+t_hub = 8;
+
+a = 100;
+nema_axle_h = 14;
+nema_axle_r = 2.6;
+r0 = nema_axle_r - .5;
 
 D = (R - wRim + wall_t)/r0;
 
@@ -33,6 +38,13 @@ module spokes(){
     }
 }
 
+module nema_axle_(){
+    difference(){
+            cylinder(r = nema_axle_r, h = nema_axle_h, $fn = a);
+            translate([-50, nema_axle_r - .5,0])cube(100);
+    }
+}
+
 module hub(){
     circle(r=r0, $fn = a);
 }
@@ -47,7 +59,7 @@ module rim(){
 
 module wheel(){
     
-    
+    /*
     module spokes_rims_(){
         linear_extrude(height = max(t_hub, t_rim)){
             hub();
@@ -55,24 +67,39 @@ module wheel(){
             spokes();
         }
     }
+    */
     
     module side_profile_(){
         denom = pow(R, 2) - 2*R*r0 + pow(r0, 2);
         a_ = (t_hub - t_rim)/denom;
         b_ = 2*R*(t_rim - t_hub)/denom;
         c_ = (pow(R, 2)*t_hub - r0*t_rim*(2*R - r0))/denom;
-        p = concat([[0,t_hub+1]], [for (x=[r0:R/a:R]) poly2(a_,b_,c_, x)], [[R+1, t_rim], [R+1, t_hub+1]]);
+        p = concat([[r0,t_hub+1]], [for (x=[r0:R/a:R]) poly2(a_,b_,c_, x)], [[R+1, t_rim], [R+1, t_hub+1]]);
         rotate_extrude($fn = 2*a) polygon(points = p);
     }
     
     color("DarkGray")
+    
     difference(){
-        spokes_rims_();
+        //spokes_rims_();
+        cylinder(r = R, h = t_hub, $fn = a);
         side_profile_();
+        // Tyre
+        rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fn = a);
+        // motor axle
+        nema_axle_();
     }
     
-    color("DarkSlateGray") rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fn = a);
+    
+    //side_profile_();
+    //color("DarkSlateGray") rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fn = a);
     
 }
 
+/*
+intersection(){
+    wheel();
+    cylinder(r=7, h = t_hub);
+}*/
+    
 wheel();
