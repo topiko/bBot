@@ -15,14 +15,13 @@ ser = serial.Serial(
 
 angle_factor = 20860.
 pi = 3.14159267
-report = True #False #True 
+report = True 
 # store time and pitch of last 3 time steps
 orient_arr = np.zeros((3, 6))  
 
 def act(orient_arr):
     
-  time.sleep(.01)
-  a = int(-(orient_arr[0,1]/10*1024) if not np.isnan(orient_arr[0,1]) else 0)
+  a = int((orient_arr[0,1]/35*1024) if not np.isnan(orient_arr[0,1]) else 0)
 
   if 1023 < a: a = 1023
   elif a < -1024: a = -1024
@@ -71,22 +70,25 @@ def predict_orient(orient_arr, add_time):
 i = 0
 orient = 0 
 wait_sum = 0
-ni = 5
+ni = 20
 cmd = [0,1,1]
 t_init = time.time()
 t0 = 0
 t_add = .1
-while True: 
+
+talk(ser, [3, 1, 0])
+time.sleep(.1)
+
+while i<1000: # True: 
 
   talk(ser, cmd)
   orient_arr = predict_orient(orient_arr, t_add)
 
   cmd = act(orient_arr)
-  if i%2==0: cmd[0] = 1
+  #if i%2==0: cmd[0] = 1
   orient, imu_time, wait = listen(ser)
 
   orient_arr = update_orient(orient_arr, orient, imu_time)
-
   wait_sum += wait
 
   if i%ni == 0:
@@ -94,7 +96,7 @@ while True:
     print('Freq: ', ni/(t1-t0))
     print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t1-t0)))
     if report:
-      print(orient_arr)
+      #print(orient_arr)
       print((orient_arr[:,0] - orient_arr[:, -1]).mean(), t_add)
       print(orient_arr[:,1] - orient_arr[:, -2])
 
@@ -104,3 +106,8 @@ while True:
     t0 = time.time()
 
   i+=1
+
+talk(ser, [0,0,0])
+time.sleep(.1)
+talk(ser, [3,0,0])
+
