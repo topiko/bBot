@@ -4,3 +4,5 @@
 *.py~
 *.un~
 *.ino~
+Analyze/datas/*
+Analyze/orient.npy
