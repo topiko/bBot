@@ -46,3 +46,17 @@ def listen(ser):
   #print('Imu time: ', time_pitch)
   return orient, time_pitch, t1 - t0
 
+def enable_legs(ser):
+
+  talk(ser, [3, 1, 0])
+  time.sleep(.1)
+
+def disable_all(ser):
+
+  talk(ser, [0,0,0])
+  time.sleep(.1)
+  talk(ser, [1,0,0])
+  time.sleep(.1)
+  talk(ser, [2,0,0])
+  time.sleep(.1) 
+  talk(ser, [3,0,0])

@@ -1,8 +1,8 @@
-
 import time
 import serial
 import numpy as np
-from communication import talk, listen #get_talk_bytes_from_cmd
+from communication import talk, listen, enable_legs, disable_all #get_talk_bytes_from_cmd
+from orientation_utils import update_orient, predict_orient
 
 ser = serial.Serial(
         port='/dev/serial0',
@@ -13,11 +13,10 @@ ser = serial.Serial(
         timeout=.00001
 )
 
-angle_factor = 20860.
-pi = 3.14159267
 report = True 
 # store time and pitch of last 3 time steps
 orient_arr = np.zeros((3, 6))  
+
 
 def act(orient_arr):
     
@@ -25,67 +24,39 @@ def act(orient_arr):
 
   if 1023 < a: a = 1023
   elif a < -1024: a = -1024
+
   return [0,a,a]
 
-def update_orient(orient_arr, orient, time_orient):
+def check_status(orient_arr):
 
-  orient = orient/angle_factor/pi*180
-  orient_arr[0,:2] = time_orient/1e6, orient 
-
-  return orient_arr
-
-def predict_orient(orient_arr, add_time):
-  
-  # fit 2 order poly to 3 values in orient arr 
-  # --> w, dw/dt, d**2w/dt**2 
-  # use these to predict values at time_orient
-  p1, p2, p3 = orient_arr[:, 1] 
-  t1, t2, t3 = orient_arr[:, 0] - orient_arr[0,0]
-
-  if (np.diff(orient_arr[:, 0]) == 0).any(): 
-      print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-
-  a = (p1*(t2 - t3) - p2*(t1 - t3) + p3*(t1 - t2)) \
-       /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-  b = (-p1*(t2**2 - t3**2) + p2*(t1**2 - t3**2) - p3*(t1**2 - t2**2)) \
-          /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-  c = (p1*t2*t3*(t2 - t3) - p2*t1*t3*(t1 - t3) + p3*t1*t2*(t1 - t2)) \
-          /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-  
-  time_orient = add_time #np.diff(orient_arr[:,0]).mean()
-  p_now = a*time_orient**2 + b*time_orient + c
-  w_now = 2*a*time_orient + b
-  wdot_now = 2*a
-  
-  w_last = 2*a*t2 + b
-  wdot_last = 2*a
-   
-  orient_arr[1:,:] = orient_arr[:-1,:]
-  orient_arr[1,2:4] = w_last, wdot_last
-  orient_arr[0,:] = orient_arr[0,0] + time_orient, p_now, w_now, wdot_now, p_now, orient_arr[0,0] + time_orient
-
-  return orient_arr
-
+    if (orient_arr[0,1] < -30) or (30 < orient_arr[0,1]):
+        return 'fell'
+    else:
+        return 'upright'
 
 i = 0
-orient = 0 
 wait_sum = 0
 ni = 20
 cmd = [0,1,1]
-t_init = time.time()
 t0 = 0
 t_add = .1
+status = 'upright'
 
-talk(ser, [3, 1, 0])
-time.sleep(.1)
 
-while i<1000: # True: 
+# enable the legs:
+enable_legs(ser)
+imax = 1000
+store_arr = np.zeros((imax, orient_arr.shape[1]))
+
+while (i<imax) and (status != 'fell'): # True: 
 
   talk(ser, cmd)
   orient_arr = predict_orient(orient_arr, t_add)
 
   cmd = act(orient_arr)
-  #if i%2==0: cmd[0] = 1
+  if (i>20):
+      status = check_status(orient_arr)  
+
   orient, imu_time, wait = listen(ser)
 
   orient_arr = update_orient(orient_arr, orient, imu_time)
@@ -96,18 +67,18 @@ while i<1000: # True:
     print('Freq: ', ni/(t1-t0))
     print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t1-t0)))
     if report:
-      #print(orient_arr)
-      print((orient_arr[:,0] - orient_arr[:, -1]).mean(), t_add)
-      print(orient_arr[:,1] - orient_arr[:, -2])
-
-    print()
-    t_add = np.diff(orient_arr[::-1,0]).mean()
-    wait_sum = 0
-    t0 = time.time()
+       #print(orient_arr)
+       print((orient_arr[:,0] - orient_arr[:, -1]).mean(), t_add)
+       print(orient_arr[:,1] - orient_arr[:, -2])
+       print()
+       t_add = np.diff(orient_arr[::-1,0]).mean()
+       wait_sum = 0
+       t0 = time.time()
+  
+  if report:
+    store_arr[i,:] = orient_arr[-1,:]
 
   i+=1
 
-talk(ser, [0,0,0])
-time.sleep(.1)
-talk(ser, [3,0,0])
-
+np.save('orient.npy', store_arr[3:])
+disable_all(ser)
