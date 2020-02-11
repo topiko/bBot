@@ -12,11 +12,11 @@ R = D_wheel/2 - dist_tube - r_tube;
 wRim = 20;
 maxPhi = 270;
 wall_t = 10;
-t_hub = 8;
+t_hub = 14;
 
 a = 100;
 nema_axle_h = 14;
-nema_axle_r = 2.6;
+nema_axle_r = 2.54;
 r0 = nema_axle_r - .5;
 
 D = (R - wRim + wall_t)/r0;
