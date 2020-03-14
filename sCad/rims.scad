@@ -11,17 +11,26 @@ module bolts_(wx, wy, r_corner, w_rim, t, threads, a){
     bolt_y_ = wy/2 - w_rim/2;
     
     // Choose whwther to use 4 or 8 bolts for attachemnt of top cover
-    nbolts = wx > 40 ? 8 : 4;
-    
+    //nbolts = wx > 40 ? 8 : 4;
+    nbolts = ((wx > 40) && (wy>40)) ? 8 : (wy>40) ? 6 : 4;
+    //choose_bolts = wx > 40 ? wy > 40 ? 6
     r_ = r_corner - (r_corner - w_rim/2)/sqrt(2) - w_rim/2;
 
     middle_points = [for (xy=[[1,0], [0,1], [-1,0], [0,-1]]) [xy[0]*bolt_x_, xy[1]*bolt_y_]];
+    
+    middle_points2 = [for (xy=[[1,0], [-1,0]]) [xy[0]*bolt_x_, xy[1]*bolt_y_]];
+    
+    middle_points3 = [for (xy=[[0,-1], [0,1]]) [xy[0]*bolt_x_, xy[1]*bolt_y_]];
+    
     corner_points = [for (i=[-1,1]) for (j=[-1,1]) [i*(bolt_x_ - r_), j*(bolt_y_ - r_)]];
     
     bolts8locs = concat(corner_points, middle_points);
+    bolts6locsx = concat(corner_points, middle_points2);
+    bolts6locsy = concat(corner_points, middle_points3);
     bolts4locs = corner_points; 
     
-    bolt_points = nbolts == 8 ? bolts8locs : nbolts == 4 ? bolts4locs : 0;
+    //bolt_points = nbolts == 8 ? bolts8locs : nbolts == 4 ? bolts4locs : 0;
+    bolt_points = nbolts == 8 ? bolts8locs : nbolts == 6 ? bolts6locsx : nbolts == 4 ? bolts4locs : 0;
     
     bolt_r = threads == 1 ? d3bolt_t/2 : d3bolt/2;
     
@@ -76,7 +85,7 @@ module upRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, A_out, t, heights_, mode
     if (mode == 0){
         difference(){
             color("DarkSlateGray") full_upper_rim();    
-            translate([0,0,t]) bolts_(wx, wy, r_corner, w_rim, t, 1, a);
+            if (3< w_rim) translate([0,0,t]) bolts_(wx, wy, r_corner, w_rim, t, 1, a);
         }
     }
     else if (mode==1){
@@ -98,7 +107,7 @@ module lowerRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, A_out, t, bottom_thic
     if (mode == 0){
         difference() {
             wigle_square(wx, wy, r_corner, theta(sc, sc2, 0,ni,mid, t, wx), 0, A_out, t, w_rim, 0, a);
-            mirror([0,0,1]) translate([0,0,bolts_shift]) bolts_(wx, wy, r_corner, w_rim, t, 1, a);
+            if (3< w_rim) mirror([0,0,1]) translate([0,0,bolts_shift]) bolts_(wx, wy, r_corner, w_rim, t, 1, a);
         }
     }
     

@@ -8,15 +8,11 @@ build = 0;
 module wigle_cyl(theta, A_in, A_out, t, wall_t, R, phi0, phi1, cyl, a){
     
 
-    a1 = R*(2*Pi)/dt;
-
-    //a1 = a;
-     
-    rotate_extrude(angle = phi1 - phi0, $fn = a1) wigle(theta, A_in, A_out, t, wall_t, R, 0, cyl, a);
+    rotate_extrude(angle = phi1 - phi0, $fa = dTHETA, $fs = dt) wigle(theta, A_in, A_out, t, wall_t, R, 0, cyl, a);
     }
 
 module wigle_bar(theta, A_in, A_out, t, wall_t, L, solid, cyl, a){
-    translate([0, -9*wall_t, 0]) rotate([90,0,90]) linear_extrude(height = L, $fn = a)
+    translate([0, -9*wall_t, 0]) rotate([90,0,90]) linear_extrude(height = L, $fn = 2)
         
     wigle(theta, A_in, A_out, t, wall_t, 10*wall_t, solid, cyl, a);
 }
@@ -27,6 +23,7 @@ module wigle(theta, A_in, A_out, t, wall_t, R, solid, cyl, a){
     // Wigle
     function fx(i,a,A,t, phase) = A*pow(sin(phase + 180*i/a), 2); 
     function fy(i,a,t) = t*i/a;
+    
     
     theta_in = solid == 1 ? 0 : theta;
     A_in_ = solid == 1 ? 0 : A_in;
@@ -76,7 +73,7 @@ module wigle_wigle_square(wx, wy, r, theta, A_in, A_out, t, wall_t, cyl, a){
         wigle_square(wx, wy, r, theta, 0, 0, t, max(wx, wy), 0, a);
         union(){
             for (i=[0:1:max(wx,wy)/t+1]){
-                rotate_extrude($fn = a1) translate([(1+i)*t,0,0]) rotate([0,0,90]) wigle(0, 0, A_out, t, wall_t, wall_t, 0, cyl, a);
+                rotate_extrude($fn = a1, $fs = .01) translate([(1+i)*t,0,0]) rotate([0,0,90]) wigle(0, 0, A_out, t, wall_t, wall_t, 0, cyl, a);
             }
         }
     }
@@ -96,7 +93,7 @@ module wigle_square(wx, wy, r, theta, A_in, A_out, t, wall_t, cyl, a){
         wall_t_y = min(wall_t, wy/2);
         solid = wy/2 < wall_t ? 1 : 0;
         intersection(){
-            translate([0, wy/2 - wall_t_y, 0])wigle_bar(theta, A_in, A_out, t, wall_t_y, wx/2 - r, solid, cyl, a);
+            translate([0, wy/2 - wall_t_y, 0]) wigle_bar(theta, A_in, A_out, t, wall_t_y, wx/2 - r, solid, cyl, a);
             linear_extrude(height = t+1) polygon(points);
         }
         

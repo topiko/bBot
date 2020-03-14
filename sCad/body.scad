@@ -3,14 +3,18 @@ use <rims.scad>;
 use <elMount.scad>;
 use <hand.scad>;
 use <leg.scad>;
-
+use <batContainer.scad>;
 
 module shifted_due_mount(mode){
         translate([-wx/2 - A_out, 0, t]) rotate([90,0,90]) due_mount(el_mount_h, bolt_sink, mode, a*3);
 }
 
+module shifted_dcdc_mount(mode){
+        translate([+wx/2 + A_out, 0, H - nema14_x - 2*t - h_dcdc - 1]) rotate([90,0,-90]) dcdc_mount(el_mount_h, bolt_sink, mode, a*3);
+}
+
 module rein_up(mode){
-    translate([axle_x, 0,0])motor_axle_reinforcement(hand_axle_h,-atan(w_rim/(nema14_x/2)),3*nema14_x, 12, 2, 0, mode);
+    translate([axle_x, 0,0]) motor_axle_reinforcement(hand_axle_h,-atan(w_rim/(nema14_x/2 + t)),3*nema14_x, 12, 2, 0, mode);
 }
 
 module rein_low(mode){
@@ -61,15 +65,14 @@ module stepper_slide(mode){
     x_ = [6,30,wx/2 - axle_x + nema14_x/2 + .2];
     if (mode == 0){ 
         sups(x_[0], nema14_x + t, h);
-        sups(x_[1], nema14_x + t, h);
+        //sups(x_[1], nema14_x + t, h);
         sups(x_[2], H-h, H);
 
     }
     else if (mode == 1){ 
         translate([wx/2-x_[0]-t_slid/2, 0, nema14_x + t + h/2]) 
         slid(.1, h);
-        translate([wx/2-x_[1]-t_slid/2, 0, nema14_x + t + h/2]) 
-        slid(.1, h);
+        //translate([wx/2-x_[1]-t_slid/2, 0, nema14_x + t + h/2]) slid(.1, h);
         translate([wx/2-x_[2]-t_slid/2, 0, H/2]) 
         slid(.1, H-2*t);
     }
@@ -89,7 +92,8 @@ module motor_axle_reinforcement(z,alpha,L, w,t, up,mode){
             rotate([0,0,90])linear_extrude(height = L) polygon(points = [[0, -w/2], [0, w/2], [-t, w/2 - t], [-t, -w/2 + t]]);
         }
         
-        translate([axle_x, wy/2+A_out,z]) rotate([0, alpha,0])      if (up == 1) rein_();
+        translate([axle_x, wy/2+A_out,z]) rotate([0, alpha,0])      
+        if (up == 1) rein_();
         else if (up == 0) mirror([0,0,1]) rein_();
         
     }
@@ -137,19 +141,27 @@ module body(show_shell, disp){
             }
         }
         
+        module dcdc_mount_(){
+            intersection(){
+                shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
+                shifted_dcdc_mount(0);
+            }
+            
+        }
+        
         // BATTERY MOUNT
-        /*
+        
         module battery_mount_(){
             intersection(){
                 shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);
-                shifted_battery_mount(0);
+                container(backBattSpace, hBattBag, 0);
             }
         }
-        */
+        
         // MOTOR MOUNTS:
         module hand_nema_mount() {
             intersection(){
-                shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);    
+                translate([0,0,-t]) shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);    
                 hand(wx_hand, wy_hand, r_corner_hand, sc_hand, sc2_hand, mid_hand, A_in, A_out, ni_hand, t, max(wx_hand, wy_hand), rot_hand, axle_x, hand_y, hand_z, t_motor_mount, hand_shift, t_motor_mount - bolt_wall_t, 1, 2, a);
             }
         }
@@ -173,7 +185,7 @@ module body(show_shell, disp){
         
         module wheel_nema_mount_(){
             intersection(){
-                shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);    
+                translate([0,0,t]) shell(20, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a);    
                 noLeg(wx, wy, r_corner, sc, sc2, mid, A_out, ni, t, t_motor_mount, wall_t, axle_x, t_motor_mount - bolt_wall_t, 2, a);        
             }
         }
@@ -185,9 +197,9 @@ module body(show_shell, disp){
             wheel_nema_mount_();
             mirror([0,1,0])wheel_nema_mount_();
             arduino_mount();
-            
+            dcdc_mount_();
             stepper_slide_();
-            //battery_mount_();
+            battery_mount_();
             
             
         }
@@ -214,12 +226,18 @@ module body(show_shell, disp){
             // DUE MOUNT
             shifted_due_mount(2);
             
+            // dcdc
+            shifted_dcdc_mount(2);
+            
             // Opening for motor AXle
             rein_up(1);
             rein_low(1);
             
             // STEPPER PLATE SLIDE
             stepper_slide(1);
+            
+            // battery bag
+            container(backBattSpace, hBattBag, 1);
         }
         
     }
@@ -228,9 +246,9 @@ module body(show_shell, disp){
 }
 
 //a = 15;
-//body(0, 0);
+body(0, 0);
 //rein_up(0);
 //rein_low(0);
 
-stepper_slide(2);
-//stepper_slide(1);
+//stepper_slide(2);
+//stepper_slide(2);

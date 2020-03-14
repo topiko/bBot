@@ -1,8 +1,8 @@
 use <utils.scad>;
 
 Pi = 3.141592653589793;
-dt = .3;
-
+dt = .25;
+dTHETA = 3;
 
 A = 1;
 A_in = A; //A;
@@ -11,10 +11,13 @@ wall_t = .66;
 t = 4;
 
 wx = 57.5; //echo(15 + 35 + 1.5 + 2 + 4);
-wy = 69;
+wy = 69; //battery width 65mm + spacings
+//wx = 58; //echo(15 + 35 + 1.5 + 2 + 4);
+//wy = 77; //battery width 65mm + spacings
+
 r_corner = wx/10;
-H_ = 124;
-ni = floor(H_/t);
+H_ = 132; //124; //124; 150; //
+ni = floor(H_/ t);
 H = t*(ni+1);
 sc = 1.;
 sc2 = 1.;
@@ -61,7 +64,12 @@ hole_coord_due = [[-x_hole_due, move_up, 0],
                   [-x_hole_due + 5, move_up-82.55 + 30.48, 0]
                   ];
                   
-bolt_coord_due = hole_coord_due;
+bolt_coord_due = [[-x_hole_due, move_up, 0], 
+                  //[x_hole_due, move_up-1.27, 0],
+                  //[x_hole_due, move_up-76.43, 0],  
+                  [-x_hole_due + 5 + 27.94, move_up-76.43 + 24.13, 0],  
+                  [-x_hole_due, move_up-82.55, 0],
+                  [-x_hole_due + 5, move_up-82.55 + 30.48, 0]];
 
 // rpi dimensions:
 rpi_width = 31;
@@ -75,6 +83,11 @@ hole_coord_rpi = [[-x_hole_rpi, 0, 0], [x_hole_rpi, 0, 0], [-x_hole_rpi, rpi_hol
 bolt_coord_rpi = hole_coord_rpi;
 
 
+// converter params:
+hole_coord_dcdc = [[-35/2, 2.5, 0], [35/2, 19 + 2.5, 0]];
+bolt_coord_dcdc = hole_coord_dcdc;
+h_dcdc = 25;
+
 // HAND PARAMS:
 sc_hand = 1.;
 sc2_hand = 1;
@@ -87,13 +100,21 @@ mid_hand = .8;
 rot_hand = 0;
 //hand_axle_h = H - nema14_x/2 - 26;
 //hand_axle_h = t + 3*nema14_x/2 + 27;
-hand_axle_h = H - nema14_x/2 - t; 
+hand_axle_h = H - nema14_x/2 - 2*t; 
 hand_z = hand_axle_h; // -ni_hand*t;
 t_motor_mount = 4;
 hand_shift = 6;
 hand_y = wy/2 + wy_hand - 2*t_motor_mount;
 axle_x = wx/2 - nema14_x/2 - 1.5;
 bolt_wall_t = .7;
+
+
+// Battery Params
+bat_x = 55;
+bat_y = 27;
+bat_z = 30;
+backBattSpace = .5;
+hBattBag = 10*t;
 
 
 echo("Top h = ", H - hand_axle_h - nema14_x/2);
@@ -144,13 +165,30 @@ wx_head = rpi_width + wall_t*2 + spacing;
 wy_head = wx_head;
 r_corner_head = wx_head/10;
 ni_head = ceil(75/t);
-head_x = -7;
+head_x = -14; //-7
 
 sc_head = 1;
 sc2_head = 1;
 mid_head = .5;
 w_rim_head = w_rim;
 heights_head = heights(sc_head, sc2_head, mid_head, t, wx_head, ni_head);
+
+/*
+// BACKBAG PARAMS:
+wx_backbag = bat_y + 4*wall_t; // + w_rim*2; //wx; //rpi_width + wall_t*2 + spacing;
+wy_backbag = bat_x + 4*wall_t; // + w_rim*2; // 54 + 25; //wy*1.1;
+r_corner_backbag = wx_backbag/10;
+
+ni_backbag = ceil((2*bat_z)/t);
+backbag_x = -7;
+
+sc_backbag = 1;
+sc2_backbag = 1;
+mid_backbag = .5;
+w_rim_backbag = w_rim;
+heights_backbag = heights(sc_backbag, sc2_backbag, mid_backbag, t, wx_backbag, ni_backbag);
+backbag_H = H - ni_backbag*t - 2*t;
+*/
 
 // NECK PARAMS
 neck_t = 18;

@@ -1,4 +1,4 @@
-
+include <design.scad>;
 
 Pi = 3.141592653589793;
 
@@ -14,7 +14,7 @@ maxPhi = 270;
 wall_t = 10;
 t_hub = 14;
 
-a = 100;
+a = 20;
 nema_axle_h = 14;
 nema_axle_r = 2.54;
 r0 = nema_axle_r - .5;
@@ -82,14 +82,15 @@ module wheel(){
     
     difference(){
         //spokes_rims_();
-        cylinder(r = R, h = t_hub, $fn = a);
+        cylinder(r = R, h = t_hub, $fs = dt/2, $fa = dTHETA);
         side_profile_();
         // Tyre
-        rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fn = a);
+        rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fs = dt/2, $fa = dTHETA);
         // motor axle
         nema_axle_();
     }
     
+    color("Black") rotate_extrude($fs = dt/2, $fa = dTHETA) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fs = dt/2, $fa = dTHETA);
     
     //side_profile_();
     //color("DarkSlateGray") rotate_extrude($fn = 2*a) translate([R + dist_tube,t_rim/2]) circle(r=r_tube, $fn = a);

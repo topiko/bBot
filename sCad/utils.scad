@@ -1,5 +1,9 @@
 use <wigleUnit.scad>;
+//include <design.scad>;
 
+
+dt_utils = .3;
+dTHETA_utils = 10;
 
 function get_bolt_sink(boltD, add) = boltD/2 + add;
 
@@ -29,7 +33,7 @@ module shell(wall_t, sc, sc2, mid, t, wx, wy, r_corner, ni, A_in, A_out, a){
         
         theta_ = theta(sc, sc2, i, ni, mid, t, wx);
         h = add(select(heights_, [0:1:i-1]));
-        translate([0,0,h]) wigle_square(wx_, wy_, r_corner_, theta_, A_in, A_out, t, wall_t, 0, a);
+        translate([0,0,h]) wigle_square(wx_, wy, r_corner, theta_, A_in, A_out, t, wall_t, 0, a);
     }
     }
 }
@@ -39,15 +43,19 @@ module bolt(L, r, a){
     r2_ = 2*r;
     a = 40;
     cylinder(r = r, h = L, $fn = a);
-    translate([0,0,L])cylinder(r1 = r, r2 = r2_, h = h_, $fn = a);
-    translate([0,0,L+h_])cylinder(r1 = r2_, r2 = r2_, h = r2_, $fn = a);
+    translate([0,0,L])cylinder(r1 = r, r2 = r2_, h = h_, $fs = dt_utils/2, $fa = dTHETA_utils);
+    translate([0,0,L+h_])cylinder(r1 = r2_, r2 = r2_, h = r2_, $fs = dt_utils/2, $fa = dTHETA_utils);
     }
 
 module bolt_new(L, r, a){
     h_ = 2*r/sqrt(3);
     r2_ = 2*r;
-    a = 40;
-    translate([0,0,-L])cylinder(r = r, h = L, $fn = a);
-    cylinder(r1 = r, r2 = r2_, h = h_, $fn = a);
-    translate([0,0,h_])cylinder(r1 = r2_, r2 = r2_, h = r2_, $fn = a);
-    }
+    h_base = 2*r2_;
+    
+    translate([0,0,-L])cylinder(r = r, h = L, $fs = dt_utils, $fa = dTHETA_utils);
+    cylinder(r1 = r, r2 = r2_, h = h_, $fs = dt_utils, $fa = dTHETA_utils);
+    translate([0,0,h_])cylinder(r1 = r2_, r2 = r2_, h = h_base, $fs = dt_utils, $fa = dTHETA_utils);
+}
+    
+    
+bolt_new(20, 1.5, 20);

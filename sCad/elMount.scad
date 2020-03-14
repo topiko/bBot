@@ -4,7 +4,7 @@ include <design.scad>;
 build = 0;
 
 module el_mount(hole_coord, bolt_coord, h, bolt_sink, mode, a){
-    r_up = due_d_bolt/2 + due_d_bolt/2;
+    r_up = due_d_bolt;
     if (mode==0){
         difference(){
             union(){
@@ -52,6 +52,31 @@ module servo_mount(){
     }
 
 
+module hole_mount(mode, r, r_out){
+    
+    if (mode == 0){
+        difference(){
+            cylinder(r = r_out, h = wall_t + A_out, $fn = 5*a);
+            cylinder(r = r + .1, h = wall_t + A_out, $fn = 5*a);
+        }
+    }
+    else if (mode == 2){
+        cylinder(r = r+.1, h = 3*wall_t + A_out, $fn = 5*a, center = true);
+    }
+    
+}
+
+
+module height_bar(){
+    h = 16;
+    r = 3.5;
+    
+    difference() {
+        cylinder(h = h, r = r, $fa = 1, $fs = .2);
+        cylinder(h = h, r = d3bolt_t/2, $fa = 1, $fs = .2);
+    }
+    
+}
 
 module rpi_mount(h, bolt_sink, mode, a){
     el_mount(hole_coord_rpi, bolt_coord_rpi, h, bolt_sink, mode, a);
@@ -68,6 +93,9 @@ module battery_mount(h, bolt_sink, mode, a){
 module mpu_mount(h, bolt_sink, mode, a){
     el_mount(hole_coord_mpu, bolt_coord_mpu, h, bolt_sink, mode, a);
 }
+module dcdc_mount(h, bolt_sink, mode, a){
+    el_mount(hole_coord_dcdc, bolt_coord_dcdc, h, bolt_sink, mode, a);
+}
 
 
 
@@ -75,6 +103,10 @@ if (false){
     rpi_mount(4, 4, 2, 40);
     due_mount(4, 4, 2, 40);
 }
+
+//dcdc_mount(1, 4, 0, 40);
 //stepper_mount(4, bolt_sink, 2, a);
-//due_mount(1, 4, 0, 40);
-servo_mount();
+height_bar();
+//due_mount(1, 4, 2, 40);
+//servo_mount();
+//switch_mount(2);

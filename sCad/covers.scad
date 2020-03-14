@@ -32,24 +32,30 @@ module topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, h
     difference(){
         translate([0,0, shift]) top_plate();
         upRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, t, heights_, 2, a);
-        translate([0,0, shift + height - get_bolt_sink(3, .2)]) bolts_(wx, wy, r_corner, w_rim, t, 0, a);
+        if (3<w_rim) translate([0,0, shift + height - get_bolt_sink(3, .2)]) bolts_(wx, wy, r_corner, w_rim, t, 0, a);
     }
 }
 
 
 module top_cover_w_neck(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, mode, a){
-    w_charge_cable = 11.;
+    r_cable = 2;
+    r_led = 3.1/2;
     difference(){
         topCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_, thickness_bottom, bottom_rim_w, wall_t, 1, a);
         // Necj bolts:
         translate([head_x,0, thickness_bottom + add(heights_)]) show_head(25, 1);
-        // cable hole:
+        // head cable hole:
         translate([3 + neck_width + head_x, 0, thickness_bottom + add(heights_)])
         translate([0,-neck_t/2,-10]) cube([3,neck_t,20]);
         // switch hole
         translate([wx/2 - switch_d/2 - w_rim - .5, wy/2  - switch_d/2 - w_rim - 5,add(heights_) - 1]) cylinder(r = switch_d/2, h = 2*thickness_bottom, $fn = 40);
-        // charging cable hole
-        translate([wx/2 - w_rim - 2.75, -wy/2 + w_rim + 3,add(heights_) - 1]) cube([2.75, w_charge_cable, 20]);
+        // LED hole
+        translate([wx/2 - switch_d/2 - w_rim - .5, wy/2  - switch_d - w_rim - 5 - r_led - 4,add(heights_) - 1]) cylinder(r = r_led, h = 2*thickness_bottom, $fa = dTHETA, $fs = .1);
+        // battery cable hole
+        translate([wx/2 - w_rim - 2.75, -wy/2 + w_rim + 3,add(heights_) - 1]) hull(){
+            translate([0, r_cable,0])cylinder(h = 10, r=r_cable, $fa = dTHETA, $fs = .1);
+            translate([0, 3*r_cable,0]) cylinder(h = 10, r=r_cable, $fa = dTHETA, $fs = .1);
+            };
     }
     if (mode==2) translate([head_x,0, thickness_bottom + add(heights_)]) show_head(60, mode);
 
@@ -102,7 +108,10 @@ module bottomCover(wx, wy, r_corner, sc, sc2, mid, A_out, w_rim, ni, t, heights_
     difference(){
         translate([0,0, shift]) bottom_plate();
         lowerRim(wx, wy, r_corner, sc, sc2, mid, w_rim, ni, t, height/2, 2, a);
-        translate([0,0, shift + get_bolt_sink(3, .2)]) mirror([0,0,1]) bolts_(wx, wy, r_corner, w_rim, t, 0, a);
+        
+        if (3<w_rim) {
+            translate([0,0, shift + get_bolt_sink(3, .2)]) mirror([0,0,1]) bolts_(wx, wy, r_corner, w_rim, t, 0, a);
+        }
     }
     
 }

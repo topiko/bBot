@@ -97,9 +97,6 @@ module neck_pivot(neck_h, axle_d_from_wall, pivot_angle_min, pivot_angle_max, mo
         translate(-pivot_point) rotate([-90,0,0]) neck_();
         horn();
     }
-    /*else if (move == 0){
-        translate(move_xyz) neck_();
-    }*/
 
 }
 

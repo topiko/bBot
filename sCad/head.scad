@@ -51,6 +51,7 @@ module head(){
 
         }
     
+        
     module head_shell_(){
         difference(){
         union() {
@@ -108,7 +109,7 @@ module show_head(angle, mode){
 
 
 show_head(15, 0);
-a = 10;
+//a = 10;
 //head();
 //head_bottom_cover();
 //head_top_cover(0);
