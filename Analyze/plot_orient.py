@@ -20,15 +20,16 @@ elif mode == 'history':
     orient_arr = np.load('datas/' + files[2])
 
 # start of predictions suck...
-times = orient_arr[50:, 0]
-phi = orient_arr[50:, 1]
-phidot = orient_arr[50:, 2]
-phidotdot = orient_arr[50:, 3]
+ndiscard = 10
+times = orient_arr[ndiscard:, 0]
+phi = orient_arr[ndiscard:, 1]
+phidot = orient_arr[ndiscard:, 2]
+phidotdot = orient_arr[ndiscard:, 3]
 
-times_pred = orient_arr[50:, 4]
-phi_pred = orient_arr[50:, 5]
-phidot_pred = orient_arr[50:, 6]
-phidotdot_pred = orient_arr[50:, 7]
+times_pred = orient_arr[ndiscard:, 4]
+phi_pred = orient_arr[ndiscard:, 5]
+phidot_pred = orient_arr[ndiscard:, 6]
+phidotdot_pred = orient_arr[ndiscard:, 7]
 
 def func(t, a,b,c):
     

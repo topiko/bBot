@@ -2,20 +2,39 @@ import numpy as np
 
 angle_factor = 20860.
 pi = 3.14159267
-def update_orient(orient_arr, orient, time_orient):
+wheel_dia = .09
+steps_per_rev = 200
+
+def wheel_cmd_to_v(a):
+  
+    
+  w = a/steps_per_rev
+  return w*wheel_dia*pi
+
+def update_orient(orient_arr, orient, cmd, time_orient):
 
   orient = orient/angle_factor/pi*180
+  #orient_arr[0,:2] = orient_arr[1,0] + time_orient/1e6, orient 
   orient_arr[0,:2] = time_orient/1e6, orient 
+
+  if cmd[0] == 0:
+    orient_arr[0,8] = wheel_cmd_to_v(cmd[1])
+    orient_arr[0,9] = wheel_cmd_to_v(cmd[2])
+  else:
+    orient_arr[0,8] = wheel_cmd_to_v(orient_arr[1,8])
+    orient_arr[0,9] = wheel_cmd_to_v(orient_arr[1,9])
 
   return orient_arr
 
-def predict_orient(orient_arr, add_time):
+def predict_orient(orient_arr, time_orient):
   
   # fit 2 order poly to 3 values in orient arr 
   # --> w, dw/dt, d**2w/dt**2 
   # use these to predict values at time_orient
+
+  t_now = orient_arr[0,0]
   p1, p2, p3 = orient_arr[:, 1] 
-  t1, t2, t3 = orient_arr[:, 0] - orient_arr[0,0]
+  t1, t2, t3 = orient_arr[:, 0] - t_now #orient_arr[0,0]
 
   if (np.diff(orient_arr[:, 0]) == 0).any(): 
       print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
@@ -27,17 +46,19 @@ def predict_orient(orient_arr, add_time):
   c = (p1*t2*t3*(t2 - t3) - p2*t1*t3*(t1 - t3) + p3*t1*t2*(t1 - t2)) \
           /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
   
-  time_orient = add_time #np.diff(orient_arr[:,0]).mean()
+  #time_orient = add_time 
   p_now = a*time_orient**2 + b*time_orient + c
   w_now = 2*a*time_orient + b
   wdot_now = 2*a
   
-  w_last = 2*a*t2 + b
+  w_last = 2*a*t1 + b
   wdot_last = 2*a
    
-  orient_arr[1:,:] = orient_arr[:-1,:]
+  orient_arr[1:,:]  = orient_arr[:-1,:]
   orient_arr[1,2:4] = w_last, wdot_last
-  orient_arr[0,:] = orient_arr[0,0] + time_orient, p_now, w_now, wdot_now, p_now, orient_arr[0,0] + time_orient
+  
+  orient_arr[0,:4] = t_now + time_orient, p_now, w_now, wdot_now
+  orient_arr[0,4:8] = t_now + time_orient, p_now, w_now, wdot_now
 
   return orient_arr
 

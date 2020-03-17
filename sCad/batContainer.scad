@@ -6,8 +6,8 @@ a = 5;
 fs = .5;
 nCells = 6;
 rCell = 18.2/2;
-wallThickness = 1.2;
-spacing = .15;
+wallThickness = 1.15;
+spacing = .11;
 lipThickness = wallThickness/2;
 hLip = 1;
 thicknessCap = .5;
@@ -152,7 +152,7 @@ module container(spacingBackCont, shiftZ, mode){
     
     h_mount = el_mount_h;
     r_bolt = 1.5;
-    l_bolt = 6;
+    l_bolt = 4;
     r_nut = 5.8/2/sqrt(3)*2;
     
     shift_attach = h_mount + wallThickness; 
@@ -199,7 +199,9 @@ module container(spacingBackCont, shiftZ, mode){
         
         difference(){
             translate([-wx/2 - r1 - A_out - wallThickness - spacingBackCont, 0, shiftZ]) 
+            
             union(){
+                mirror([0,1,0])
                 shifted_(0);
                 attach_();
             }
@@ -210,8 +212,8 @@ module container(spacingBackCont, shiftZ, mode){
             // bolts:
             attach_bolts_(1);   
             // hole for cables
-            translate([xshift,-H/2+10/2,shiftZ + rCell_spacing]) cable_cut_(12, 1.5);
-            translate([xshift,-H/2+3,shiftZ + rCell_spacing*9]) cable_cut_(10, 2);
+            translate([xshift,H/2-10/2,shiftZ + rCell_spacing]) cable_cut_(12, 1.5);
+            translate([xshift,H/2-3,shiftZ + rCell_spacing*9]) cable_cut_(10, 2);
             
         }
         
@@ -235,11 +237,11 @@ module container(spacingBackCont, shiftZ, mode){
     
 }
 
-
+dTHETA = 3;
 //container(backBattSpace, hBattBag, 0);
-container(backBattSpace, hBattBag, 2);
+//container(backBattSpace, hBattBag, 2);
 //container(backBattSpace, hBattBag, 2);
 
-//cap(hBat, 1);
+cap(hBat, 1);
 
 
