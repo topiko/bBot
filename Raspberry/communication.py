@@ -6,6 +6,7 @@ NBYTES = 3
 def get_talk_bytes_from_command(cmd):
     """
     Parse bytes that are send to arduino from cmd.
+    Just to test.
     """
     cmd[1] += 1024
     cmd[2] += 1024
