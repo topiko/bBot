@@ -1,0 +1,29 @@
+Here are simple steps with sparse checkout approach which will populate the
+working directory sparsely, so you can tell Git which folder(s) or file(s) in
+the working directory are worth checking out.
+
+    Clone repository as usual (--no-checkout is optional):
+
+    git clone --no-checkout git@foo/bar.git
+    cd bar
+
+    You may skip this step, if you've your repository already cloned.
+
+    Hint: For large repos, consider shallow clone (--depth 1) to checkout only
+latest revision or/and --single-branch only.
+
+    Enable sparseCheckout option:
+
+    git config core.sparseCheckout true
+
+    Specify folder(s) for sparse checkout (without space at the end):
+
+    echo "trunk/public_html/*"> .git/info/sparse-checkout
+
+    or edit .git/info/sparse-checkout.
+
+    Checkout the branch (e.g. master):
+
+    git checkout master
+
+Now you should have selected folders in your current directory.
