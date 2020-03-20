@@ -21,7 +21,7 @@ ser = serial.Serial(
 )
 
 upright_angle = -15;
-pid = PID(-25, -200, -0.1, setpoint=upright_angle)
+pid = PID(-25, -200, 0.1, setpoint=upright_angle)
 
 report = True 
 # store time and pitch of last 3 time steps
