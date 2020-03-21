@@ -20,24 +20,28 @@ ser = serial.Serial(
         timeout=.001
 )
 
-upright_angle = -15;
-pid = PID(-25, -200, 0.1, setpoint=upright_angle)
+upright_angle = 15;
+pid = PID(25, 200, -0.1, setpoint=upright_angle)
 
-report = True 
+report = True
 # store time and pitch of last 3 time steps
-orient_arr = np.zeros((3, 10))  
+orient_arr = np.zeros((3, 12))
+
+def get_cmd(phi, phidot, phidotdot, v, dt):
+    
+    phidodot = 0 
 
 def act(orient_arr):
-  
-  phi = orient_arr[0,1] if not np.isnan(orient_arr[0,1]) else upright_angle 
-  a = int(pid(phi))
-  #a = int(((orient_arr[0,1]-upright_angle)/30*1024) if not np.isnan(orient_arr[0,1]) else 0)
-  #orient_arr[1, 8]
-  #a_prev = orient_arr
-  if 1023 < a: a = 1023
-  elif a < -1024: a = -1024
 
-  return [0,a,a]
+    phi = orient_arr[0,1] if not np.isnan(orient_arr[0,1]) else upright_angle
+    a = int(pid(phi))
+
+    #a = get_cmd(phi, phidot, vl)
+
+    if 1023 < a: a = 1023
+    elif a < -1024: a = -1024
+
+    return [0,a,a]
 
 def check_status(orient_arr):
 
@@ -86,7 +90,7 @@ while (i<imax) and (status != 'fell'): # True:
   wait_sum += wait
 
   if (i>20):
-      status = check_status(orient_arr)  
+      status = check_status(orient_arr)
 
   if i%ni == 0:
     t1 = time.time()
