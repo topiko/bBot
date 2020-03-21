@@ -2,6 +2,8 @@ import time
 
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
+ANGLE_FACTOR = -20860.
+PI = 3.14159267
 
 def get_talk_bytes_from_command(cmd):
     """
@@ -38,6 +40,9 @@ def talk(ser, cmd):
     sendbytes = get_talk_bytes_from_command(cmd)
     ser.write(sendbytes)
 
+def from_orient_int_to_theta(orient_int):
+    return orient_int/ANGLE_FACTOR/PI*180
+
 def listen(ser):
     """
     Listen to the serial communication and report the received
@@ -49,13 +54,14 @@ def listen(ser):
     t1 = time.time()
 
     s = ser.read(2)
-    time_pitch = ser.read(4)
+    cur_time = ser.read(4)
     #time_pitch = ser.read(2)
 
-    orient = int.from_bytes(s, byteorder='big', signed=True)
-    time_pitch = int.from_bytes(time_pitch, byteorder='big', signed=False)
-    #print('Imu time: ', time_pitch)
-    return orient, time_pitch, t1 - t0
+    orient_int = int.from_bytes(s, byteorder='big', signed=True)
+    cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)
+    theta = from_orient_int_to_theta(orient_int)
+
+    return theta, cur_time, t1 - t0
 
 def enable_legs(ser):
 

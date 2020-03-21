@@ -1,6 +1,5 @@
 import numpy as np
 
-ANGLE_FACTOR = -20860.
 PI = 3.14159267
 WHEEL_DIA = .09
 STEPS_PER_REV = 400
@@ -11,10 +10,18 @@ def wheel_v_to_cmd(v):
     return v/(WHEEL_DIA*PI)*STEPS_PER_REV
 
 
+def check_status(orient_arr):
 
-def update_orient(orient_arr, orient, cmd, time_orient):
+    if ((orient_arr[0,1]-upright_angle) < -30) or (30 < (orient_arr[0,1]-upright_angle)):
+        print('FELL: {}'.format(orient_arr[0,1]-upright_angle))
+        print(orient_arr)
+        return 'fell'
+    else:
+        return 'upright'
 
-    orient = orient/ANGLE_FACTOR/PI*180
+def update_state(orient_arr, orient, cmd, time_orient):
+
+    #orient = orient/ANGLE_FACTOR/PI*180
     orient_arr[0, :2] = time_orient/1e6, orient
 
     if cmd[0] == 0:
@@ -31,7 +38,7 @@ def update_orient(orient_arr, orient, cmd, time_orient):
 
     return orient_arr
 
-def predict_orient(orient_arr, time_orient):
+def predict_theta(orient_arr, time_orient):
 
     # fit 2 order poly to 3 values in orient arr
     # --> w, dw/dt, d**2w/dt**2
