@@ -1,12 +1,16 @@
 import numpy as np
 
-ANGLE_FACTOR = 20860.
+ANGLE_FACTOR = -20860.
 PI = 3.14159267
 WHEEL_DIA = .09
-STEPS_PER_REV = 200
+STEPS_PER_REV = 400
 
 def wheel_cmd_to_v(a):
     return a/STEPS_PER_REV*WHEEL_DIA*PI
+def wheel_v_to_cmd(v):
+    return v/(WHEEL_DIA*PI)*STEPS_PER_REV
+
+
 
 def update_orient(orient_arr, orient, cmd, time_orient):
 
@@ -19,6 +23,11 @@ def update_orient(orient_arr, orient, cmd, time_orient):
     else:
         orient_arr[0, 8] = wheel_cmd_to_v(orient_arr[1, 8])
         orient_arr[0, 9] = wheel_cmd_to_v(orient_arr[1, 9])
+
+    # Figure out the past accel:
+    dt = orient_arr[0, 0] - orient_arr[1, 0]
+    orient_arr[1, 10] = (orient_arr[1, 8] - orient_arr[0, 8])/dt
+    orient_arr[1, 11] = (orient_arr[1, 9] - orient_arr[0, 9])/dt
 
     return orient_arr
 

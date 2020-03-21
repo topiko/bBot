@@ -44,7 +44,7 @@ def listen(ser):
     values.
     """
     t0 = time.time()
-    while ser.in_waiting < 2: 
+    while ser.in_waiting < 2:
         pass
     t1 = time.time()
 
