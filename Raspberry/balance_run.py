@@ -4,11 +4,11 @@ import time
 import serial
 
 import numpy as np
-from utils.communication import talk, listen, \
-        enable_legs, disable_all #get_talk_bytes_from_cmd
-from utils.state import update_state, predict_theta, \
-        check_status
-from utils.control import act
+from communication import talk, listen, \
+        enable_legs, disable_all, parse_cmd_dict_to_cmd #get_talk_bytes_from_cmd
+from state import update_state, predict_theta, \
+        check_status, update_array
+from control import act, UPRIGHT_THETA
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -27,20 +27,39 @@ SER = serial.Serial(
 
 REPORT = True
 
-
-
-def __main__():
+def balance_loop():
+    """
+    The main loop where patric is balancing.
+    """
     i = 0
     wait_sum = 0
-    ni = 50
-    cmd = [0, 1, 1]
-    t0 = 0
+    n_report = 50
+    t_init = 0
     t_add = .015
     status = 'upright'
+    imax = 1000
 
-    # store time and pitch of last 3 time steps
-    state_dict = {'theta':np.zeros((4, 3)),
-                  'legs':np.zeros((4, 6))}
+    # This dictionary handles the command
+    cmd_dict = {'cmd_to':'wheels', 'v':0, 'phidot':0}
+
+    # State dictionary handles the state of the robot
+    state_dict = {'times':np.zeros(3),
+                  'time_next':0,
+                  'theta':np.zeros(3),
+                  'thetadot':np.zeros(3),
+                  'thetadotdot':np.zeros(3),
+                  'theta_predict':0,
+                  'v':np.zeros(3),
+                  'a':np.zeros(3),
+                  'phidot':np.zeros(3),
+                  'target_theta':UPRIGHT_THETA}
+
+    # Report dict is for debugging and performance evaluation
+    report_dict = {'predict_times':np.zeros(3),
+                   'predict_thetas':np.zeros(3)}
+
+    # store state:
+    store_arr = np.zeros((imax, state_dict['leg'].shape[1]))
 
     # enable the legs:
     if MODE == 'test_mpu':
@@ -48,40 +67,52 @@ def __main__():
     else:
         enable_legs(SER)
 
-    imax = 1000
-    store_arr = np.zeros((imax, state_dict['leg'].shape[1]))
 
     while (i < imax) and (status != 'fell'): # True:
 
-        talk(SER, cmd)
-        predict_theta(state_dict['theta'], t_add)
+        talk(SER, parse_cmd_dict_to_cmd(cmd_dict))
 
-        cmd = act(state_dict)
+        cmd_dict = act(state_dict)
+        theta, cur_time, wait = listen(SER)
 
-        orient, imu_time, wait = listen(SER)
-
-        state_dict = update_state(state_dict, orient, cmd, imu_time)
+        update_state(state_dict, theta, cmd_dict, cur_time, t_add)
         wait_sum += wait
 
-        if (i > 20):
+        if i > 20:
             status = check_status(state_dict)
 
-        if i%ni == 0:
-            t1 = time.time()
-            print('Freq: ', ni/(t1-t0))
-            print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t1-t0)))
-        if REPORT:
-            print(state_dict)
-            print()
-            wait_sum = 0
-            t0 = time.time()
-        if i != 0:
-            t_add = np.diff(state_dict[::-1, 0]).mean()
+        if i%n_report == 0:
+            t_report = time.time()
+            print('Freq: ', n_report/(t_report-t_init))
+            print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
+            if REPORT:
+                print(state_dict)
+                print()
+                wait_sum = 0
+                t_init = time.time()
+            if i != 0:
+                t_add = np.diff(state_dict[::-1, 0]).mean()
 
         if REPORT:
-            store_arr[i, :] = state_dict[-1, :]
+            report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
+                                                         state_dict['theta_predict'])
+            report_dict['predict_times'] = update_array(report_dict['predict_times'],
+                                                        state_dict['times'][1] + t_add)
+            for j, key in enumerate(['times', 'theta',
+                                     'thetadot', 'thetadotdot',
+                                     'v', 'a']):
+                store_arr[i, j] = state_dict[key][1]
+            store_arr[i, j+1] = report_dict['predict_times'][1]
+            store_arr[i, j+2] = report_dict['predict_thetas'][1]
+
+        predict_theta(state_dict)
         i += 1
     print(status)
 
     np.save('orient.npy', store_arr[3:i])
     disable_all(SER)
+
+
+
+if __name__ == '__main__':
+    balance_loop()

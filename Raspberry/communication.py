@@ -1,4 +1,5 @@
 import time
+from control import wheel_v_to_cmd
 
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
@@ -43,6 +44,12 @@ def talk(ser, cmd):
 def from_orient_int_to_theta(orient_int):
     return orient_int/ANGLE_FACTOR/PI*180
 
+
+def wheel_cmd_to_v(a):
+    return a/STEPS_PER_REV*WHEEL_DIA*PI
+def wheel_v_to_cmd(v):
+    return v/(WHEEL_DIA*PI)*STEPS_PER_REV
+
 def listen(ser):
     """
     Listen to the serial communication and report the received
@@ -67,6 +74,15 @@ def enable_legs(ser):
 
     talk(ser, [3, 1, 0])
     time.sleep(.1)
+
+def parse_cmd_dict_to_cmd(cmd_dict):
+
+    cmd = [0, 0, 0]
+    if cmd_dict['cmd_to'] == 'wheels':
+        cmd[0] = 0
+        cmd[1] = wheel_v_to_cmd(cmd_dict['cmd']['v'])
+        cmd[2] = wheel_v_to_cmd(cmd_dict['cmd']['v'])
+    return cmd
 
 def disable_all(ser):
 

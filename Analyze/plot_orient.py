@@ -24,19 +24,19 @@ elif MODE == 'history':
 # start of predictions suck...
 ndiscard = 10
 times = orient_arr[ndiscard:, 0]
-phi = orient_arr[ndiscard:, 1]
-phidot = orient_arr[ndiscard:, 2]
-phidotdot = orient_arr[ndiscard:, 3]
+theta = orient_arr[ndiscard:, 1]
+thetadot = orient_arr[ndiscard:, 2]
+thetadotdot = orient_arr[ndiscard:, 3]
 
-times_pred = orient_arr[ndiscard:, 4]
-phi_pred = orient_arr[ndiscard:, 5]
-phidot_pred = orient_arr[ndiscard:, 6]
-phidotdot_pred = orient_arr[ndiscard:, 7]
+times_pred = orient_arr[ndiscard:, 6]
+theta_pred = orient_arr[ndiscard:, 7]
+#thetadot_pred = orient_arr[ndiscard:, 6]
+#thetadotdot_pred = orient_arr[ndiscard:, 7]
 
-vl = orient_arr[ndiscard:, 8]
-vr = orient_arr[ndiscard:, 9]
-al = orient_arr[ndiscard:, 10]
-ar = orient_arr[ndiscard:, 11]
+v = orient_arr[ndiscard:, 4]
+#vr = orient_arr[ndiscard:, 9]
+a = orient_arr[ndiscard:, 5]
+#ar = orient_arr[ndiscard:, 11]
 
 def func(t, a, b, c):
     return a*t**2 + b*t + c
@@ -49,7 +49,7 @@ def get_phidot_phidotdot(i, n):
     if i < n+n_: return 0, 0
 
     t_ = times[i-n-n_:i-n_]
-    phi_ = phi[i-n-n_:i-n_]
+    phi_ = theta[i-n-n_:i-n_]
     (a,b,c), _ = curve_fit(func, t_, phi_, (1,1,1))
     phidot = derivative(func, times[i], dx = .05, args = (a,b,c))
     phidotdot = derivative(func, times[i], n = 2, dx = .05, args =(a,b,c))
@@ -71,45 +71,46 @@ fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, figsize = (12,8), sharex = True
 s = 5
 # Phi:
 #=======================================================
-ax1.plot(times, phi, '-o', markersize = s, label = 'rpi')
-ax1.plot(times_pred, phi_pred, '-o', markersize = s, label = 'pred_rpi')
+ax1.plot(times, theta, '-o', markersize = s, label = 'rpi')
+ax1.plot(times_pred, theta_pred, '-o', markersize = s, label = 'pred_rpi')
 for i in range(len(times)-1):
-    ax1.plot([times[i], times_pred[i]], [phi[i], phi_pred[i]], lw = .5, color = 'black')
+    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
 ax1.legend()
 ax1.set_title('phi')
 #=======================================================
 
 # phi dot
 #=======================================================
-ax2.plot(times, phidot, '-o', markersize = s, label = 'rpi')
-ax2.plot(times_pred, phidot_pred, '-o', markersize= s, label = 'pred')
-for i in range(len(times)-1):
-    ax2.plot([times[i], times_pred[i]], [phidot[i], phidot_pred[i]], lw = .5, color = 'black')
-ax2.plot(times, np.gradient(phi, times), markersize = s, label = 'grad')
+ax2.plot(times, thetadot, '-o', markersize = s, label = 'rpi')
+#ax2.plot(times_pred, thetadot_pred, '-o', markersize= s, label = 'pred')
+#for i in range(len(times)-1):
+#    ax2.plot([times[i], times_pred[i]], [thetadot[i], thetadot_pred[i]], lw = .5, color = 'black')
+ax2.plot(times, np.gradient(theta, times), markersize = s, label = 'grad')
 ax2.set_title('phidot')
 ax2.legend()
 #=======================================================
 
 # Phi dodtot
 #=======================================================
-ax3.plot(times, phidotdot, '-o', markersize = s, label = 'rpi')
-ax3.plot(times_pred, phidotdot_pred, '-o', markersize = s, label = 'pred')
-ax3.plot(times, np.gradient(np.gradient(phi, times), times), markersize = s, label = 'grad')
+ax3.plot(times, thetadotdot, '-o', markersize = s, label = 'rpi')
+#ax3.plot(times_pred, thetadotdot_pred, '-o', markersize = s, label = 'pred')
+ax3.plot(times, np.gradient(np.gradient(theta, times), times), markersize = s, label = 'grad')
 ax3.set_title('phidotdot')
 ax3.legend()
 #=======================================================
 
 # Vleft and right
 #=======================================================
-ax4.plot(times, vl, '-o', markersize = s, label = 'vl')
-ax4.plot(times, vr, '-o', markersize = s, label = 'vr')
+ax4.plot(times, v, '-o', markersize=s, label='v')
+#ax4.plot(times, vr, '-o', markersize = s, label = 'vr')
 
 # Vleft and right
 #=======================================================
-ax5.plot(times, al, '-o', markersize = s, label = 'al')
-ax5.plot(times, ar, '-o', markersize = s, label = 'ar')
-
+ax5.plot(times, a, '-o', markersize=s, label='a')
+#ax5.plot(times, a, '-o', markersize=s, label='a')
+#ax5.plot(times, ar, '-o', markersize = s, label = 'ar')
 ax5.set_xlabel('time')
+
 plt.show()
 
 str_time = datetime.datetime.now().strftime("%d-%m_%H:%M")
