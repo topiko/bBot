@@ -60,14 +60,15 @@ def balance_loop():
                   'a':np.zeros(3),
                   'phi':np.zeros(3),
                   'phidot':np.zeros(3),
-                  'R':np.zeros((3, 2))}
+                  'x':np.zeros(3),
+                  'y':np.zeros(3)}
 
     # Report dict is for debugging and performance evaluation
     report_dict = {'predict_times':np.zeros(3),
                    'predict_thetas':np.zeros(3)}
 
     # store state:
-    store_arr = np.zeros((imax, 8))
+    store_arr = np.zeros((imax, 11))
 
     # enable the legs:
     if MODE == 'test_mpu':
@@ -125,7 +126,7 @@ def balance_loop():
                                                         state_dict['times'][1] + t_add)
             for j, key in enumerate(['times', 'theta',
                                      'thetadot', 'thetadotdot',
-                                     'v', 'a']):
+                                     'v', 'a', 'x', 'y', 'phi']):
                 store_arr[i, j] = state_dict[key][1]
             store_arr[i, j+1] = report_dict['predict_times'][1]
             store_arr[i, j+2] = report_dict['predict_thetas'][1]

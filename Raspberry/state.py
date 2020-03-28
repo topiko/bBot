@@ -64,9 +64,11 @@ def update_location(state_dict):
                                 [np.sin(phi),  np.cos(phi)]])
 
     dr = rotation_matrix.dot(dr_p).T
-    R = state_dict['R'][0] + dr
-    state_dict['R'] = update_array(state_dict['R'], R)
+    x = state_dict['x'][0] + dr[0]
+    y = state_dict['y'][0] + dr[1]
 
+    state_dict['x'] = update_array(state_dict['x'], x)
+    state_dict['y'] = update_array(state_dict['y'], y)
 
 def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
 

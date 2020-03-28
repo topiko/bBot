@@ -28,8 +28,8 @@ theta = orient_arr[ndiscard:, 1]
 thetadot = orient_arr[ndiscard:, 2]
 thetadotdot = orient_arr[ndiscard:, 3]
 
-times_pred = orient_arr[ndiscard:, 6]
-theta_pred = orient_arr[ndiscard:, 7]
+times_pred = orient_arr[ndiscard:, 9]
+theta_pred = orient_arr[ndiscard:, 10]
 
 print(times[-10:])
 print(times_pred[-10:])

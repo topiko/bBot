@@ -20,7 +20,7 @@ def v_to_cmd_int(v):
         cmd = 1023
     elif cmd < -1024:
         cmd = -1024
-    return cmd
+    return int(cmd)
 
 def wheels_v_to_cmds(v, phidot):
 
@@ -39,9 +39,9 @@ def update_cmd(state_dict, cmd_dict):
         theta = UPRIGHT_THETA
 
 
-    accel = CTRL_PID(theta)
-    dt = state_dict['time_next'] - state_dict['times'][0]
-    vt = v_now + accel*dt
+    vt = CTRL_PID(theta)
+    #dt = state_dict['time_next'] - state_dict['times'][0]
+    #vt = v_now + accel*dt
 
     phidot = 1/360*2*PI # 1 deg/sec
     v_l, v_r = wheels_v_to_cmds(vt, phidot)
