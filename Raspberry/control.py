@@ -6,14 +6,14 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         STEPS_PER_REV, PI
 
 
-CTRL_PID = PID(5000, 70000, 50., setpoint=UPRIGHT_THETA)
+CTRL_PID = PID(.005, .07, 0., setpoint=UPRIGHT_THETA)
 
 def v_to_cmd_int(v):
     """
     Get the command integer from velocity.
     """
-    rev_per_sec = v/(WHEEL_DIA * PI)
-    steps_per_sec = STEPS_PER_REV / rev_per_sec
+    rev_per_sec = v / (WHEEL_DIA * PI)
+    steps_per_sec = STEPS_PER_REV * rev_per_sec
     cmd = steps_per_sec / ARDUINO_STEP_MULTIP
 
     if cmd > 1023:
@@ -28,7 +28,6 @@ def wheels_v_to_cmds(v, phidot):
     """
     v_l = v - phidot * RAIL_W / 2
     v_r = v + phidot * RAIL_W / 2
-
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
 def react(state_dict, cmd_dict):
