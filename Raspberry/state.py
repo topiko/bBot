@@ -7,11 +7,13 @@ STEPS_PER_REV = 400
 
 
 
-def check_status(orient_arr):
+def check_status(state_dict):
 
-    if ((orient_arr[0,1] - UPRIGHT_THETA) < -30) or (30 < (orient_arr[0,1]-UPRIGHT_THETA)):
-        print('FELL: {}'.format(orient_arr[0,1]-UPRIGHT_THETA))
-        print(orient_arr)
+    theta = state_dict['theta'][0]
+
+    if ((theta - UPRIGHT_THETA) < -30) or (30 < (theta-UPRIGHT_THETA)):
+        print('FELL: {}'.format(theta-UPRIGHT_THETA))
+        print(state_dict)
         return 'fell'
     else:
         return 'upright'
@@ -27,7 +29,7 @@ def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
     times = state_dict['times']
     state_dict['times'] = update_array(times, cur_time)
     state_dict['theta'] = update_array(state_dict['theta'], theta)
-    state_dict['next_time'] = cur_time + t_add
+    state_dict['time_next'] = cur_time + t_add
 
     if cmd_dict['cmd_to'] == 'wheels':
         for key in ['v', 'phidot']:
@@ -35,6 +37,9 @@ def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
 
 
     # update the orientation array:
+    state_dict['thetadot'][2] = state_dict['thetadot'][1]
+    state_dict['thetadotdot'][2] = state_dict['thetadotdot'][1]
+
     a, b, c = fit_parabel(times, state_dict['theta'])
     state_dict['thetadot'][1] = 2*a*times[1] + b
     state_dict['thetadotdot'][1] = 2*a
@@ -64,48 +69,14 @@ def fit_parabel(times, points):
 def predict_theta(state_dict):
 
     times = state_dict['times']
-    thetas = state_dict['thetas']
+    thetas = state_dict['theta']
 
-    t_future = state_dict['next_time'] - times[0]
+    t_future = state_dict['time_next'] - times[0]
     a, b, c = fit_parabel(times - times[0], thetas)
 
     theta_predict =  a*t_future**2 + b*t_future + c
     state_dict['theta_predict'] = theta_predict
-    state_dict['theta_predict_hist'] = \
-            update_array(state_dict['theta_predict_hist'], theta_predict)
+    #state_dict['theta_predict_hist'] = \
+    #        update_array(state_dict['theta_predict_hist'], theta_predict)
 
 
-def predict_theta(orient_arr, time_orient):
-
-    # fit 2 order poly to 3 values in orient arr
-    # --> w, dw/dt, d**2w/dt**2
-    # use these to predict values at time_orient
-
-    t_now = orient_arr[0, 0]
-    p1, p2, p3 = orient_arr[:, 1]
-    t1, t2, t3 = orient_arr[:, 0] - t_now #orient_arr[0,0]
-
-    if (np.diff(orient_arr[:, 0]) == 0).any():
-        print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-
-    a = (p1*(t2 - t3) - p2*(t1 - t3) + p3*(t1 - t2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-    b = (-p1*(t2**2 - t3**2) + p2*(t1**2 - t3**2) - p3*(t1**2 - t2**2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-    c = (p1*t2*t3*(t2 - t3) - p2*t1*t3*(t1 - t3) + p3*t1*t2*(t1 - t2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-
-    p_now = a*time_orient**2 + b*time_orient + c
-    w_now = 2*a*time_orient + b
-    wdot_now = 2*a
-
-    w_last = 2*a*t1 + b
-    wdot_last = 2*a
-
-    orient_arr[1:, :] = orient_arr[:-1, :]
-    orient_arr[1, 2:4] = w_last, wdot_last
-
-    orient_arr[0, :4] = t_now + time_orient, p_now, w_now, wdot_now
-    orient_arr[0, 4:8] = t_now + time_orient, p_now, w_now, wdot_now
-
-    return orient_arr

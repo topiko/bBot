@@ -40,7 +40,7 @@ def balance_loop():
     imax = 1000
 
     # This dictionary handles the command
-    cmd_dict = {'cmd_to':'wheels', 'v':0, 'phidot':0}
+    cmd_dict = {'cmd_to':'wheels', 'v':0, 'phidot':0, 'cmd':[0,0,0]}
 
     # State dictionary handles the state of the robot
     state_dict = {'times':np.zeros(3),
@@ -59,7 +59,7 @@ def balance_loop():
                    'predict_thetas':np.zeros(3)}
 
     # store state:
-    store_arr = np.zeros((imax, state_dict['leg'].shape[1]))
+    store_arr = np.zeros((imax, 8))
 
     # enable the legs:
     if MODE == 'test_mpu':
@@ -72,7 +72,7 @@ def balance_loop():
 
         talk(SER, parse_cmd_dict_to_cmd(cmd_dict))
 
-        cmd_dict = act(state_dict)
+        cmd_dict['cmd'] = act(state_dict)
         theta, cur_time, wait = listen(SER)
 
         update_state(state_dict, theta, cmd_dict, cur_time, t_add)
@@ -86,12 +86,16 @@ def balance_loop():
             print('Freq: ', n_report/(t_report-t_init))
             print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
             if REPORT:
-                print(state_dict)
+                print(state_dict['times'])
+                print(state_dict['theta'])
+                print(report_dict['predict_times'])
+                print(report_dict['predict_thetas'])
+
                 print()
                 wait_sum = 0
                 t_init = time.time()
             if i != 0:
-                t_add = np.diff(state_dict[::-1, 0]).mean()
+                t_add = np.diff(state_dict['times'][::-1]).mean()
 
         if REPORT:
             report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],

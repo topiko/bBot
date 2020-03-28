@@ -1,5 +1,4 @@
 import time
-from control import wheel_v_to_cmd
 
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
@@ -77,12 +76,13 @@ def enable_legs(ser):
 
 def parse_cmd_dict_to_cmd(cmd_dict):
 
-    cmd = [0, 0, 0]
-    if cmd_dict['cmd_to'] == 'wheels':
-        cmd[0] = 0
-        cmd[1] = wheel_v_to_cmd(cmd_dict['cmd']['v'])
-        cmd[2] = wheel_v_to_cmd(cmd_dict['cmd']['v'])
-    return cmd
+    #cmd = [0, 0, 0]
+    #if cmd_dict['cmd_to'] == 'wheels':
+    #    cmd[0] = 0
+    #    cmd[1] = cmd_dict['cmd'][1] #wheel_v_to_cmd(cmd_dict['cmd']['v'])
+    #    cmd[2] = cmd_dict['cmd'][2] #wheel_v_to_cmd(cmd_dict['cmd']['v'])
+    return cmd_dict['cmd']
+    #return cmd
 
 def disable_all(ser):
 
