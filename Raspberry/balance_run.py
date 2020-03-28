@@ -9,7 +9,7 @@ from communication import talk, listen, \
 from state import update_state, predict_theta, \
         check_status, update_array, update_location, \
         update_cmd_vars
-from control import update_cmd
+from control import react
 from params import UPRIGHT_THETA
 
 if len(sys.argv) == 2:
@@ -82,12 +82,12 @@ def balance_loop():
         # Send the latest command to arduino
         talk(SER, cmd_dict['cmd'])
 
-        # Update the history of the command variables 
-        # before obtaining new ones: 
+        # Update the history of the command variables
+        # before obtaining new ones:
         update_cmd_vars(state_dict, cmd_dict)
 
         # Get new command to be sent at next iteration:
-        update_cmd(state_dict, cmd_dict)
+        react(state_dict, cmd_dict)
 
         # Listen to serial as a response to above talk:
         theta, cur_time, wait = listen(SER)
@@ -96,7 +96,7 @@ def balance_loop():
         update_state(state_dict, theta, cmd_dict, cur_time, t_add)
         update_location(state_dict)
 
-        # To see how much time has been spent 
+        # To see how much time has been spent
         # waiting for the arduino to respond:
         wait_sum += wait
 
