@@ -7,8 +7,10 @@ import numpy as np
 from communication import talk, listen, \
         enable_legs, disable_all, parse_cmd_dict_to_cmd #get_talk_bytes_from_cmd
 from state import update_state, predict_theta, \
-        check_status, update_array
-from control import act, UPRIGHT_THETA
+        check_status, update_array, update_location, \
+        update_cmd_vars
+from control import update_cmd
+from params import UPRIGHT_THETA
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -40,7 +42,12 @@ def balance_loop():
     imax = 1000
 
     # This dictionary handles the command
-    cmd_dict = {'cmd_to':'wheels', 'v':0, 'phidot':0, 'cmd':[0,0,0]}
+    cmd_dict = {'cmd_to':'wheels',
+                'v':0,
+                'phidot':0,
+                'target_theta':UPRIGHT_THETA,
+                'target_R':np.zeros(2),
+                'cmd':[0, 0, 0]}
 
     # State dictionary handles the state of the robot
     state_dict = {'times':np.zeros(3),
@@ -51,8 +58,9 @@ def balance_loop():
                   'theta_predict':0,
                   'v':np.zeros(3),
                   'a':np.zeros(3),
+                  'phi':np.zeros(3),
                   'phidot':np.zeros(3),
-                  'target_theta':UPRIGHT_THETA}
+                  'R':np.zeros((3, 2))}
 
     # Report dict is for debugging and performance evaluation
     report_dict = {'predict_times':np.zeros(3),
@@ -70,12 +78,25 @@ def balance_loop():
 
     while (i < imax) and (status != 'fell'): # True:
 
-        talk(SER, parse_cmd_dict_to_cmd(cmd_dict))
+        # Send the latest command to arduino
+        talk(SER, cmd_dict['cmd'])
 
-        cmd_dict['cmd'] = act(state_dict)
+        # Update the history of the command variables 
+        # before obtaining new ones: 
+        update_cmd_vars(state_dict, cmd_dict)
+
+        # Get new command to be sent at next iteration:
+        update_cmd(state_dict, cmd_dict)
+
+        # Listen to serial as a response to above talk:
         theta, cur_time, wait = listen(SER)
 
+        # Update the state of the system with the input from serial:
         update_state(state_dict, theta, cmd_dict, cur_time, t_add)
+        update_location(state_dict)
+
+        # To see how much time has been spent 
+        # waiting for the arduino to respond:
         wait_sum += wait
 
         if i > 20:

@@ -1,9 +1,8 @@
 import time
-
+from params import PI
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
 ANGLE_FACTOR = -20860.
-PI = 3.14159267
 
 def get_talk_bytes_from_command(cmd):
     """
@@ -44,10 +43,6 @@ def from_orient_int_to_theta(orient_int):
     return orient_int/ANGLE_FACTOR/PI*180
 
 
-def wheel_cmd_to_v(a):
-    return a/STEPS_PER_REV*WHEEL_DIA*PI
-def wheel_v_to_cmd(v):
-    return v/(WHEEL_DIA*PI)*STEPS_PER_REV
 
 def listen(ser):
     """
@@ -64,7 +59,7 @@ def listen(ser):
     #time_pitch = ser.read(2)
 
     orient_int = int.from_bytes(s, byteorder='big', signed=True)
-    cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)
+    cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)/1e6 # from mus to s
     theta = from_orient_int_to_theta(orient_int)
 
     return theta, cur_time, t1 - t0
@@ -73,16 +68,6 @@ def enable_legs(ser):
 
     talk(ser, [3, 1, 0])
     time.sleep(.1)
-
-def parse_cmd_dict_to_cmd(cmd_dict):
-
-    #cmd = [0, 0, 0]
-    #if cmd_dict['cmd_to'] == 'wheels':
-    #    cmd[0] = 0
-    #    cmd[1] = cmd_dict['cmd'][1] #wheel_v_to_cmd(cmd_dict['cmd']['v'])
-    #    cmd[2] = cmd_dict['cmd'][2] #wheel_v_to_cmd(cmd_dict['cmd']['v'])
-    return cmd_dict['cmd']
-    #return cmd
 
 def disable_all(ser):
 

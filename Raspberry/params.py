@@ -1,0 +1,9 @@
+"""Various physical parameters"""
+
+
+UPRIGHT_THETA = 15
+STEPS_PER_REV = 400
+ARDUINO_STEP_MULTIP = 2
+WHEEL_DIA = .08
+RAIL_W = .01
+PI = 3.14159267

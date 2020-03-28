@@ -15,11 +15,11 @@ else: MODE = 'read_rpi'
 PREDICT = True
 
 if MODE == 'read_rpi':
-    subprocess.call(['scp', 'sexybot:bBot/orient.npy', '.'])
+    subprocess.call(['scp', 'sexybot:bBot/Raspberry/orient.npy', '.'])
     orient_arr = np.load('orient.npy')
 elif MODE == 'history':
     files = os.listdir('./datas')
-    orient_arr = np.load('datas/' + files[2])
+    orient_arr = np.load('datas/' + files[0])
 
 # start of predictions suck...
 ndiscard = 10
@@ -30,6 +30,9 @@ thetadotdot = orient_arr[ndiscard:, 3]
 
 times_pred = orient_arr[ndiscard:, 6]
 theta_pred = orient_arr[ndiscard:, 7]
+
+print(times[-10:])
+print(times_pred[-10:])
 #thetadot_pred = orient_arr[ndiscard:, 6]
 #thetadotdot_pred = orient_arr[ndiscard:, 7]
 
@@ -73,8 +76,8 @@ s = 5
 #=======================================================
 ax1.plot(times, theta, '-o', markersize = s, label = 'rpi')
 ax1.plot(times_pred, theta_pred, '-o', markersize = s, label = 'pred_rpi')
-for i in range(len(times)-1):
-    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
+#for i in range(len(times)-1):
+#    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
 ax1.legend()
 ax1.set_title('phi')
 #=======================================================
@@ -82,7 +85,6 @@ ax1.set_title('phi')
 # phi dot
 #=======================================================
 ax2.plot(times, thetadot, '-o', markersize = s, label = 'rpi')
-#ax2.plot(times_pred, thetadot_pred, '-o', markersize= s, label = 'pred')
 #for i in range(len(times)-1):
 #    ax2.plot([times[i], times_pred[i]], [thetadot[i], thetadot_pred[i]], lw = .5, color = 'black')
 ax2.plot(times, np.gradient(theta, times), markersize = s, label = 'grad')
@@ -93,7 +95,6 @@ ax2.legend()
 # Phi dodtot
 #=======================================================
 ax3.plot(times, thetadotdot, '-o', markersize = s, label = 'rpi')
-#ax3.plot(times_pred, thetadotdot_pred, '-o', markersize = s, label = 'pred')
 ax3.plot(times, np.gradient(np.gradient(theta, times), times), markersize = s, label = 'grad')
 ax3.set_title('phidotdot')
 ax3.legend()
@@ -102,20 +103,16 @@ ax3.legend()
 # Vleft and right
 #=======================================================
 ax4.plot(times, v, '-o', markersize=s, label='v')
-#ax4.plot(times, vr, '-o', markersize = s, label = 'vr')
 
 # Vleft and right
 #=======================================================
 ax5.plot(times, a, '-o', markersize=s, label='a')
-#ax5.plot(times, a, '-o', markersize=s, label='a')
-#ax5.plot(times, ar, '-o', markersize = s, label = 'ar')
 ax5.set_xlabel('time')
 
 plt.show()
 
 str_time = datetime.datetime.now().strftime("%d-%m_%H:%M")
 np.save('datas/run_date-{}.npy'.format(str_time), orient_arr)
-
 
 plt.plot(times, times_pred, '-o', markersize = s)
 plt.plot(times, times, '-', color = 'black')
