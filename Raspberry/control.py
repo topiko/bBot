@@ -6,7 +6,7 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         STEPS_PER_REV, PI
 
 
-CTRL_PID = PID(25, 200, -0.1, setpoint=UPRIGHT_THETA)
+CTRL_PID = PID(5000, 70000, 50., setpoint=UPRIGHT_THETA)
 
 def v_to_cmd_int(v):
     """
@@ -24,9 +24,9 @@ def v_to_cmd_int(v):
 
 def wheels_v_to_cmds(v, phidot):
 
-    v_l = v - phidot*RAIL_W/2
-    v_r = v + phidot*RAIL_W/2
-
+    v_l = v - phidot * RAIL_W / 2
+    v_r = v + phidot * RAIL_W / 2
+    print(v_l, v_r)
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
 def update_cmd(state_dict, cmd_dict):
@@ -43,7 +43,7 @@ def update_cmd(state_dict, cmd_dict):
     #dt = state_dict['time_next'] - state_dict['times'][0]
     #vt = v_now + accel*dt
 
-    phidot = 1/360*2*PI # 1 deg/sec
+    phidot = 5/360*2*PI # 1 deg/sec
     v_l, v_r = wheels_v_to_cmds(vt, phidot)
 
     cmd_dict['cmd'] = [0, v_l, v_r]

@@ -5,7 +5,7 @@ import serial
 
 import numpy as np
 from communication import talk, listen, \
-        enable_legs, disable_all, parse_cmd_dict_to_cmd #get_talk_bytes_from_cmd
+        enable_legs, disable_all
 from state import update_state, predict_theta, \
         check_status, update_array, update_location, \
         update_cmd_vars
@@ -110,9 +110,9 @@ def balance_loop():
             if REPORT:
                 print(state_dict['times'])
                 print(state_dict['theta'])
-                print(report_dict['predict_times'])
-                print(report_dict['predict_thetas'])
-
+                print('v = ', state_dict['v'])
+                print('x = ', state_dict['x'])
+                print('cmd = ', cmd_dict['cmd'])
                 print()
                 wait_sum = 0
                 t_init = time.time()
