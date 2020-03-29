@@ -40,8 +40,8 @@ def update_location(state_dict):
     """
 
     dt = state_dict['times'][0] - state_dict['times'][1]
-    dphi = state_dict['phidot'][0] * dt
-    dl = state_dict['v'][0] * dt
+    dphi = state_dict['phidot'][1] * dt
+    dl = state_dict['v'][1] * dt
     phi = state_dict['phi'][0]
 
     # update the turn angle:
