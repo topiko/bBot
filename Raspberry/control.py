@@ -3,10 +3,9 @@ import numpy as np
 from simple_pid import PID
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, WHEEL_DIA, RAIL_W, \
-        STEPS_PER_REV, PI
+        STEPS_PER_REV, PID_P, PID_I, PID_D, PI
 
-
-CTRL_PID = PID(-.05, -.20, 0.00, setpoint=UPRIGHT_THETA)
+CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
 def v_to_cmd_int(v):
     """
