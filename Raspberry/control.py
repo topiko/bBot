@@ -6,7 +6,7 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         STEPS_PER_REV, PI
 
 
-CTRL_PID = PID(.005, .07, 0., setpoint=UPRIGHT_THETA)
+CTRL_PID = PID(-.05, -.20, 0.00, setpoint=UPRIGHT_THETA)
 
 def v_to_cmd_int(v):
     """
@@ -22,12 +22,16 @@ def v_to_cmd_int(v):
         cmd = -1024
     return int(cmd)
 
-def wheels_v_to_cmds(v, phidot):
+def wheels_v_to_cmds(cmd_dict):
     """
     Get the individual wheel cmds from desired v and phidot.
     """
+    v = cmd_dict['v']
+    phidot = cmd_dict['phidot']
+
     v_l = v - phidot * RAIL_W / 2
     v_r = v + phidot * RAIL_W / 2
+
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
 def react(state_dict, cmd_dict):
@@ -46,7 +50,9 @@ def react(state_dict, cmd_dict):
     #dt = state_dict['time_next'] - state_dict['times'][0]
     #vt = v_now + accel*dt
 
-    phidot = 0 #5/360*2*PI # 1 deg/sec
-    v_l, v_r = wheels_v_to_cmds(v, phidot)
+    cmd_dict['v'] = v
+    #phidot = 90/360*2*PI # 10 deg/sec
+    v_l, v_r = wheels_v_to_cmds(cmd_dict) #v, phidot)
 
+    #cmd_dict['phidot'] = phidot
     cmd_dict['cmd'] = [0, v_l, v_r]

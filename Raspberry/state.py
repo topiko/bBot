@@ -28,15 +28,21 @@ def update_cmd_vars(state_dict, cmd_dict):
     state_dict['v'] = update_array(state_dict['v'], cmd_dict['v'])
     state_dict['phidot'] = update_array(state_dict['phidot'], cmd_dict['phidot'])
 
+def reset_location(state_dict):
+
+    for key in ['x', 'y', 'phi']:
+        state_dict[key] = np.zeros(3)
+
+
 def update_location(state_dict):
     """
     Update the location according to phidot and v.
     """
 
-    dt = state_dict['times'][1] - state_dict['times'][0]
-    dphi = state_dict['phidot'][1]*dt
-    dl = state_dict['v'][1]*dt
-    phi = state_dict['phi'][1]
+    dt = state_dict['times'][0] - state_dict['times'][1]
+    dphi = state_dict['phidot'][0] * dt
+    dl = state_dict['v'][0] * dt
+    phi = state_dict['phi'][0]
 
     # update the turn angle:
     phi_now = phi + dphi
