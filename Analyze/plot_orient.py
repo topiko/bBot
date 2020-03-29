@@ -17,9 +17,13 @@ PREDICT = True
 if MODE == 'read_rpi':
     subprocess.call(['scp', 'sexybot:bBot/Raspberry/orient.npy', '.'])
     orient_arr = np.load('orient.npy')
-elif MODE == 'history':
+else:
     files = os.listdir('./datas')
-    orient_arr = np.load('datas/' + files[0])
+    try:
+        orient_arr = np.load('datas/' + MODE)
+    except FileNotFoundError:
+        print('Invalid fname: {}'.format(MODE))
+        orient_arr = np.load('datas/' + files[0])
 
 # start of predictions suck...
 ndiscard = 10
@@ -31,15 +35,12 @@ thetadotdot = orient_arr[ndiscard:, 3]
 times_pred = orient_arr[ndiscard:, 9]
 theta_pred = orient_arr[ndiscard:, 10]
 
-print(times[-10:])
-print(times_pred[-10:])
-#thetadot_pred = orient_arr[ndiscard:, 6]
-#thetadotdot_pred = orient_arr[ndiscard:, 7]
+x = orient_arr[ndiscard:, 6]
+y = orient_arr[ndiscard:, 7]
 
 v = orient_arr[ndiscard:, 4]
-#vr = orient_arr[ndiscard:, 9]
 a = orient_arr[ndiscard:, 5]
-#ar = orient_arr[ndiscard:, 11]
+
 
 def func(t, a, b, c):
     return a*t**2 + b*t + c
@@ -69,7 +70,8 @@ def get_phidot_phidotdot_arr(times, n):
 
     return phidot_arr, phidotdot_arr
 
-fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, figsize = (12,8), sharex = True)
+fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, figsize=(12,8), sharex=True)
+fig2, ax_loc = plt.subplots(figsize=(12,12))
 
 s = 5
 # Phi:
@@ -109,15 +111,33 @@ ax4.plot(times, v, '-o', markersize=s, label='v')
 ax5.plot(times, a, '-o', markersize=s, label='a')
 ax5.set_xlabel('time')
 
+
+# Location
+ax_loc.plot(x, y, '-+', c='black', lw=1)
+ax_loc.axis('equal')
+ax_loc.set_xlabel('x')
+ax_loc.set_ylabel('y')
 plt.show()
 
-str_time = datetime.datetime.now().strftime("%d-%m_%H:%M")
-np.save('datas/run_date-{}.npy'.format(str_time), orient_arr)
+# phi, phidotdot, a
+def get_thetadotdot_model(x, R, theta0, g):
+    a = x[:, 0]
+    theta = x[:, 1]
+    return 1/R*(g*np.sin(theta-theta0) + np.cos(theta-theta0)*a)
 
-plt.plot(times, times_pred, '-o', markersize = s)
-plt.plot(times, times, '-', color = 'black')
+from scipy.optimize import curve_fit
+fit_dat = np.hstack((a.reshape(-1,1), theta.reshape(-1,1)))
+print(fit_dat)
+R, theta0, g = curve_fit(get_thetadotdot_model, fit_dat, thetadotdot)[0]
+fig3, ax_phidotdot = plt.subplots(figsize=(12, 7))
+ax_phidotdot.scatter(theta, get_thetadotdot_model(fit_dat, R, theta0, g))
+ax_phidotdot.set_title('R = {}, theta0 = {}, g = {}'.format(R, theta0, g))
 plt.show()
 
+if MODE == 'read_rpi':
+    str_time = datetime.datetime.now().strftime("%d-%m_%H:%M")
+    np.save('datas/run_date-{}.npy'.format(str_time), orient_arr)
 
 
-print(orient_arr[-20:])
+
+

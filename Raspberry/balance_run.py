@@ -77,7 +77,7 @@ def balance_loop():
         enable_legs(SER)
 
     time_lim = 30
-    talk(SER, [0,0,0])
+    talk(SER, [0, 0, 0])
     _, init_time, _ = listen(SER)
     state_dict['times'][0] = init_time
     run_time = 0
