@@ -97,8 +97,8 @@ def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
     state_dict['thetadotdot'][1] = 2*a
 
     # wheel v and a
-    a, _, _ = fit_parabel(times, state_dict['v'])
-    state_dict['a'][1] = 2*a
+    a, b, _ = fit_parabel(times, state_dict['v'])
+    state_dict['a'][1] = 2*a*times[1] + b
 
 
 def fit_parabel(times, points):
