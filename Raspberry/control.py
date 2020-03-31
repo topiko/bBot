@@ -1,6 +1,7 @@
 # This is the control packag
 import numpy as np
 from simple_pid import PID
+from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, WHEEL_DIA, RAIL_W, \
         STEPS_PER_REV, PID_P, PID_I, PID_D, \
@@ -45,16 +46,17 @@ def react(state_dict, cmd_dict):
     """
     theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
-
+    target_theta = get_target_theta(state_dict)
 
     if np.isnan(theta):
         print('Warning: nan-theta')
         theta = UPRIGHT_THETA
 
-    a = (theta - theta_target)*A_MLTP
+    a = (theta - target_theta)*A_MLTP
     dt = state_dict['time_next'] - state_dict['times'][0]
 
     cmd_dict['v'] = v_now + a*dt
+    state_dict['a'] = update_array(state_dict['a'], a)
     #v = CTRL_PID(theta)
     #dt = state_dict['time_next'] - state_dict['times'][0]
     #vt = v_now + accel*dt
