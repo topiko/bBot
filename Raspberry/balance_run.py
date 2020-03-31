@@ -76,13 +76,11 @@ def balance_loop():
     else:
         enable_legs(SER)
 
-    time_lim = 30
-    initialize_times(SER, state_dict)
-    #talk(SER, [0, 0, 0])
-    #_, init_time, _ = listen(SER)
-    #state_dict['times'][0] = init_time
     run_time = 0
+    time_lim = 30
 
+    initialize_times(SER, state_dict)
+    init_time = state_dict['times'][0]
     while (run_time < time_lim) and (i < imax) and (status != 'fell'): # True:
 
         # Send the latest command to arduino

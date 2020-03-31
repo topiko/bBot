@@ -75,7 +75,7 @@ def initialize_times(ser, state_dict):
         talk(ser, [0, 0, 0])
         _, t, _ = listen(ser)
         state_dict['times'][-i] = t
-    state_dict['times_next'] = t + .016
+    state_dict['time_next'] = t + .016
 
 def disable_all(ser):
 
