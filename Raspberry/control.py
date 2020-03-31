@@ -3,7 +3,8 @@ import numpy as np
 from simple_pid import PID
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, WHEEL_DIA, RAIL_W, \
-        STEPS_PER_REV, PID_P, PID_I, PID_D, PI
+        STEPS_PER_REV, PID_P, PID_I, PID_D, \
+        TILT_MLTP, A_MLTP, PI
 
 CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
@@ -33,23 +34,32 @@ def wheels_v_to_cmds(cmd_dict):
 
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
+def get_target_theta(state_dict):
+
+    tilt_theta = state_dict['v'][0]*TILT_MLTP
+    return UPRIGHT_THETA - tilt_theta
+
 def react(state_dict, cmd_dict):
     """
     React to the current state by updating the cmd_dictionary.
     """
     theta = state_dict['theta'][0]
-    #v_now = state_dict['v'][0]
+    v_now = state_dict['v'][0]
 
 
     if np.isnan(theta):
+        print('Warning: nan-theta')
         theta = UPRIGHT_THETA
 
+    a = (theta - theta_target)*A_MLTP
+    dt = state_dict['time_next'] - state_dict['times'][0]
 
-    v = CTRL_PID(theta)
+    cmd_dict['v'] = v_now + a*dt
+    #v = CTRL_PID(theta)
     #dt = state_dict['time_next'] - state_dict['times'][0]
     #vt = v_now + accel*dt
 
-    cmd_dict['v'] = v
+    #cmd_dict['v'] = v
     #phidot = 90/360*2*PI # 10 deg/sec
     v_l, v_r = wheels_v_to_cmds(cmd_dict) #v, phidot)
 
