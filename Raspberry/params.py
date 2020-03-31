@@ -14,5 +14,5 @@ PID_I = -0.20 #-.20
 PID_D = -0.0001
 
 
-TILT_MLTP = 20
+TILT_MLTP = .02
 A_MLTP = .02
