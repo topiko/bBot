@@ -69,6 +69,14 @@ def enable_legs(ser):
     talk(ser, [3, 1, 0])
     time.sleep(.1)
 
+def initialize_times(ser, state_dict):
+
+    for i in range(len(state_dict['times'])):
+        talk(ser, [0, 0, 0])
+        _, t, _ = listen(ser)
+        state_dict['times'][-i] = t
+    state_dict['times_next'] = t + .016
+
 def disable_all(ser):
 
     talk(ser, [0, 0, 0])

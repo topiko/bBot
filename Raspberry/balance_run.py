@@ -5,7 +5,7 @@ import serial
 
 import numpy as np
 from communication import talk, listen, \
-        enable_legs, disable_all
+        enable_legs, disable_all, initialize_times
 from state import update_state, predict_theta, \
         check_status, update_array, update_location, \
         update_cmd_vars, reset_location
@@ -77,9 +77,10 @@ def balance_loop():
         enable_legs(SER)
 
     time_lim = 30
-    talk(SER, [0, 0, 0])
-    _, init_time, _ = listen(SER)
-    state_dict['times'][0] = init_time
+    initialize_times(SER, state_dict)
+    #talk(SER, [0, 0, 0])
+    #_, init_time, _ = listen(SER)
+    #state_dict['times'][0] = init_time
     run_time = 0
 
     while (run_time < time_lim) and (i < imax) and (status != 'fell'): # True:
