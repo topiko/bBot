@@ -46,13 +46,13 @@ def react(state_dict, cmd_dict):
     """
     theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
-    target_theta = get_target_theta(state_dict)
+    cmd_dict['target_theta'] = get_target_theta(state_dict)
 
     if np.isnan(theta):
         print('Warning: nan-theta')
         theta = UPRIGHT_THETA
 
-    a = (theta - target_theta)*A_MLTP
+    a = -(cmd_dict['target_theta'] - theta) * A_MLTP
     dt = state_dict['time_next'] - state_dict['times'][0]
 
     cmd_dict['v'] = v_now + a*dt

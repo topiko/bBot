@@ -112,13 +112,15 @@ def balance_loop():
         if i%n_report == 0:
             if i < n_report*2:
                 reset_location(state_dict)
-                cmd_dict['phidot'] = 20/180*PI
+                cmd_dict['phidot'] = 0/180*PI
             t_report = time.time()
             print('Freq: ', n_report/(t_report-t_init))
             print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
             if REPORT:
                 print('theta = ', state_dict['theta'][0])
+                print('target_theta = ', cmd_dict['target_theta'])
                 print('v = ', cmd_dict['v'])
+                print('a = ', state_dict['a'][0])
                 print('cmd = ', cmd_dict['cmd'])
                 print('x,y = [{:.0f}mm, {:.0f}mm], phi = {:.1f}deg'.format(state_dict['x'][0]*1000,
                                                                            state_dict['y'][0]*1000,
