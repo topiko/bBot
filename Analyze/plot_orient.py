@@ -54,9 +54,9 @@ def get_phidot_phidotdot(i, n):
 
     t_ = times[i-n-n_:i-n_]
     phi_ = theta[i-n-n_:i-n_]
-    (a,b,c), _ = curve_fit(func, t_, phi_, (1,1,1))
-    phidot = derivative(func, times[i], dx = .05, args = (a,b,c))
-    phidotdot = derivative(func, times[i], n = 2, dx = .05, args =(a,b,c))
+    (a, b, c), _ = curve_fit(func, t_, phi_, (1, 1, 1))
+    phidot = derivative(func, times[i], dx=.05, args=(a, b, c))
+    phidotdot = derivative(func, times[i], n=2, dx=.05, args=(a, b, c))
     return phidot, phidotdot
 
 def get_phidot_phidotdot_arr(times, n):
@@ -70,6 +70,23 @@ def get_phidot_phidotdot_arr(times, n):
 
     return phidot_arr, phidotdot_arr
 
+def get_thetadotdot_model(x, alpha, beta):
+    a = x[:, 0]
+    theta = x[:, 1]/180*np.pi
+    g = 9.81
+    theta0 = 15
+    theta0 = theta0/180*np.pi
+    return alpha*np.sin(theta0-theta) + beta*np.cos(theta0-theta)*a
+
+
+# phi, phidotdot, a
+def get_thetadotdot_model_old(x, R, theta0):
+    a = x[:, 0]
+    theta = x[:, 1]/180*np.pi
+    g = 9.81
+    theta0 = theta0/180*np.pi
+    return -1/R*(g*np.sin(theta0-theta) + np.cos(theta0-theta)*a)/np.pi*180
+
 fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, figsize=(12,8), sharex=True)
 fig2, ax_loc = plt.subplots(figsize=(12,12))
 
@@ -81,57 +98,70 @@ ax1.plot(times_pred, theta_pred, '-o', markersize = s, label = 'pred_rpi')
 #for i in range(len(times)-1):
 #    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
 ax1.legend()
-ax1.set_title('phi')
+ax1.set_title('theta')
 #=======================================================
 
 # phi dot
 #=======================================================
-ax2.plot(times, thetadot, '-o', markersize = s, label = 'rpi')
+ax2.plot(times, thetadot, '-o', markersize=s, label='rpi')
 #for i in range(len(times)-1):
 #    ax2.plot([times[i], times_pred[i]], [thetadot[i], thetadot_pred[i]], lw = .5, color = 'black')
-ax2.plot(times, np.gradient(theta, times), markersize = s, label = 'grad')
-ax2.set_title('phidot')
+ax2.plot(times, np.gradient(theta, times), markersize=s, label='grad theta')
+ax2.set_title('theta.')
 ax2.legend()
 #=======================================================
 
 # Phi dodtot
 #=======================================================
-ax3.plot(times, thetadotdot, '-o', markersize = s, label = 'rpi')
-ax3.plot(times, np.gradient(np.gradient(theta, times), times), markersize = s, label = 'grad')
-ax3.set_title('phidotdot')
+gradv = np.gradient(v, times)
+fit_dat = np.hstack((gradv.reshape(-1, 1), theta.reshape(-1, 1)))
+gradgradtheta = np.gradient(np.gradient(theta, times), times)
+alpha, beta = curve_fit(get_thetadotdot_model, fit_dat, gradgradtheta, [.1, 1])[0]
+thetadotdot_model = get_thetadotdot_model(fit_dat, alpha, beta)
+
+ax3.plot(times, thetadotdot, '-o', markersize=s, label='rpi')
+ax3.plot(times, thetadotdot_model, '-o', markersize=s,
+         label=r'model, alpha={:.02f}, beta={:.1f}'.format(alpha, beta))
+ax3.plot(times, gradgradtheta, label='grad grad theta')
+ax3.set_title('theta..')
 ax3.legend()
 #=======================================================
 
 # Vleft and right
 #=======================================================
 ax4.plot(times, v, '-o', markersize=s, label='v')
+ax4.set_ylabel('v [m/s]')
 
 # Vleft and right
 #=======================================================
 ax5.plot(times, a, '-o', markersize=s, label='a')
+ax5.plot(times, gradv, '-o', markersize=s, label='grad v')
+ax5.set_ylabel('a [m/s^2]')
 ax5.set_xlabel('time')
 
 
 # Location
-ax_loc.plot(x, y, '-+', c='black', lw=1)
+ax_loc.plot(x*1000, y*1000, '-+', c='black', lw=1)
 ax_loc.axis('equal')
-ax_loc.set_xlabel('x')
-ax_loc.set_ylabel('y')
+ax_loc.set_xlabel('x [mm]')
+ax_loc.set_ylabel('y [mm]')
 plt.show()
 
-# phi, phidotdot, a
-def get_thetadotdot_model(x, R, theta0, g):
-    a = x[:, 0]
-    theta = x[:, 1]
-    return 1/R*(g*np.sin(theta-theta0) + np.cos(theta-theta0)*a)
 
-from scipy.optimize import curve_fit
-fit_dat = np.hstack((a.reshape(-1,1), theta.reshape(-1,1)))
-print(fit_dat)
-R, theta0, g = curve_fit(get_thetadotdot_model, fit_dat, thetadotdot)[0]
-fig3, ax_phidotdot = plt.subplots(figsize=(12, 7))
-ax_phidotdot.scatter(theta, get_thetadotdot_model(fit_dat, R, theta0, g))
-ax_phidotdot.set_title('R = {}, theta0 = {}, g = {}'.format(R, theta0, g))
+# Test model between phi.., phi and a
+x1 = gradv
+x2 = theta
+Y = thetadotdot
+_, ax_2d = plt.subplots(figsize=(10, 6))
+ax_2d.tricontour(x1, x2, Y, 5, linewidths=0.2)
+from matplotlib.colors import Normalize
+norm = Normalize(vmin=-3000, vmax=3000, clip=False)
+cntr1 = ax_2d.tricontourf(x1, x2, Y, 100, cmap="RdBu_r", norm = norm)
+ax_2d.scatter(x1, x2, s=5, alpha=.3)
+
+ax_2d.set_xlabel('a [m/s^2]')
+ax_2d.set_ylabel('theta [deg]')
+fig.colorbar(cntr1, ax=ax_2d, label='theta..')
 plt.show()
 
 if MODE == 'read_rpi':

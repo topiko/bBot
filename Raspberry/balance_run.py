@@ -147,10 +147,26 @@ def balance_loop():
         i += 1
     print(status)
 
-    np.save('orient.npy', store_arr[3:i])
+    disable_all(SER)
+    return store_arr[3:i]
+
+
+def run_balancing():
+    """
+    Starts the balancing whenever robot is
+    at UPRIGHT angle.
+    """
+    while True:
+        try:
+            talk(SER, [0, 0, 0])
+            theta, _, _ = listen(SER)
+            if abs(theta - UPRIGHT_THETA) < 1:
+                run_data = balance_loop()
+                np.save('orient.npy', run_data)
+        except KeyboardInterrupt:
+            print('Disabling.')
+            break
     disable_all(SER)
 
-
-
 if __name__ == '__main__':
-    balance_loop()
+    run_balancing()

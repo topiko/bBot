@@ -15,4 +15,5 @@ PID_D = -0.0001
 
 
 TILT_MLTP = .02
-A_MLTP = .2
+A_MLTP1 = .2
+A_MLTP2 = .002
