@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.misc import derivative
 from scipy.optimize import curve_fit
+from matplotlib.colors import Normalize
 
 if len(sys.argv) == 2: MODE = sys.argv[1]
 else: MODE = 'read_rpi'
@@ -27,8 +28,10 @@ else:
 
 # start of predictions suck...
 ndiscard = 10
+nconv = np.ones(5)/5
 times = orient_arr[ndiscard:, 0]
 theta = orient_arr[ndiscard:, 1]
+theta_conv = np.convolve(theta, nconv, mode='same')
 thetadot = orient_arr[ndiscard:, 2]
 thetadotdot = orient_arr[ndiscard:, 3]
 
@@ -93,8 +96,9 @@ fig2, ax_loc = plt.subplots(figsize=(12,12))
 s = 5
 # Phi:
 #=======================================================
-ax1.plot(times, theta, '-o', markersize = s, label = 'rpi')
-ax1.plot(times_pred, theta_pred, '-o', markersize = s, label = 'pred_rpi')
+ax1.plot(times, theta, '-o', markersize=s, label='rpi')
+ax1.plot(times_pred, theta_pred, '-o', markersize=s, label='pred_rpi')
+ax1.plot(times, theta_conv, '-', markersize=s, label='conv')
 #for i in range(len(times)-1):
 #    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
 ax1.legend()
@@ -154,7 +158,6 @@ x2 = theta
 Y = thetadotdot
 _, ax_2d = plt.subplots(figsize=(10, 6))
 ax_2d.tricontour(x1, x2, Y, 5, linewidths=0.2)
-from matplotlib.colors import Normalize
 norm = Normalize(vmin=-3000, vmax=3000, clip=False)
 cntr1 = ax_2d.tricontourf(x1, x2, Y, 100, cmap="RdBu_r", norm = norm)
 ax_2d.scatter(x1, x2, s=5, alpha=.3)
