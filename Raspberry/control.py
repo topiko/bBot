@@ -40,7 +40,7 @@ def get_target_theta(state_dict):
     Updates the target theta based on current velocity or somethign..
     """
     tilt_theta = state_dict['v'][0]*TILT_MLTP
-    return UPRIGHT_THETA #- tilt_theta
+    return UPRIGHT_THETA - tilt_theta
 
 def react(state_dict, cmd_dict):
     """
