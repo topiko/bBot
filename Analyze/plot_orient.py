@@ -18,6 +18,8 @@ PREDICT = True
 if MODE == 'read_rpi':
     subprocess.call(['scp', 'sexybot:bBot/Raspberry/orient.npy', '.'])
     orient_arr = np.load('orient.npy')
+elif MODE == 'latest':
+    orient_arr = np.load('orient.npy')
 else:
     files = os.listdir('./datas')
     try:
@@ -140,6 +142,7 @@ ax4.set_ylabel('v [m/s]')
 #=======================================================
 ax5.plot(times, a, '-o', markersize=s, label='a')
 ax5.plot(times, gradv, '-o', markersize=s, label='grad v')
+ax5.legend()
 ax5.set_ylabel('a [m/s^2]')
 ax5.set_xlabel('time')
 

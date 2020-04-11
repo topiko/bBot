@@ -6,3 +6,6 @@
 *.ino~
 Analyze/datas/*
 Analyze/orient.npy
+*.swp
+*.bak*
+__pycache__
