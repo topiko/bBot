@@ -36,7 +36,7 @@ def balance_loop():
     i = 0
     wait_sum = 0
     n_report = 1000
-    dt = .02
+    dt = .033
     t_init = 0
     t_add = .015
     status = 'upright'
@@ -57,8 +57,8 @@ def balance_loop():
                   'thetadot':np.zeros(3),
                   'thetadotdot':np.zeros(3),
                   'theta_predict':0,
-                  'run_l': 0,
-                  'abs_run_l': 0,
+                  'run_l': np.zeros(3),
+                  'abs_run_l': np.zeros(3),
                   'v':np.zeros(3),
                   'a':np.zeros(3),
                   'phi':np.zeros(3),
@@ -86,7 +86,7 @@ def balance_loop():
     init_time = state_dict['times'][0]
     while (run_time < time_lim) and (i < imax) and (status != 'fell'): # True:
 
-        t0 = time.time()
+        #t0 = time.time()
         # Send the latest command to arduino
         talk(SER, cmd_dict['cmd'])
 
@@ -153,8 +153,9 @@ def balance_loop():
         i += 1
 
         # wait in order to make each time interval constant dt.
-        t1 = time.time()
-        while t1 < t0 + dt: t1 = time.time()
+        #t1 = time.time()
+        #while t1 < t0 + dt:
+        #    t1 = time.time()
 
     print(status)
 
