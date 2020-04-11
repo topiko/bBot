@@ -48,6 +48,14 @@ def update_location(state_dict):
     phi_now = phi + dphi
     state_dict['phi'] = update_array(state_dict['phi'], phi_now)
 
+    # Update run length
+    l_now = state_dict['run_l'][0] + dl
+    state_dict['run_l'] = update_array(state_dict['run_l'], l_now)
+
+    # Update abs run l
+    abs_l_now = state_dict['abs_run_l'][0] + abs(dl)
+    state_dict['abs_run_l'] = update_array(state_dict['abs_run_l'], abs_l_now)
+
     # Radius is always positive or None for straight
     turn_radius = np.abs(dl/dphi) if dphi != 0 else None
 
@@ -98,10 +106,18 @@ def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
 
     # wheel v and a
     # a, b, _ = fit_parabel(times, state_dict['v'])
-    dt = state_dict['times'][1] - state_dict['times'][2]
-    state_dict['a'][2] = state_dict['a'][1]
-    state_dict['a'][1] = (state_dict['v'][1] - state_dict['v'][2])/dt
 
+    update_location(state_dict)
+
+    # The run_l in sonly avail after update_location has been ran.
+    dt1 = state_dict['times'][0] - state_dict['times'][1]
+    dt2 = state_dict['times'][1] - state_dict['times'][2]
+
+    run_l_arr = state_dict['run_l']
+    state_dict['a'][1] = ((run_l_arr[0] - run_l_arr[1])/dt1 \
+            - (run_l_arr[1] - run_l_arr[2])/dt2) / (dt1/2 + dt2/2)
+    #state_dict['a'][2] = state_dict['a'][1]
+    #state_dict['a'][1] = (state_dict['v'][1] - state_dict['v'][2])/dt
 
 def fit_parabel(times, points):
 
