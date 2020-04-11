@@ -57,6 +57,8 @@ def balance_loop():
                   'thetadot':np.zeros(3),
                   'thetadotdot':np.zeros(3),
                   'theta_predict':0,
+                  'run_l': 0,
+                  'abs_run_l': 0,
                   'v':np.zeros(3),
                   'a':np.zeros(3),
                   'phi':np.zeros(3),
@@ -100,7 +102,7 @@ def balance_loop():
 
         # Update the state of the system with the input from serial:
         update_state(state_dict, theta, cmd_dict, cur_time, t_add)
-        update_location(state_dict)
+        #update_location(state_dict)
 
         # To see how much time has been spent
         # waiting for the arduino to respond:
