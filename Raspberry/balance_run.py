@@ -40,7 +40,7 @@ def balance_loop():
     t_init = 0
     t_add = .015
     status = 'upright'
-    imax = 10000
+    imax =  10000
 
     # This dictionary handles the command
     cmd_dict = {'cmd_to':'wheels',
@@ -121,6 +121,8 @@ def balance_loop():
                 print('target_theta = ', cmd_dict['target_theta'])
                 print('v = ', cmd_dict['v'])
                 print('a = ', state_dict['a'][0])
+                print('a = ', state_dict['a'])
+                print('v = ', state_dict['v'])
                 print('cmd = ', cmd_dict['cmd'])
                 print('x,y = [{:.0f}mm, {:.0f}mm], phi = {:.1f}deg'.format(state_dict['x'][0]*1000,
                                                                            state_dict['y'][0]*1000,
@@ -155,6 +157,7 @@ def balance_loop():
     print(status)
 
     disable_all(SER)
+
     return store_arr[3:i]
 
 
