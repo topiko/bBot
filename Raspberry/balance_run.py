@@ -86,7 +86,6 @@ def balance_loop():
     init_time = state_dict['times'][0]
     while (run_time < time_lim) and (i < imax) and (status != 'fell'): # True:
 
-        #t0 = time.time()
         # Send the latest command to arduino
         talk(SER, cmd_dict['cmd'])
 
@@ -102,7 +101,6 @@ def balance_loop():
 
         # Update the state of the system with the input from serial:
         update_state(state_dict, theta, cmd_dict, cur_time, t_add)
-        #update_location(state_dict)
 
         # To see how much time has been spent
         # waiting for the arduino to respond:
@@ -151,11 +149,6 @@ def balance_loop():
         predict_theta(state_dict)
         run_time = cur_time - init_time
         i += 1
-
-        # wait in order to make each time interval constant dt.
-        #t1 = time.time()
-        #while t1 < t0 + dt:
-        #    t1 = time.time()
 
     print(status)
 

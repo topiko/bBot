@@ -14,8 +14,9 @@ thetadot = dat[:, 2]
 thetadotdot = dat[:, 3]
 a_ground = dat[:, 5]
 
-var_thetadotdot = 50.00
-var_theta = .01**2
+var_thetadotdot = 25.00
+var_theta = .015**2
+
 times = dat[:, 0]
 
 thetadotdot = dat[:, 3]
@@ -30,7 +31,9 @@ model_thetadotdot = lambda a, theta: alpha*np.sin(-theta/180*np.pi) + beta*np.co
 
 kalman_input_arr = np.vstack((theta, thetadot)).T
 
-F = np.array([[1, dt], [0, 1]])
+F = np.array([[1, dt],
+              [0, 1]])
+
 P = np.eye(2)*1000
 R = np.array([[1, 1/dt], [1/dt, 2/dt**2]])*var_theta
 B = np.array([[1./2*dt**2],
@@ -49,7 +52,6 @@ kl_estimate = np.zeros((N, 2))
 # Initialize:
 kl2_predict[0] = init_vec
 kl_predict[0] = init_vec
-
 
 kl2 = KalmanFilter(dim_x=2, dim_z=2, dim_u=1)
 kl2.x = init_vec
@@ -88,7 +90,7 @@ ax2.set_title('theta.')
 ax2.legend()
 
 ax3.plot(times, thetadotdot, label='measure')
-ax3.plot(times, np.gradient(kl_estimate[:,1], times), label='kl')
+ax3.plot(times, np.gradient(kl_estimate[:, 1], times), label='kl')
 ax3.plot(times, model_thetadotdot(a_ground, kl_estimate[:, 0]), label='..')
 ax3.set_title('theta..')
 ax3.set_ylabel('deg/s^2')
