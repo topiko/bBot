@@ -54,6 +54,10 @@ def listen(ser):
         pass
     t1 = time.time()
 
+    init_byte = ser.read(1)
+    if init_byte != b'00000000':
+        raise ValueError('Communication issues')
+
     s = ser.read(2)
     cur_time = ser.read(4)
     #time_pitch = ser.read(2)
