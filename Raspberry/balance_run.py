@@ -35,7 +35,7 @@ def balance_loop():
     """
     i = 0
     wait_sum = 0
-    n_report = 10
+    n_report = 1000
     dt = .02
     t_init = 0
     t_add = .015
