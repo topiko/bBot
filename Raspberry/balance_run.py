@@ -150,7 +150,7 @@ def balance_loop():
 
         # wait in order to make each time interval constant dt.
         t1 = time.time()
-        while t0 + dt < t1: t1 = time.time()
+        while t1 < t0 + dt: t1 = time.time()
 
     print(status)
 
@@ -167,6 +167,7 @@ def run_balancing():
         try:
             talk(SER, [0, 0, 0])
             theta, _, _ = listen(SER)
+            print('theta = {:.2f}'.format(theta))
             if abs(theta - UPRIGHT_THETA) < 1:
                 run_data = balance_loop()
                 np.save('orient.npy', run_data)

@@ -55,7 +55,8 @@ def listen(ser):
     t1 = time.time()
 
     init_byte = ser.read(1)
-    if init_byte != b'00000000':
+    if init_byte != b'\x00': #b'00000000':
+        print(init_byte) #, int(init_byte))
         raise ValueError('Communication issues')
 
     s = ser.read(2)
