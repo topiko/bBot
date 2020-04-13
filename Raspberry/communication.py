@@ -32,62 +32,70 @@ def get_talk_bytes_from_command(cmd):
     return make_bytes_(make_number_())
 
 
-def talk(ser, cmd):
+def talk(ser, state_dict, cmd_dict):
     """
     Send command to arduino.
     """
-    sendbytes = get_talk_bytes_from_command(cmd)
-    ser.write(sendbytes)
+    if state_dict['mode'] == 'simulate':
+        if state_dict is None:
+            return
+        ser.run(state_dict, cmd_dict)
+    else:
+        sendbytes = get_talk_bytes_from_command(cmd_dict['cmd'])
+        ser.write(sendbytes)
 
 def from_orient_int_to_theta(orient_int):
     return orient_int/ANGLE_FACTOR/PI*180
 
 
 
-def listen(ser):
+def listen(ser, mode=None):
     """
     Listen to the serial communication and report the received
     values.
     """
-    t0 = time.time()
-    while ser.in_waiting < 2:
-        pass
-    t1 = time.time()
+    if mode == 'simulate':
+        return ser.theta, ser.cur_time, 0
+    else:
+        t0 = time.time()
+        while ser.in_waiting < 2:
+            pass
+        t1 = time.time()
 
-    init_byte = ser.read(1)
-    if init_byte != b'\x00': #b'00000000':
-        print(init_byte) #, int(init_byte))
-        raise ValueError('Communication issues')
+        init_byte = ser.read(1)
+        if init_byte != b'\x00': #b'00000000':
+            print(init_byte) #, int(init_byte))
+            raise ValueError('Communication issues')
 
-    s = ser.read(2)
-    cur_time = ser.read(4)
-    #time_pitch = ser.read(2)
+        s = ser.read(2)
+        cur_time = ser.read(4)
+        #time_pitch = ser.read(2)
 
-    orient_int = int.from_bytes(s, byteorder='big', signed=True)
-    cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)/1e6 # from mus to s
-    theta = from_orient_int_to_theta(orient_int)
+        orient_int = int.from_bytes(s, byteorder='big', signed=True)
+        cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)/1e6 # from mus to s
+        theta = from_orient_int_to_theta(orient_int)
 
-    return theta, cur_time, t1 - t0
+        return theta, cur_time, t1 - t0
 
 def enable_legs(ser):
 
-    talk(ser, [3, 1, 0])
+    talk(ser, None, {'cmd': [3, 1, 0]})
     time.sleep(.1)
 
 def initialize_times(ser, state_dict):
 
     for i in range(len(state_dict['times'])):
-        talk(ser, [0, 0, 0])
+        talk(ser, None, {'cmd': [0, 0, 0]})
         _, t, _ = listen(ser)
         state_dict['times'][-i] = t
     state_dict['time_next'] = t + .016
 
 def disable_all(ser):
 
-    talk(ser, [0, 0, 0])
+    talk(ser, None, {'cmd': [0, 0, 0]})
     time.sleep(.1)
-    talk(ser, [1, 0, 0])
+    talk(ser, None, {'cmd': [1, 0, 0]})
     time.sleep(.1)
-    talk(ser, [2, 0, 0])
+    talk(ser, None, {'cmd': [2, 0, 0]})
     time.sleep(.1)
-    talk(ser, [3, 0, 0])
+    talk(ser, None, {'cmd': [3, 0, 0]})

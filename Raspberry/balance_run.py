@@ -11,21 +11,25 @@ from state import update_state, predict_theta, \
         update_cmd_vars, reset_location
 from control import react
 from params import UPRIGHT_THETA, PI
+from simulate import simulate_ser, display_simulation
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
 else:
     MODE = 'test_mpu'
 
-SER = serial.Serial(
-    port='/dev/serial0',
-    baudrate=115200,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=.001
-)
 
+if MODE == 'simulate':
+    SER = simulate_ser(dt=.016)
+else:
+    SER = serial.Serial(
+        port='/dev/serial0',
+        baudrate=115200,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_ONE,
+        bytesize=serial.EIGHTBITS,
+        timeout=.001
+    )
 
 REPORT = True
 
@@ -40,7 +44,7 @@ def balance_loop():
     t_init = 0
     t_add = .015
     status = 'upright'
-    imax =  10000
+    imax = 10000
 
     # This dictionary handles the command
     cmd_dict = {'cmd_to':'wheels',
@@ -64,7 +68,8 @@ def balance_loop():
                   'phi':np.zeros(3),
                   'phidot':np.zeros(3),
                   'x':np.zeros(3),
-                  'y':np.zeros(3)}
+                  'y':np.zeros(3),
+                  'mode':MODE}
 
     # Report dict is for debugging and performance evaluation
     report_dict = {'predict_times':np.zeros(3),
@@ -74,7 +79,7 @@ def balance_loop():
     store_arr = np.zeros((imax, 11))
 
     # enable the legs:
-    if MODE == 'test_mpu':
+    if MODE in ['test_mpu', 'simulate']:
         pass
     else:
         enable_legs(SER)
@@ -87,7 +92,7 @@ def balance_loop():
     while (run_time < time_lim) and (i < imax) and (status != 'fell'): # True:
 
         # Send the latest command to arduino
-        talk(SER, cmd_dict['cmd'])
+        talk(SER, state_dict, cmd_dict)
 
         # Update the history of the command variables
         # before obtaining new ones:
@@ -157,6 +162,8 @@ def balance_loop():
     return store_arr[3:i]
 
 
+
+
 def run_balancing():
     """
     Starts the balancing whenever robot is
@@ -164,7 +171,7 @@ def run_balancing():
     """
     while True:
         try:
-            talk(SER, [0, 0, 0])
+            talk(SER, None, {'cmd': [0, 0, 0]})
             theta, _, _ = listen(SER)
             print('theta = {:.2f}'.format(theta))
             if abs(theta - UPRIGHT_THETA) < 1:
@@ -176,4 +183,7 @@ def run_balancing():
     disable_all(SER)
 
 if __name__ == '__main__':
-    run_balancing()
+    if MODE == 'simulate':
+        display_simulation()
+    else:
+        run_balancing()
