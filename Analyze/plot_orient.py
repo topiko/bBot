@@ -32,19 +32,26 @@ else:
 ndiscard = 10
 nconv = np.ones(5)/5
 times = orient_arr[ndiscard:, 0]
+times -= times.min()
+
 theta = orient_arr[ndiscard:, 1]
-theta_conv = np.convolve(theta, nconv, mode='same')
 thetadot = orient_arr[ndiscard:, 2]
 thetadotdot = orient_arr[ndiscard:, 3]
+theta_conv = np.convolve(theta, nconv, mode='same')
 
-times_pred = orient_arr[ndiscard:, 9]
-theta_pred = orient_arr[ndiscard:, 10]
+theta_measured = orient_arr[ndiscard:, 4]
+thetadot_measured = orient_arr[ndiscard:, 5]
+thetadotdot_measured = orient_arr[ndiscard:, 6]
 
-x = orient_arr[ndiscard:, 6]
-y = orient_arr[ndiscard:, 7]
+times_pred = orient_arr[ndiscard:, 12]
+times_pred -= times_pred.min()
+theta_pred = orient_arr[ndiscard:, 13]
 
-v = orient_arr[ndiscard:, 4]
-a = orient_arr[ndiscard:, 5]
+x = orient_arr[ndiscard:, 9]
+y = orient_arr[ndiscard:, 10]
+
+v = orient_arr[ndiscard:, 7]
+a = orient_arr[ndiscard:, 8]
 
 
 def func(t, a, b, c):
@@ -101,8 +108,9 @@ s = 5
 # Phi:
 #=======================================================
 ax1.plot(times, theta, '-o', markersize=s, label='rpi')
+ax1.plot(times, theta_measured, '-*', markersize=s, label='measured')
 ax1.plot(times_pred, theta_pred, '-o', markersize=s, label='pred_rpi')
-ax1.plot(times, theta_conv, '-', markersize=s, label='conv')
+#ax1.plot(times, theta_conv, '-', markersize=s, label='conv')
 #for i in range(len(times)-1):
 #    ax1.plot([times[i], times_pred[i]], [theta[i], theta_pred[i]], lw = .5, color = 'black')
 ax1.legend()
@@ -114,6 +122,7 @@ ax1.set_title('theta')
 ax2.plot(times, thetadot, '-o', markersize=s, label='rpi')
 #for i in range(len(times)-1):
 #    ax2.plot([times[i], times_pred[i]], [thetadot[i], thetadot_pred[i]], lw = .5, color = 'black')
+ax2.plot(times, thetadot_measured, '-*', markersize=s, label='measured')
 ax2.plot(times, np.gradient(theta, times), markersize=s, label='grad theta')
 ax2.set_title('theta.')
 ax2.legend()
@@ -130,9 +139,10 @@ print(alpha)
 thetadotdot_model = get_thetadotdot_model(fit_dat, alpha)
 
 ax3.plot(times, thetadotdot, '-o', markersize=s, label='rpi')
+ax3.plot(times, thetadotdot_measured, '-*', markersize=s, label='measured')
 ax3.plot(times, thetadotdot_model, '-o', markersize=s,
          label=r'model, alpha={:.02f}'.format(alpha))
-ax3.plot(times, gradgradtheta, label='grad grad theta')
+#ax3.plot(times, gradgradtheta, label='grad grad theta')
 ax3.set_title('theta..')
 ax3.legend()
 #=======================================================
