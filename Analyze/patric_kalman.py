@@ -25,8 +25,8 @@ theta_init = theta[0] #dat[0, 1]
 thetadot_init = dat[0, 2]
 
 
-alpha = 7491 #13350
-beta = 313 #1026
+alpha = 0 #7491 #13350
+beta = -226 #313 #1026
 model_thetadotdot = lambda a, theta: alpha*np.sin(-theta/180*np.pi) + beta*np.cos(-theta/180*np.pi)*a
 
 kalman_input_arr = np.vstack((theta, thetadot)).T

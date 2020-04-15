@@ -75,13 +75,15 @@ def get_phidot_phidotdot_arr(times, n):
 
     return phidot_arr, phidotdot_arr
 
-def get_thetadotdot_model(x, alpha, beta):
+def get_thetadotdot_model(x, alpha):
     a = x[:, 0]
     theta = x[:, 1]/180*np.pi
     g = 9.81
     theta0 = 15
     theta0 = theta0/180*np.pi
-    return alpha*np.sin(theta0-theta) + beta*np.cos(theta0-theta)*a
+    return alpha*(g*np.sin(theta - theta0) - np.cos(theta-theta0)*a)
+    #return beta*np.cos(theta -theta0)*a + alpha*np.sin(theta - theta0)
+    #return alpha*np.sin(theta-theta0) + beta*np.cos(theta-theta0)*a
 
 
 # phi, phidotdot, a
@@ -122,12 +124,14 @@ ax2.legend()
 gradv = np.gradient(v, times)
 fit_dat = np.hstack((gradv.reshape(-1, 1), theta.reshape(-1, 1)))
 gradgradtheta = np.gradient(np.gradient(theta, times), times)
-alpha, beta = curve_fit(get_thetadotdot_model, fit_dat, gradgradtheta, [.1, 1])[0]
-thetadotdot_model = get_thetadotdot_model(fit_dat, alpha, beta)
+alpha = curve_fit(get_thetadotdot_model, fit_dat, gradgradtheta, [.1],
+                        bounds=(0, np.inf))[0][0]
+print(alpha)
+thetadotdot_model = get_thetadotdot_model(fit_dat, alpha)
 
 ax3.plot(times, thetadotdot, '-o', markersize=s, label='rpi')
 ax3.plot(times, thetadotdot_model, '-o', markersize=s,
-         label=r'model, alpha={:.02f}, beta={:.1f}'.format(alpha, beta))
+         label=r'model, alpha={:.02f}'.format(alpha))
 ax3.plot(times, gradgradtheta, label='grad grad theta')
 ax3.set_title('theta..')
 ax3.legend()
