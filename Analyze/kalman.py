@@ -9,7 +9,6 @@ class KLFilter():
     """
     def __init__(self, x, F=None, P=None, R=None, Q=None, B=None):
 
-        dt = 1
         n = len(x)
         self.n = n
         self.x = x.reshape(-1, 1)
@@ -42,16 +41,12 @@ class KLFilter():
         """
         if z.shape[0] == self.n:
             z = z.reshape(-1, 1)
-        #print('P = ', self.P)
 
         mat1 = np.matmul(self.H, np.matmul(self.P, self.H.T))
         mat2 = np.linalg.inv(mat1 + self.R)
-        self.K  = np.matmul(self.P, np.matmul(self.H.T, mat2))
+        self.K = np.matmul(self.P, np.matmul(self.H.T, mat2))
 
         self.P = self.P - np.matmul(self.K, np.matmul(self.H, self.P))
-        #print('z = ', z, 'estim x = ', self.x)
         self.x = self.x + np.matmul(self.K, z - np.matmul(self.H, self.x))
-        #print('K:', self.K)
-        #print('P:', self.P)
-        #print()
+
         return self.x.ravel()

@@ -81,7 +81,7 @@ def get_thetadotdot_model(x, alpha):
     g = 9.81
     theta0 = 15
     theta0 = theta0/180*np.pi
-    return alpha*(g*np.sin(theta - theta0) - np.cos(theta-theta0)*a)
+    return alpha*(g*np.sin(theta - theta0) - np.cos(theta-theta0)*a)/np.pi*180
     #return beta*np.cos(theta -theta0)*a + alpha*np.sin(theta - theta0)
     #return alpha*np.sin(theta-theta0) + beta*np.cos(theta-theta0)*a
 
