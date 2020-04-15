@@ -15,5 +15,14 @@ PID_D = -0.0001
 
 
 TILT_MLTP = .02
-A_MLTP1 = .25
-A_MLTP2 = 30.5
+A_MLTP1 = .2
+A_MLTP2 = 0 #30.5
+
+
+# Dyn params 
+ALPHA = 736 #-225
+
+GRAVITY_ACCEL = 9.81
+
+# Uncertainty in theta measurement
+SIGMA_THETA = .05**2

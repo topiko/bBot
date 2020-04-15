@@ -1,13 +1,13 @@
 # This is the control packag
 import numpy as np
-from simple_pid import PID
+#from simple_pid import PID
 from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, PID_P, PID_I, PID_D, \
         TILT_MLTP, A_MLTP1, A_MLTP2, PI
 
-CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
+#CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
 def v_to_cmd_int(vel):
     """
@@ -55,14 +55,12 @@ def react(state_dict, cmd_dict):
 
     # TODO: FIX better function for a
     delta_theta = theta - cmd_dict['target_theta']
-    if abs(delta_theta) < .2:
-        accel = 0
-    else:
-        accel = delta_theta * A_MLTP1 + state_dict['thetadot'][0] * A_MLTP2
+    accel = delta_theta * A_MLTP1 + state_dict['thetadot'][0] * A_MLTP2
 
     delta_t = state_dict['time_next'] - state_dict['times'][0]
 
     cmd_dict['v'] = v_now + accel*delta_t
+    cmd_dict['a'] = accel
     state_dict['a'] = update_array(state_dict['a'], accel)
     #v = CTRL_PID(theta)
     #dt = state_dict['time_next'] - state_dict['times'][0]

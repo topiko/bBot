@@ -1,5 +1,6 @@
 import time
 from params import PI
+import numpy as np
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
 ANGLE_FACTOR = -20860.
@@ -37,8 +38,6 @@ def talk(ser, state_dict, cmd_dict):
     Send command to arduino.
     """
     if state_dict['mode'] == 'simulate':
-        if state_dict is None:
-            return
         ser.run(state_dict, cmd_dict)
     else:
         sendbytes = get_talk_bytes_from_command(cmd_dict['cmd'])
@@ -55,7 +54,7 @@ def listen(ser, mode=None):
     values.
     """
     if mode == 'simulate':
-        return ser.theta, ser.cur_time, 0
+        return ser.theta, ser.time, 0
     else:
         t0 = time.time()
         while ser.in_waiting < 2:
@@ -82,20 +81,29 @@ def enable_legs(ser):
     talk(ser, None, {'cmd': [3, 1, 0]})
     time.sleep(.1)
 
-def initialize_times(ser, state_dict):
+def initialize_state_dict(ser, state_dict):
+    """
+    Initialize the state dict arrays.
+    """
+    if state_dict['mode'] == 'simulate':
+        state_dict['theta'][:] = ser.theta
+        state_dict['thetadot'][:] = ser.thetadot
+        state_dict['times'][:] = np.array([0, ser.dt, ser.dt*2])
+        state_dict['time_next'] = ser.dt*3
+    else:
+        for i in range(len(state_dict['times'])):
+            talk(ser, state_dict, {'cmd': [0, 0, 0]})
+            theta, t, _ = listen(ser)
+            state_dict['times'][-i] = t
+            state_dict['thetas'][-i] = theta
+        state_dict['time_next'] = t + .016
 
-    for i in range(len(state_dict['times'])):
-        talk(ser, None, {'cmd': [0, 0, 0]})
-        _, t, _ = listen(ser)
-        state_dict['times'][-i] = t
-    state_dict['time_next'] = t + .016
+def disable_all(ser, state_dict):
 
-def disable_all(ser):
-
-    talk(ser, None, {'cmd': [0, 0, 0]})
+    talk(ser, state_dict, {'cmd': [0, 0, 0]})
     time.sleep(.1)
-    talk(ser, None, {'cmd': [1, 0, 0]})
+    talk(ser, state_dict, {'cmd': [1, 0, 0]})
     time.sleep(.1)
-    talk(ser, None, {'cmd': [2, 0, 0]})
+    talk(ser, state_dict, {'cmd': [2, 0, 0]})
     time.sleep(.1)
-    talk(ser, None, {'cmd': [3, 0, 0]})
+    talk(ser, state_dict, {'cmd': [3, 0, 0]})
