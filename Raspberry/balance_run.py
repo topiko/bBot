@@ -12,7 +12,6 @@ from state import update_state, predict_theta, \
         update_cmd_vars, reset_location
 from control import react
 from params import UPRIGHT_THETA, PI, DT
-from simulate import display_simulation, simulate_patric
 from kalman import get_patric_kalman
 
 if len(sys.argv) == 2:
@@ -21,6 +20,7 @@ else:
     MODE = 'test_mpu'
 
 if MODE == 'simulate':
+    from simulate import display_simulation, simulate_patric
     SER = simulate_patric(dt=DT)
 else:
     import serial
@@ -185,7 +185,7 @@ def run_balancing():
     """
     while True:
         try:
-            talk(SER, None, {'cmd': [0, 0, 0]})
+            talk(SER, {'mode':MODE}, {'cmd': [0, 0, 0]})
             theta, _, _ = listen(SER)
             print('theta = {:.2f}'.format(theta))
             if abs(theta - UPRIGHT_THETA) < 1:

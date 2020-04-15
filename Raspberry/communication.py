@@ -78,7 +78,7 @@ def listen(ser, mode=None):
 
 def enable_legs(ser):
 
-    talk(ser, None, {'cmd': [3, 1, 0]})
+    talk(ser, {'mode':'run'}, {'cmd': [3, 1, 0]})
     time.sleep(.1)
 
 def initialize_state_dict(ser, state_dict):
@@ -95,7 +95,7 @@ def initialize_state_dict(ser, state_dict):
             talk(ser, state_dict, {'cmd': [0, 0, 0]})
             theta, t, _ = listen(ser)
             state_dict['times'][-i] = t
-            state_dict['thetas'][-i] = theta
+            state_dict['theta'][-i] = theta
         state_dict['time_next'] = t + state_dict['dt'] #.016
 
 def disable_all(ser, state_dict):
