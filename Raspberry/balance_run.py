@@ -41,7 +41,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
     """
     i = 0
     wait_sum = 0
-    n_report = 1000
+    n_report = 1 if MODE == 'simulate' else 1000
     dt = DT if MODE == 'simulate' else 0.016 ##.01
     t_init = 0
     status = 'upright'
@@ -123,7 +123,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
         # waiting for the arduino to respond:
         wait_sum += wait
 
-        if i > 20:
+        if i > 5:
             status = check_status(state_dict)
 
         if i%n_report == 0:

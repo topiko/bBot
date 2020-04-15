@@ -25,7 +25,7 @@ class simulate_patric():
         self.dt = dt
         self.noise = True #False #True #False
         self.theta_noisy = self.theta
-        self.record_theta = np.zeros((int(SIMUL_LOOP_TIME//self.dt)+2, 4))
+        self.record_theta = np.zeros((int(SIMUL_LOOP_TIME//self.dt)+3, 4))
         self.idx = 0
 
     def reset_idx(self):
@@ -58,10 +58,10 @@ class simulate_patric():
         self.thetadot = thetadots[-1]
         self.time += self.dt
 
-        self.record_theta[self.idx] = [self.time, self.theta, self.thetadot, get_thetadotdot(self.theta, accel)]
-        self.idx += 1
+        #self.record_theta[self.idx] = [self.time, self.theta, self.thetadot, get_thetadotdot(self.theta, accel)]
+        #self.idx += 1
 
-def plot_dynamics(theta_data, theta_test):
+def plot_dynamics(theta_data): #, theta_test):
 
     times = theta_data[:, 0]
     thetas = theta_data[:, 1]
@@ -83,7 +83,7 @@ def plot_dynamics(theta_data, theta_test):
     axarr[1].plot(times, theta_data[:, 5], label='measured')
     axarr[2].plot(times, theta_data[:, 6], label='measured')
     axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
-    axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
+    # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
 
 
@@ -108,7 +108,7 @@ def display_simulation(ser, balance_loop):
         ser.reset_idx()
         print(orient_arr[-1, 1], orient_arr[-1, 2], orient_arr[-1, 0])
         print(ser.theta, ser.thetadot, ser.time)
-        plot_dynamics(orient_arr, ser.record_theta)
+        plot_dynamics(orient_arr) #, ser.record_theta[:ser.idx])
         if status == 'fell':
             break
         i += 1

@@ -55,7 +55,7 @@ def react(state_dict, cmd_dict):
 
     # TODO: FIX better function for a
     delta_theta = theta - cmd_dict['target_theta']
-    accel = delta_theta * A_MLTP1 #+ state_dict['thetadot'][0] * A_MLTP2
+    accel = delta_theta * A_MLTP1 + state_dict['thetadot'][0] * A_MLTP2
 
     #delta_t = state_dict['time_next'] - state_dict['times'][0]
 
