@@ -26,7 +26,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .01**2 # .015**2
-SIGMA_THETADOTDOT = 5.
+SIGMA_THETADOTDOT = .2
 
 
 SIMUL_LOOP_TIME = 3
