@@ -9,20 +9,25 @@ RAIL_W = .078
 PI = 3.14159267
 
 #PID:
-PID_P = -.05 #-.08
-PID_I = -0.20 #-.20
-PID_D = -0.0001
+#PID_P = -.05 #-.08
+#PID_I = -0.20 #-.20
+#PID_D = -0.0001
 
 
-TILT_MLTP = .02
-A_MLTP1 = .2
+DT = .01
+
+TILT_MLTP = 0 #.02
+A_MLTP1 = 0.2 #1 #.2
 A_MLTP2 = 0 #30.5
 
-
-# Dyn params 
-ALPHA = 736 #-225
+# Dyn params
+ALPHA = 12.85 #736 #-225
 
 GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
-SIGMA_THETA = .05**2
+SIGMA_THETA = .05**2 # .015**2
+SIGMA_THETADOTDOT = 1.
+
+
+SIMUL_LOOP_TIME = 3

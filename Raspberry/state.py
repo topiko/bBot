@@ -1,6 +1,6 @@
 import numpy as np
 from params import UPRIGHT_THETA
-
+from modelpatric import get_thetadotdot
 
 
 
@@ -84,25 +84,63 @@ def update_location(state_dict):
     state_dict['x'] = update_array(state_dict['x'], x)
     state_dict['y'] = update_array(state_dict['y'], y)
 
-def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
+
+def get_second_deriv(times, values):
+
+    dt1 = times[0] - times[1]
+    dt2 = times[1] - times[2]
+
+    return ((values[0] - values[1])/dt1 \
+            - (values[1] - values[2])/dt2) / (dt1/2 + dt2/2)
+
+def update_state(state_dict, kl, theta, cur_time, dt):
 
     times = state_dict['times']
     state_dict['times'] = update_array(times, cur_time)
-    state_dict['theta'] = update_array(state_dict['theta'], theta)
-    state_dict['time_next'] = cur_time + t_add
 
-    for key in ['v', 'phidot']:
-        # The command is one time step ahead
-        state_dict[key][1] = cmd_dict[key]
+    # Update measurements
+    #===========================================
+    state_dict['theta_measured'] = update_array(state_dict['theta_measured'],
+                                                theta)
+    thetadot_measured = \
+            (state_dict['theta_measured'][0] - state_dict['theta_measured'][1]) / \
+            (state_dict['times'][0] - state_dict['times'][1])
+    state_dict['thetadot_measured'] = \
+            update_array(state_dict['thetadot_measured'],
+                         thetadot_measured)
+    thetadotdot_measured = \
+            get_second_deriv(state_dict['times'], state_dict['theta_measured'])
+    state_dict['thetadotdot_measured'] = \
+            update_array(state_dict['thetadotdot_measured'], thetadotdot_measured)
+    state_dict['thetadotdot_measured'][1:] = \
+            state_dict['thetadotdot_measured'][:-1]
+    #===========================================
+
+    thetadot = (theta - state_dict['theta'][0]) \
+        /(state_dict['times'][0] - state_dict['times'][1])
+
+    # Use the klaman to estiamte theta
+    theta, thetadot = kl.update(np.array([theta, thetadot]))
+
+    # Update the theta array
+    state_dict['theta'] = update_array(state_dict['theta'], theta)
+    state_dict['thetadot'] = update_array(state_dict['thetadot'], thetadot)
+    state_dict['time_next'] = cur_time + dt
+
+    #for key in ['v', 'phidot']:
+    #    # The command is one time step ahead
+    #    state_dict[key][1] = cmd_dict[key]
 
 
     # update the orientation array:
-    state_dict['thetadot'][2] = state_dict['thetadot'][1]
+    #state_dict['thetadot'][2] = state_dict['thetadot'][1]
     state_dict['thetadotdot'][2] = state_dict['thetadotdot'][1]
+    state_dict['thetadotdot'][1] = get_second_deriv(state_dict['times'],
+                                                    state_dict['theta'])
 
-    a, b, _ = fit_parabel(times, state_dict['theta'])
-    state_dict['thetadot'][1] = 2*a*times[1] + b
-    state_dict['thetadotdot'][1] = 2*a
+    #a, b, _ = fit_parabel(times, state_dict['theta'])
+    #state_dict['thetadot'][1] = 2*a*times[1] + b
+    #state_dict['thetadotdot'][1] = 2*a
 
     # wheel v and a
     # a, b, _ = fit_parabel(times, state_dict['v'])
@@ -114,11 +152,12 @@ def update_state(state_dict, theta, cmd_dict, cur_time, t_add):
     dt2 = state_dict['times'][1] - state_dict['times'][2]
 
     run_l_arr = state_dict['run_l']
-    state_dict['a'][1] = ((run_l_arr[0] - run_l_arr[1])/dt1 \
-            - (run_l_arr[1] - run_l_arr[2])/dt2) / (dt1/2 + dt2/2)
+    state_dict['a'][1] = get_second_deriv(times, run_l_arr)
+    #((run_l_arr[0] - run_l_arr[1])/dt1 \
+    #        - (run_l_arr[1] - run_l_arr[2])/dt2) / (dt1/2 + dt2/2)
     #state_dict['a'][2] = state_dict['a'][1]
     #state_dict['a'][1] = (state_dict['v'][1] - state_dict['v'][2])/dt
-
+"""
 def fit_parabel(times, points):
 
     if (np.diff(times) == 0).all():
@@ -135,17 +174,26 @@ def fit_parabel(times, points):
         /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
 
     return a, b, c
+"""
+def predict_theta(state_dict, cmd_dict, kl):
+    """
+    Predict theta uusing the kalman filter.
+    """
 
-def predict_theta(state_dict):
+    theta = state_dict['theta'][0]
+    accel = cmd_dict['a']
+    thetadotdot = get_thetadotdot(theta, accel)
 
-    times = state_dict['times']
-    thetas = state_dict['theta']
+    state_dict['theta_predict'], _ = kl.predict(control_input=thetadotdot) #control_input=get_thetadotdot(theta, accel))
 
-    t_future = state_dict['time_next'] - times[0]
-    a, b, c = fit_parabel(times - times[0], thetas)
+    #times = state_dict['times']
+    #thetas = state_dict['theta']
 
-    theta_predict =  a*t_future**2 + b*t_future + c
-    state_dict['theta_predict'] = theta_predict
+    #t_future = state_dict['time_next'] - times[0]
+    #a, b, c = fit_parabel(times - times[0], thetas)
+
+    #theta_predict =  a*t_future**2 + b*t_future + c
+    #state_dict['theta_predict'] = theta_predict
     #state_dict['theta_predict_hist'] = \
     #        update_array(state_dict['theta_predict_hist'], theta_predict)
 

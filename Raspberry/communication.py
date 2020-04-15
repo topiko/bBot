@@ -54,7 +54,7 @@ def listen(ser, mode=None):
     values.
     """
     if mode == 'simulate':
-        return ser.theta, ser.time, 0
+        return ser.theta_noisy, ser.time, 0
     else:
         t0 = time.time()
         while ser.in_waiting < 2:
@@ -86,7 +86,7 @@ def initialize_state_dict(ser, state_dict):
     Initialize the state dict arrays.
     """
     if state_dict['mode'] == 'simulate':
-        state_dict['theta'][:] = ser.theta
+        state_dict['theta'][:] = ser.theta_noisy
         state_dict['thetadot'][:] = ser.thetadot
         state_dict['times'][:] = np.array([0, ser.dt, ser.dt*2])
         state_dict['time_next'] = ser.dt*3
@@ -96,7 +96,7 @@ def initialize_state_dict(ser, state_dict):
             theta, t, _ = listen(ser)
             state_dict['times'][-i] = t
             state_dict['thetas'][-i] = theta
-        state_dict['time_next'] = t + .016
+        state_dict['time_next'] = t + state_dict['dt'] #.016
 
 def disable_all(ser, state_dict):
 

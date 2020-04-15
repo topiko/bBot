@@ -1,4 +1,6 @@
-
+"""
+This is the main balancing loop.
+"""
 import sys
 import time
 
@@ -6,20 +8,20 @@ import numpy as np
 from communication import talk, listen, \
         enable_legs, disable_all, initialize_state_dict
 from state import update_state, predict_theta, \
-        check_status, update_array, update_location, \
+        check_status, update_array, \
         update_cmd_vars, reset_location
 from control import react
-from params import UPRIGHT_THETA, PI
+from params import UPRIGHT_THETA, PI, DT
 from simulate import display_simulation, simulate_patric
+from kalman import get_patric_kalman
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
 else:
     MODE = 'test_mpu'
 
-
 if MODE == 'simulate':
-    SER = simulate_patric(dt=.01)
+    SER = simulate_patric(dt=DT)
 else:
     import serial
     SER = serial.Serial(
@@ -33,16 +35,15 @@ else:
 
 REPORT = True
 
-def balance_loop(SER, run_time_max=10, cmd_dict=None, state_dict=None):
+def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
     """
     The main loop where patric is balancing.
     """
     i = 0
     wait_sum = 0
     n_report = 1000
-    #dt = .033
+    dt = DT if MODE == 'simulate' else 0.016 ##.01
     t_init = 0
-    t_add = .015
     status = 'upright'
     imax = 10000
 
@@ -60,9 +61,12 @@ def balance_loop(SER, run_time_max=10, cmd_dict=None, state_dict=None):
     if state_dict is None:
         state_dict = {'times':np.zeros(3),
                       'time_next':0,
+                      'theta_measured':np.zeros(3),
                       'theta':np.zeros(3),
                       'thetadot':np.zeros(3),
+                      'thetadot_measured':np.zeros(3),
                       'thetadotdot':np.zeros(3),
+                      'thetadotdot_measured':np.zeros(3),
                       'theta_predict':0,
                       'run_l': np.zeros(3),
                       'abs_run_l': np.zeros(3),
@@ -72,29 +76,35 @@ def balance_loop(SER, run_time_max=10, cmd_dict=None, state_dict=None):
                       'phidot':np.zeros(3),
                       'x':np.zeros(3),
                       'y':np.zeros(3),
+                      'dt':dt,
                       'mode':MODE}
 
-        initialize_state_dict(SER, state_dict)
+        initialize_state_dict(ser, state_dict)
 
     # Report dict is for debugging and performance evaluation
     report_dict = {'predict_times':np.zeros(3),
                    'predict_thetas':np.zeros(3)}
 
     # store state:
-    store_arr = np.zeros((imax, 11))
+    store_arr = np.zeros((imax, 14))
+
+    # Request the Kalman filter:
+    if kl is None:
+        kl = get_patric_kalman(np.array([state_dict['theta'][1],
+                                         state_dict['thetadot'][1]]), dt)
 
     # enable the legs:
     if MODE in ['test_mpu', 'simulate']:
         pass
     else:
-        enable_legs(SER)
+        enable_legs(ser)
 
     run_time = 0
     init_time = state_dict['times'][0]
     while (run_time < run_time_max) and (i < imax) and (status != 'fell'): # True:
 
         # Send the latest command to arduino
-        talk(SER, state_dict, cmd_dict)
+        talk(ser, state_dict, cmd_dict)
 
         # Update the history of the command variables
         # before obtaining new ones:
@@ -104,10 +114,10 @@ def balance_loop(SER, run_time_max=10, cmd_dict=None, state_dict=None):
         react(state_dict, cmd_dict)
 
         # Listen to serial as a response to above talk:
-        theta, cur_time, wait = listen(SER, mode=MODE)
+        theta, cur_time, wait = listen(ser, mode=MODE)
 
         # Update the state of the system with the input from serial:
-        update_state(state_dict, theta, cmd_dict, cur_time, t_add)
+        update_state(state_dict, kl, theta, cur_time, dt)
 
         # To see how much time has been spent
         # waiting for the arduino to respond:
@@ -139,29 +149,31 @@ def balance_loop(SER, run_time_max=10, cmd_dict=None, state_dict=None):
                 wait_sum = 0
                 t_init = time.time()
             if i != 0:
-                t_add = np.diff(state_dict['times'][::-1]).mean()
+                dt = np.diff(state_dict['times'][::-1]).mean()
 
         if REPORT:
             report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
                                                          state_dict['theta_predict'])
             report_dict['predict_times'] = update_array(report_dict['predict_times'],
-                                                        state_dict['times'][1] + t_add)
+                                                        state_dict['times'][1] + dt)
             for j, key in enumerate(['times', 'theta',
                                      'thetadot', 'thetadotdot',
+                                     'theta_measured', 'thetadot_measured',
+                                     'thetadotdot_measured',
                                      'v', 'a', 'x', 'y', 'phi']):
                 store_arr[i, j] = state_dict[key][1]
             store_arr[i, j+1] = report_dict['predict_times'][1]
             store_arr[i, j+2] = report_dict['predict_thetas'][1]
 
-        predict_theta(state_dict)
+        predict_theta(state_dict, cmd_dict, kl)
         run_time = cur_time - init_time
         i += 1
 
     print(status)
     if MODE not in ['simulate']:
-        disable_all(SER, state_dict)
+        disable_all(ser, state_dict)
 
-    return store_arr[3:i], SER, status, cmd_dict, state_dict
+    return store_arr[3:i], ser, status, cmd_dict, state_dict, kl
 
 
 
