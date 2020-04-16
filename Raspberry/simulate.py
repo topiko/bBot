@@ -19,7 +19,7 @@ class simulate_patric():
         """
         Init.
         """
-        self.theta = theta + .1
+        self.theta = theta + 10
         self.thetadot = thetadot
         self.time = 0
         self.dt = dt

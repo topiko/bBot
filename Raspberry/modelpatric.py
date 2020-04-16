@@ -6,7 +6,7 @@ def get_thetadotdot(theta, accel):
     Get the reaction in thetadotdot for given theta and accel
     """
     theta = (theta - UPRIGHT_THETA)/180*np.pi
-    return ALPHA * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) / np.pi * 180
+    return ALPHA * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) # / np.pi * 180
 
 
 

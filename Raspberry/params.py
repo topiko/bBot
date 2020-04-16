@@ -20,7 +20,7 @@ A_MLTP1 = 0.2 # 00 #.2
 A_MLTP2 = 0.010 #30.5
 
 # Dyn params
-ALPHA = 12.85 #736 #-225
+ALPHA = 736 #12.85 #736 #-225
 
 GRAVITY_ACCEL = 9.81
 

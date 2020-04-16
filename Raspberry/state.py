@@ -184,7 +184,8 @@ def predict_theta(state_dict, cmd_dict, kl):
     accel = cmd_dict['a']
     thetadotdot = get_thetadotdot(theta, accel)
 
-    state_dict['theta_predict'], _ = kl.predict(control_input=thetadotdot) #control_input=get_thetadotdot(theta, accel))
+    state_dict['theta_predict'], state_dict['thetadot_predict'] \
+            = kl.predict(control_input=thetadotdot) #control_input=get_thetadotdot(theta, accel))
 
     #times = state_dict['times']
     #thetas = state_dict['theta']
