@@ -1,7 +1,7 @@
 """Various physical parameters"""
 
 
-UPRIGHT_THETA = 15.
+UPRIGHT_THETA = 15.5
 STEPS_PER_REV = 400
 ARDUINO_STEP_MULTIP = 2
 WHEEL_DIA = .09
@@ -15,7 +15,7 @@ PI = 3.14159267
 
 DT = .016
 
-TILT_MLTP = 0 #.2
+TILT_MLTP = 5.
 A_MLTP1 = 0.2 # 00 #.2
 A_MLTP2 = 0.010 #30.5
 
@@ -25,7 +25,7 @@ ALPHA = 736 #12.85 #736 #-225
 GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
-SIGMA_THETA = .01**2 # .015**2
+SIGMA_THETA = .02**2 # .015**2
 SIGMA_THETADOTDOT = .2
 
 

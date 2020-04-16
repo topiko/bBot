@@ -41,7 +41,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
     """
     i = 0
     wait_sum = 0
-    n_report = 1 if MODE == 'simulate' else 1000
+    n_report = 1 if MODE == 'simulate' else 500
     dt = DT if MODE == 'simulate' else 0.016 ##.01
     t_init = 0
     status = 'upright'
@@ -130,11 +130,12 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
         if i%n_report == 0:
             if i < n_report*2:
                 reset_location(state_dict)
-                cmd_dict['phidot'] = 0/180*PI
+                cmd_dict['phidot'] = 90/180*PI
             t_report = time.time()
             print('Freq: ', n_report/(t_report-t_init))
             print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
             if REPORT:
+                print('i = ', i)
                 print('theta = ', state_dict['theta'][0])
                 print('target_theta = ', cmd_dict['target_theta'])
                 print('v = ', cmd_dict['v'])
@@ -151,6 +152,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                 t_init = time.time()
             if i != 0:
                 dt = np.diff(state_dict['times'][::-1]).mean()
+                state_dict['dt'] = dt
 
         if REPORT:
             report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
@@ -170,7 +172,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
         run_time = cur_time - init_time
         i += 1
 
-    print(status)
+    print(status, i)
     if MODE not in ['simulate']:
         disable_all(ser, state_dict)
 
@@ -190,8 +192,10 @@ def run_balancing():
             theta, _, _ = listen(SER)
             print('theta = {:.2f}'.format(theta))
             if abs(theta - UPRIGHT_THETA) < 1:
+                print('Run Loop')
                 run_data = balance_loop(SER, run_time_max=30)[0]
                 np.save('orient.npy', run_data)
+            time.sleep(.2)
         except KeyboardInterrupt:
             print('Disabling.')
             break

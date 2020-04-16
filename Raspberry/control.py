@@ -53,8 +53,8 @@ def get_a_01(state_dict, cmd_dict):
     --> thetadot_target = d Delta theta / dt  = -kappa/t**2 = -1/kappa * (Delta theta)**2
     Remeber though to take the sign into account.
     """
-    kappa = 1.
-    gamma = 500
+    kappa = .5
+    gamma = 2000
 
     theta = state_dict['theta_predict']
     thetadot = state_dict['thetadot_predict']
@@ -63,8 +63,6 @@ def get_a_01(state_dict, cmd_dict):
     delta_theta = theta - target_theta
     thetadot_target = - 1 / kappa * delta_theta**2 * np.sign(delta_theta)
 
-
-    print(thetadot_target, thetadot)
     # How much we are off drom the desired thetadot
     delta_thetadot = thetadot_target - thetadot
 
