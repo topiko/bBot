@@ -1,7 +1,7 @@
 """Various physical parameters"""
 
 
-UPRIGHT_THETA = 15.5
+UPRIGHT_THETA = 15.2
 STEPS_PER_REV = 400
 ARDUINO_STEP_MULTIP = 2
 WHEEL_DIA = .09
@@ -15,7 +15,7 @@ PI = 3.14159267
 
 DT = .016
 
-TILT_MLTP = 5.
+TILT_MLTP = -100.
 A_MLTP1 = 0.2 # 00 #.2
 A_MLTP2 = 0.010 #30.5
 

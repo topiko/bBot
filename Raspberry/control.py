@@ -36,12 +36,12 @@ def wheels_v_to_cmds(cmd_dict):
 
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
-def get_target_theta(state_dict):
+def get_target_theta(state_dict, cmd_dict):
     """
     Updates the target theta based on current velocity or somethign..
     """
-    tilt_theta = state_dict['v'][0]*TILT_MLTP
-    return UPRIGHT_THETA - tilt_theta
+    tilt_theta = -(state_dict['v'][0] - cmd_dict['target_v'])*TILT_MLTP
+    return UPRIGHT_THETA + tilt_theta
 
 def deg_to_rad(degs):
     return degs/180*np.pi
@@ -74,19 +74,49 @@ def get_a_01(state_dict, cmd_dict):
 
     return accel
 
+def get_a_02(state_dict, cmd_dict):
+    """
+    Get the reaction a for given state.
+    This is based in driving along: Delta theta = exp^(-kappa/t)
+    --> thetadot_target = d Delta theta / dt  =  -kappa * Delta theta
+    Remeber though to take the sign into account.
+    """
+    kappa = 1
+    gamma = 1500
+
+    theta = state_dict['theta_measured'][0] #tate_dict['theta_predict']
+    thetadot = state_dict['thetadot_measured'][0] #state_dict['thetadot_predict']
+    target_theta = cmd_dict['target_theta']
+
+    delta_theta = theta - target_theta
+    thetadot_target = - kappa * delta_theta * np.sign(delta_theta)
+
+    # How much we are off drom the desired thetadot
+    delta_thetadot = thetadot_target - thetadot
+
+    # We want to update thetadot so that delta_thetadot gets smaller.
+    # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
+    accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta -UPRIGHT_THETA)) \
+             - deg_to_rad(delta_thetadot)*gamma) \
+            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)))
+
+    return accel
+
+
 def react(state_dict, cmd_dict):
     """
     React to the current state by updating the cmd_dictionary.
     """
     theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
-    cmd_dict['target_theta'] = get_target_theta(state_dict)
+    cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict)
     #if np.isnan(theta):
     #    print('Warning: nan-theta')
     #    theta = UPRIGHT_THETA
 
     # TODO: FIX better function for a
-    accel = get_a_01(state_dict, cmd_dict)
+    #accel = get_a_01(state_dict, cmd_dict)
+    accel = get_a_02(state_dict, cmd_dict)
 
     #delta_theta = theta - cmd_dict['target_theta']
     #accel = delta_theta * A_MLTP1 + state_dict['thetadot'][0] * A_MLTP2

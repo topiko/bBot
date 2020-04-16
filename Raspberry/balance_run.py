@@ -54,6 +54,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                     'a':0,
                     'phidot':0,
                     'target_theta':UPRIGHT_THETA,
+                    'target_v': 0,
                     'target_R':np.zeros(2),
                     'cmd':[0, 0, 0]}
 
@@ -130,7 +131,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
         if i%n_report == 0:
             if i < n_report*2:
                 reset_location(state_dict)
-                cmd_dict['phidot'] = 90/180*PI
+                cmd_dict['phidot'] = 0/180*PI
             t_report = time.time()
             print('Freq: ', n_report/(t_report-t_init))
             print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
@@ -195,6 +196,7 @@ def run_balancing():
                 print('Run Loop')
                 run_data = balance_loop(SER, run_time_max=30)[0]
                 np.save('orient.npy', run_data)
+                time.sleep(5)
             time.sleep(.2)
         except KeyboardInterrupt:
             print('Disabling.')
