@@ -43,15 +43,15 @@ theta_measured = orient_arr[ndiscard:, 4]
 thetadot_measured = orient_arr[ndiscard:, 5]
 thetadotdot_measured = orient_arr[ndiscard:, 6]
 
-times_pred = orient_arr[ndiscard:, 12]
+times_pred = orient_arr[ndiscard:, 14]
 times_pred -= times_pred.min()
-theta_pred = orient_arr[ndiscard:, 13]
+theta_pred = orient_arr[ndiscard:, 15]
 
-x = orient_arr[ndiscard:, 9]
-y = orient_arr[ndiscard:, 10]
+x = orient_arr[ndiscard:, 11]
+y = orient_arr[ndiscard:, 12]
 
-v = orient_arr[ndiscard:, 7]
-a = orient_arr[ndiscard:, 8]
+v = orient_arr[ndiscard:, 9]
+a = orient_arr[ndiscard:, 10]
 
 
 def func(t, a, b, c):
@@ -88,7 +88,7 @@ def get_thetadotdot_model(x, alpha):
     g = 9.81
     theta0 = 15
     theta0 = theta0/180*np.pi
-    return alpha*(g*np.sin(theta - theta0) - np.cos(theta-theta0)*a)/np.pi*180
+    return alpha*(g*np.sin(theta - theta0) - np.cos(theta-theta0)*a)
     #return beta*np.cos(theta -theta0)*a + alpha*np.sin(theta - theta0)
     #return alpha*np.sin(theta-theta0) + beta*np.cos(theta-theta0)*a
 
