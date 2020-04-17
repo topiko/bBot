@@ -11,7 +11,7 @@ from params import UPRIGHT_THETA, ALPHA, \
         GRAVITY_ACCEL, SIGMA_THETA, SIMUL_LOOP_TIME
 import matplotlib.pyplot as plt
 from modelpatric import get_thetadotdot
-
+from score import score_run
 
 class simulate_patric():
 
@@ -61,17 +61,17 @@ class simulate_patric():
         #self.record_theta[self.idx] = [self.time, self.theta, self.thetadot, get_thetadotdot(self.theta, accel)]
         #self.idx += 1
 
-def plot_dynamics(theta_data): #, theta_test):
+def plot_dynamics(run_data): #, theta_test):
 
-    times = theta_data[:, 0]
-    thetas = theta_data[:, 1]
-    thetadots = theta_data[:, 2]
-    thetadotdots = theta_data[:, 3]
-    target_thetas = theta_data[:, 7]
-    target_thetadot = theta_data[:, 8]
-    xpos = theta_data[:, 11]
-    vel = theta_data[:, 9]
-    accel = theta_data[:, 10]
+    times = run_data[:, 0]
+    thetas = run_data[:, 1]
+    thetadots = run_data[:, 2]
+    thetadotdots = run_data[:, 3]
+    target_thetas = run_data[:, 7]
+    target_thetadot = run_data[:, 8]
+    xpos = run_data[:, 11]
+    vel = run_data[:, 9]
+    accel = run_data[:, 10]
 
     figh = 4
     figw = 10
@@ -83,15 +83,15 @@ def plot_dynamics(theta_data): #, theta_test):
         ax.set_title(title)
 
 
-    axarr[0].plot(times, theta_data[:, 4], label='measured')
+    axarr[0].plot(times, run_data[:, 4], label='measured')
     axarr[0].plot(times, target_thetas, label='targeted')
     axarr[0].legend()
 
-    axarr[1].plot(times, theta_data[:, 5], label='measured')
+    axarr[1].plot(times, run_data[:, 5], label='measured')
     axarr[1].plot(times, target_thetadot, label='targeted')
     axarr[1].legend()
 
-    axarr[2].plot(times, theta_data[:, 6], label='measured')
+    axarr[2].plot(times, run_data[:, 6], label='measured')
     axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
@@ -109,16 +109,19 @@ def display_simulation(ser, balance_loop):
     kl = None
     dt = .01
     while True:
-        orient_arr, ser, status, cmd_dict, state_dict, kl \
+        run_array, ser, status, cmd_dict, state_dict, kl \
                 = balance_loop(ser,
                                run_time_max=SIMUL_LOOP_TIME*(i+1),
                                cmd_dict=cmd_dict,
                                state_dict=state_dict,
                                kl=kl)
         ser.reset_idx()
-        print(orient_arr[-1, 1], orient_arr[-1, 2], orient_arr[-1, 0])
-        print(ser.theta, ser.thetadot, ser.time)
-        plot_dynamics(orient_arr) #, ser.record_theta[:ser.idx])
+
+        print('SCORE:')
+        print(score_run(run_array))
+
+        plot_dynamics(run_array) #, ser.record_theta[:ser.idx])
+
         if status == 'fell':
             break
         i += 1

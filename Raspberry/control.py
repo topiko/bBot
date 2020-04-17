@@ -5,8 +5,8 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        TILT_MLTP, A_MLTP1, A_MLTP2, PI, ALPHA, \
-        UPRIGHT_THETA
+        PI, ALPHA
+
 
 #CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
@@ -36,11 +36,23 @@ def wheels_v_to_cmds(cmd_dict):
 
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
-def get_target_theta(state_dict, cmd_dict):
+def get_target_v(state_dict, cmd_dict, ctrl_params_dict):
+    """
+    Get the targeted velocity. This will depend where Patric is and
+    where it should be. 1D for now...
+    """
+    kappa = ctrl_params_dict['kappa_v']
+    delta_x = state_dict['x'][0] - cmd_dict['target_x']
+    target_v = - delta_x * kappa
+
+    return np.clip(target_v, -1, 1)
+
+def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     """
     Updates the target theta based on current velocity or somethign..
     """
-    tilt_theta = -(state_dict['v'][0] - cmd_dict['target_v'])*TILT_MLTP
+    kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
+    tilt_theta = -(state_dict['v'][0] - cmd_dict['target_v']) * kappa_tilt_theta #TILT_MLTP
     return UPRIGHT_THETA + tilt_theta
 
 def deg_to_rad(degs):
@@ -74,14 +86,14 @@ def get_a_01(state_dict, cmd_dict):
 
     return accel
 
-def get_a_02(state_dict, cmd_dict):
+def get_a_02(state_dict, cmd_dict, ctrl_params_dict):
     """
     Get the reaction a for given state.
     This is based in driving along: Delta theta = exp^(-kappa/t)
     --> thetadot_target = d Delta theta / dt  =  -kappa * Delta theta
     """
-    kappa = 4.0
-    gamma = 1000
+    kappa = ctrl_params_dict['kappa_theta'] #4.0
+    gamma = ctrl_params_dict['gamma_theta'] #1000
 
     theta = state_dict['theta_predict']
     thetadot = state_dict['thetadot_predict']
@@ -104,19 +116,20 @@ def get_a_02(state_dict, cmd_dict):
     return accel
 
 
-def react(state_dict, cmd_dict):
+def react(state_dict, cmd_dict, ctrl_params_dict):
     """
     React to the current state by updating the cmd_dictionary.
     """
     theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
-    cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict)
+    cmd_dict['target_v'] = get_target_v(state_dict, cmd_dict, ctrl_params_dict)
+    cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict, ctrl_params_dict)
     state_dict['target_theta'] = update_array(state_dict['target_theta'],
                                               cmd_dict['target_theta'])
 
     # TODO: FIX better function for a
     accel = get_a_01(state_dict, cmd_dict)
-    accel = get_a_02(state_dict, cmd_dict)
+    accel = get_a_02(state_dict, cmd_dict, ctrl_params_dict)
 
     cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
     cmd_dict['a'] = accel

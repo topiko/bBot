@@ -37,7 +37,7 @@ def talk(ser, state_dict, cmd_dict):
     """
     Send command to arduino.
     """
-    if state_dict['mode'] == 'simulate':
+    if state_dict['mode'].startswith('simul'):
         ser.run(state_dict, cmd_dict)
     else:
         sendbytes = get_talk_bytes_from_command(cmd_dict['cmd'])
@@ -53,7 +53,7 @@ def listen(ser, mode=None):
     Listen to the serial communication and report the received
     values.
     """
-    if mode == 'simulate':
+    if mode.startswith('simul'):
         return ser.theta_noisy, ser.time, 0
     else:
         t0 = time.time()
@@ -76,8 +76,10 @@ def listen(ser, mode=None):
 
         return theta, cur_time, t1 - t0
 
-def enable_legs(ser):
+def enable_legs(ser, mode):
 
+    if mode.startswith('simul'):
+        return
     talk(ser, {'mode':'run'}, {'cmd': [3, 1, 0]})
     time.sleep(.1)
 
@@ -85,7 +87,7 @@ def initialize_state_dict(ser, state_dict):
     """
     Initialize the state dict arrays.
     """
-    if state_dict['mode'] == 'simulate':
+    if state_dict['mode'].startswith('simul'):
         state_dict['theta'][:] = ser.theta_noisy
         state_dict['thetadot'][:] = ser.thetadot
         state_dict['times'][:] = np.array([0, ser.dt, ser.dt*2])
@@ -100,6 +102,8 @@ def initialize_state_dict(ser, state_dict):
 
 def disable_all(ser, state_dict):
 
+    if state_dict['mode'].startswith('simul'):
+        return
     talk(ser, state_dict, {'cmd': [0, 0, 0]})
     time.sleep(.1)
     talk(ser, state_dict, {'cmd': [1, 0, 0]})

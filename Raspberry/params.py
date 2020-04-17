@@ -1,5 +1,5 @@
 """Various physical parameters"""
-
+import numpy as np
 
 UPRIGHT_THETA = 15.2
 STEPS_PER_REV = 400
@@ -8,16 +8,11 @@ WHEEL_DIA = .09
 RAIL_W = .078
 PI = 3.14159267
 
-#PID:
-#PID_P = -.05 #-.08
-#PID_I = -0.20 #-.20
-#PID_D = -0.0001
-
 DT = .016
 
-TILT_MLTP = 10.
-A_MLTP1 = 0.2 # 00 #.2
-A_MLTP2 = 0.010 #30.5
+#TILT_MLTP = 10.
+#A_MLTP1 = 0.2 # 00 #.2
+#A_MLTP2 = 0.010 #30.5
 
 # Dyn params
 ALPHA = 422 #736
@@ -30,3 +25,11 @@ SIGMA_THETADOTDOT = .2
 
 
 SIMUL_LOOP_TIME = 3
+OPM_LOOP_TIME = 5
+try:
+    CTRL_PARAMS_DICT = np.load('ctrl_params.npy').item()
+except FileNotFoundError:
+    CTRL_PARAMS_DICT = {'kappa_v':1, # D x * kappa = v_target
+                        'kappa_tilt_theta':10, # D v * kappa = theta tilt
+                        'kappa_theta':4, # D theta = exp(-kappa * t)
+                        'gamma_theta':1000} # D thetadot * gamma = thetadotdot
