@@ -70,6 +70,8 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                       'thetadotdot_measured':np.zeros(3),
                       'theta_predict':UPRIGHT_THETA,
                       'thetadot_predict':0,
+                      'target_theta':np.zeros(3),
+                      'target_thetadot':np.zeros(3),
                       'run_l': np.zeros(3),
                       'abs_run_l': np.zeros(3),
                       'v':np.zeros(3),
@@ -88,7 +90,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                    'predict_thetas':np.zeros(3)}
 
     # store state:
-    store_arr = np.zeros((imax, 14))
+    store_arr = np.zeros((imax, 16))
 
     # Request the Kalman filter:
     if kl is None:
@@ -153,7 +155,8 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                 t_init = time.time()
             if i != 0:
                 dt = np.diff(state_dict['times'][::-1]).mean()
-                state_dict['dt'] = dt
+                if MODE != 'simulate':
+                    state_dict['dt'] = dt
 
         if REPORT:
             report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
@@ -164,6 +167,7 @@ def balance_loop(ser, run_time_max=10, cmd_dict=None, state_dict=None, kl=None):
                                      'thetadot', 'thetadotdot',
                                      'theta_measured', 'thetadot_measured',
                                      'thetadotdot_measured',
+                                     'target_theta', 'target_thetadot',
                                      'v', 'a', 'x', 'y', 'phi']):
                 store_arr[i, j] = state_dict[key][1]
             store_arr[i, j+1] = report_dict['predict_times'][1]

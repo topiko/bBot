@@ -19,7 +19,7 @@ class simulate_patric():
         """
         Init.
         """
-        self.theta = theta + 10
+        self.theta = theta + 15
         self.thetadot = thetadot
         self.time = 0
         self.dt = dt
@@ -67,26 +67,36 @@ def plot_dynamics(theta_data): #, theta_test):
     thetas = theta_data[:, 1]
     thetadots = theta_data[:, 2]
     thetadotdots = theta_data[:, 3]
-    accel = theta_data[:, 8]
+    target_thetas = theta_data[:, 7]
+    target_thetadot = theta_data[:, 8]
+    xpos = theta_data[:, 11]
+    vel = theta_data[:, 9]
+    accel = theta_data[:, 10]
 
     figh = 4
     figw = 10
-    _, axarr = plt.subplots(4, 1, figsize=(figw, figh*3))
+    _, axarr = plt.subplots(6, 1, figsize=(figw, figh*3), sharex = True)
     for ax, dat, title in zip(axarr.ravel(),
-                              [thetas, thetadots, thetadotdots, accel],
-                              ['theta', 'thetadot', 'thetadotdot', 'accel']):
+                              [thetas, thetadots, thetadotdots, xpos, vel, accel],
+                              ['theta', 'thetadot', 'thetadotdot', 'xpos', 'vel', 'accel']):
         ax.plot(times, dat, '-+')
         ax.set_title(title)
 
 
     axarr[0].plot(times, theta_data[:, 4], label='measured')
+    axarr[0].plot(times, target_thetas, label='targeted')
+    axarr[0].legend()
+
     axarr[1].plot(times, theta_data[:, 5], label='measured')
+    axarr[1].plot(times, target_thetadot, label='targeted')
+    axarr[1].legend()
+
     axarr[2].plot(times, theta_data[:, 6], label='measured')
     axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
 
-
+    plt.tight_layout()
     plt.show()
 
 def display_simulation(ser, balance_loop):

@@ -79,18 +79,19 @@ def get_a_02(state_dict, cmd_dict):
     Get the reaction a for given state.
     This is based in driving along: Delta theta = exp^(-kappa/t)
     --> thetadot_target = d Delta theta / dt  =  -kappa * Delta theta
-    Remeber though to take the sign into account.
     """
-    kappa = 1
-    gamma = 1500
+    kappa = 4.0
+    gamma = 1000
 
-    theta = state_dict['theta_measured'][0] #tate_dict['theta_predict']
-    thetadot = state_dict['thetadot_measured'][0] #state_dict['thetadot_predict']
+    theta = state_dict['theta_predict']
+    thetadot = state_dict['thetadot_predict']
     target_theta = cmd_dict['target_theta']
 
     delta_theta = theta - target_theta
-    thetadot_target = - kappa * delta_theta * np.sign(delta_theta)
+    thetadot_target = - kappa * delta_theta #* np.sign(delta_theta)
 
+    state_dict['target_thetadot'] = update_array(state_dict['target_thetadot'],
+                                                 thetadot_target)
     # How much we are off drom the desired thetadot
     delta_thetadot = thetadot_target - thetadot
 
@@ -110,18 +111,12 @@ def react(state_dict, cmd_dict):
     theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
     cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict)
-    #if np.isnan(theta):
-    #    print('Warning: nan-theta')
-    #    theta = UPRIGHT_THETA
+    state_dict['target_theta'] = update_array(state_dict['target_theta'],
+                                              cmd_dict['target_theta'])
 
     # TODO: FIX better function for a
-    #accel = get_a_01(state_dict, cmd_dict)
+    accel = get_a_01(state_dict, cmd_dict)
     accel = get_a_02(state_dict, cmd_dict)
-
-    #delta_theta = theta - cmd_dict['target_theta']
-    #accel = delta_theta * A_MLTP1 + state_dict['thetadot'][0] * A_MLTP2
-
-    #delta_t = state_dict['time_next'] - state_dict['times'][0]
 
     cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
     cmd_dict['a'] = accel
