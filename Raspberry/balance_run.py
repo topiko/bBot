@@ -255,7 +255,7 @@ def run_balancing(ser, ctrl_params_dict=None, run_time_max=10):
         theta = UPRIGHT_THETA
     else:
         talk(SER, {'mode':MODE}, {'cmd': [0, 0, 0]})
-        theta, _, _ = listen(SER)
+        theta, _, _ = listen(SER, mode=MODE)
 
     if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
         print('theta = {:.2f}'.format(theta))
