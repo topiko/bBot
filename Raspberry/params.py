@@ -27,7 +27,7 @@ SIGMA_THETADOTDOT = .2
 SIMUL_LOOP_TIME = 3
 OPM_LOOP_TIME = 5
 try:
-    CTRL_PARAMS_DICT = np.load('ctrl_params.npy').item()
+    CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'kappa_v':1, # D x * kappa = v_target
                         'kappa_tilt_theta':10, # D v * kappa = theta tilt

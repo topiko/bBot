@@ -137,8 +137,8 @@ def balance_loop(ser, run_time_max=10,
         # waiting for the arduino to respond:
         wait_sum += wait
 
-        if i > 5:
-            status = check_status(state_dict)
+        # Check the patric status:
+        status = check_status(state_dict)
 
         if i%n_report == 0:
             if i < n_report*2:
@@ -197,13 +197,19 @@ def optimize_params():
     """
     Optimizes various parameters using some optimization...
     """
-    try:
-        ctrl_params_dict = np.load('ctrl_params.npy').item()
-    except FileNotFoundError:
-        ctrl_params_dict = CTRL_PARAMS_DICT
+    ctrl_params_dict = CTRL_PARAMS_DICT
+    def params_to_dict_(params):
+        ctrl_params_dict['kappa_theta'] = params[0]
+        ctrl_params_dict['gamma_theta'] = params[1]*10
+        return ctrl_params_dict
+    def dict_to_params_():
+        return [ctrl_params_dict['kappa_theta'],
+                ctrl_params_dict['gamma_theta']/10]
 
     def opm_callback_(params): #, opm_state):
         print('Current params: ', params)
+        np.save('ctrl_params.npy', params_to_dict_(params))
+
 
     def get_balance_score_from_params_(params):
         """
@@ -213,7 +219,7 @@ def optimize_params():
             score: balance run score
         """
         ser = simulate_patric(dt=DT)
-        ctrl_params_dict['kappa_theta'] = params[0]
+        ctrl_params_dict = params_to_dict_(params)
         run_array = None
         while run_array is None:
             run_array = run_balancing(ser,
@@ -223,8 +229,10 @@ def optimize_params():
         #plot_dynamics(run_array)
         return score_run(run_array)
 
-    minimize(get_balance_score_from_params_, [1], options={'eps':.1},
-             constraints=[(0, 5)],
+    init_params = dict_to_params_()
+    minimize(get_balance_score_from_params_, init_params,
+             options={'eps':.1},
+             bounds=[(0, 3), (10, 200)],
              method='L-BFGS-B', callback=opm_callback_)
     return
 
