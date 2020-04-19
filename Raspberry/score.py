@@ -2,7 +2,8 @@
 MOdule to handle the performance scoring of Patric.
 """
 
-from scipy.integrate import trapz
+#from scipy.integrate import trapz
+import numpy as np
 
 def score_run(run_array):
     """
@@ -13,5 +14,5 @@ def score_run(run_array):
     target_thetas = run_array[:, 7]
 
     squared_diff = (thetas - target_thetas)**2
-
-    return trapz(squared_diff, times)/(times[-1] - times[0])
+    return (squared_diff[1:]*np.diff(times)).sum()/(times[-1] - times[0])
+    #return trapz(squared_diff, times)/(times[-1] - times[0])

@@ -39,6 +39,36 @@ else:
 REPORT = True
 PRINT_REPORT = False
 
+def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cmd_dict):
+    #    if i < n_report*2:
+    #            reset_location(state_dict)
+    #            cmd_dict['phidot'] = 0/180*PI
+    t_report = time.time()
+    if PRINT_REPORT:
+        print('Freq: ', n_report/(t_report-t_init))
+        print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
+        print('i = ', i)
+        print('theta = ', state_dict['theta'][0])
+        print('target_theta = ', cmd_dict['target_theta'])
+        print('v = ', cmd_dict['v'])
+        print('a = ', state_dict['a'][0])
+        print('a = ', state_dict['a'])
+        print('v = ', state_dict['v'])
+        print('cmd = ', cmd_dict['cmd'])
+        print('x,y = [{:.0f}mm, {:.0f}mm], phi = {:.1f}deg'.format(state_dict['x'][0]*1000,
+                                                                   state_dict['y'][0]*1000,
+                                                                   state_dict['phi'][0]/(2*PI)*360))
+        print('run_time = {:.1f} / {:.0f}'.format(run_time, run_time_max))
+        print()
+        wait_sum = 0
+        t_init = time.time()
+    if i != 0:
+        dt = np.diff(state_dict['times'][::-1]).mean()
+        if not MODE.startswith('simul'):
+            state_dict['dt'] = dt
+
+
+
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
                  state_dict=None,
@@ -140,33 +170,13 @@ def balance_loop(ser, run_time_max=10,
         # Check the patric status:
         status = check_status(state_dict)
 
+        # report
         if i%n_report == 0:
-            if i < n_report*2:
-                reset_location(state_dict)
-                cmd_dict['phidot'] = 0/180*PI
-            t_report = time.time()
-            if PRINT_REPORT:
-                print('Freq: ', n_report/(t_report-t_init))
-                print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
-                print('i = ', i)
-                print('theta = ', state_dict['theta'][0])
-                print('target_theta = ', cmd_dict['target_theta'])
-                print('v = ', cmd_dict['v'])
-                print('a = ', state_dict['a'][0])
-                print('a = ', state_dict['a'])
-                print('v = ', state_dict['v'])
-                print('cmd = ', cmd_dict['cmd'])
-                print('x,y = [{:.0f}mm, {:.0f}mm], phi = {:.1f}deg'.format(state_dict['x'][0]*1000,
-                                                                           state_dict['y'][0]*1000,
-                                                                           state_dict['phi'][0]/(2*PI)*360))
-                print('run_time = {:.1f} / {:.0f}'.format(run_time, run_time_max))
-                print()
-                wait_sum = 0
-                t_init = time.time()
-            if i != 0:
-                dt = np.diff(state_dict['times'][::-1]).mean()
-                if not MODE.startswith('simul'):
-                    state_dict['dt'] = dt
+            report(i, n_report, t_init,
+                   run_time, wait_sum,
+                   run_time_max,
+                   state_dict,
+                   cmd_dict)
 
         if REPORT:
             report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
