@@ -195,6 +195,7 @@ def balance_loop(ser, run_time_max=10,
 
         predict_theta(state_dict, cmd_dict, kl)
         run_time = cur_time - init_time
+        cmd_dict['target_x'] = .1*np.sin(run_time/3*np.pi)
         i += 1
 
     print(status, i)
@@ -242,7 +243,7 @@ def optimize_params():
                                       run_time_max=OPM_LOOP_TIME)
 
         #plot_dynamics(run_array)
-        print(ctrl_params_dict)
+        #print(ctrl_params_dict)
         return score_run(run_array)
 
     init_params = dict_to_params_()
@@ -289,7 +290,7 @@ if __name__ == '__main__':
     else:
         try:
             while True:
-                if run_balancing(SER) is not None:
+                if run_balancing(SER, run_time_max=30) is not None:
                     print('Sleeping')
                     time.sleep(5)
         except KeyboardInterrupt:

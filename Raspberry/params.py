@@ -29,7 +29,7 @@ OPM_LOOP_TIME = 5
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'kappa_v':1, # D x * kappa = v_target
+    CTRL_PARAMS_DICT = {'kappa_v':3, # D x * kappa = v_target
                         'kappa_tilt_theta':10, # D v * kappa = theta tilt
-                        'kappa_theta':4, # D theta = exp(-kappa * t)
-                        'gamma_theta':1000} # D thetadot * gamma = thetadotdot
+                        'kappa_theta':5, # D theta = exp(-kappa * t)
+                        'gamma_theta':2000} # D thetadot * gamma = thetadotdot
