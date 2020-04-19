@@ -228,25 +228,34 @@ def optimize_params():
         Return:
             score: balance run score
         """
-        ser = simulate_patric(dt=DT)
+        if MODE.startswith('simul'):
+            ser = simulate_patric(dt=DT)
+        else:
+            ser = SER
+
         ctrl_params_dict = params_to_dict_(params)
         run_array = None
-        while run_array is None:
+        status = 'upright'
+        while (run_array is None) and (status != 'fell'):
             run_array = run_balancing(ser,
                                       ctrl_params_dict=ctrl_params_dict,
                                       run_time_max=OPM_LOOP_TIME)
 
         #plot_dynamics(run_array)
+        print(ctrl_params_dict)
         return score_run(run_array)
 
     init_params = dict_to_params_()
     minimize(get_balance_score_from_params_, init_params,
              options={'eps':.1},
-             bounds=[(0, 3), (10, 200)],
+             bounds=[(0, 5), (10, 500)],
              method='L-BFGS-B', callback=opm_callback_)
     return
 
-def run_balancing(ser, ctrl_params_dict=None, run_time_max=10):
+def run_balancing(ser,
+                  ctrl_params_dict=None,
+                  run_time_max=10,
+                  max_diff_theta=5):
     """
     Starts the balancing whenever robot is
     at UPRIGHT angle.
@@ -259,14 +268,15 @@ def run_balancing(ser, ctrl_params_dict=None, run_time_max=10):
 
     if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
         print('theta = {:.2f}'.format(theta))
-    if abs(theta - UPRIGHT_THETA) < 1:
+    if abs(theta - UPRIGHT_THETA) < max_diff_theta:
         print('Run Loop')
-        run_data = balance_loop(ser,
-                                run_time_max=run_time_max,
-                                ctrl_params_dict=ctrl_params_dict)[0]
+        run_data, _, status = balance_loop(ser,
+                                    run_time_max=run_time_max,
+                                    ctrl_params_dict=ctrl_params_dict)[:3]
         np.save('orient.npy', run_data)
         disable_all(SER, {'mode':MODE})
-        return run_data
+        if status != 'fell':
+            return run_data
     return None
 
 if __name__ == '__main__':
