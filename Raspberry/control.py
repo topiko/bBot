@@ -1,4 +1,6 @@
-# This is the control packag
+"""
+This is the control packag
+"""
 import numpy as np
 #from simple_pid import PID
 from state import update_array
@@ -45,15 +47,25 @@ def get_target_v(state_dict, cmd_dict, ctrl_params_dict):
     delta_x = state_dict['x'][0] - cmd_dict['target_x']
     target_v = - delta_x * kappa
 
-    return np.clip(target_v, -1, 1)
+    return target_v
 
 def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     """
-    Updates the target theta based on current velocity or somethign..
+    Updates the target theta based on current velocity.
+    If velocity is too low, we tilt forward from the steady pos.
+    Delta v = v - target_v
+    Again Delta v = exp(-kappa_til_theta*t) --> d (Delta v) / dt = -kappa_... * Delta v
+    => a = -kappa... * Delta v
+    Thetadotdot == 0, see modelpatric
+    a = GRAVITY_ACCEL*tan(theta_target - UPRIGHT_THETA)
+    => arctan(a/GRAVITY_ACCEL) = theta_target - UPRIGHT_THETA
+    => arctan(-kappa... * Delta v / GRAVITY_ACCEL) =: tilt_theta
     """
     kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
-    tilt_theta = -(state_dict['v'][0] - cmd_dict['target_v']) * kappa_tilt_theta #TILT_MLTP
-    return UPRIGHT_THETA + tilt_theta
+    delta_v = state_dict['v'][0] - cmd_dict['target_v']
+    tilt_theta = np.arctan(-delta_v / GRAVITY_ACCEL * kappa_tilt_theta) #TILT_MLTP
+    return UPRIGHT_THETA + tilt_theta/PI*180
+
 
 def deg_to_rad(degs):
     return degs/180*np.pi
@@ -120,15 +132,14 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
     """
     React to the current state by updating the cmd_dictionary.
     """
-    theta = state_dict['theta'][0]
     v_now = state_dict['v'][0]
     cmd_dict['target_v'] = get_target_v(state_dict, cmd_dict, ctrl_params_dict)
     cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict, ctrl_params_dict)
-    state_dict['target_theta'] = update_array(state_dict['target_theta'],
-                                              cmd_dict['target_theta'])
-
-    # TODO: FIX better function for a
-    accel = get_a_01(state_dict, cmd_dict)
+    state_dict['target_theta'] = update_array(state_dict['target_theta'], cmd_dict['target_theta'])
+    state_dict['target_x'] = update_array(state_dict['target_x'], cmd_dict['target_x'])
+    state_dict['target_y'] = update_array(state_dict['target_y'], cmd_dict['target_y'])
+    state_dict['target_v'] = update_array(state_dict['target_v'], cmd_dict['target_v'])
+    #  accel = get_a_01(state_dict, cmd_dict)
     accel = get_a_02(state_dict, cmd_dict, ctrl_params_dict)
 
     cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
