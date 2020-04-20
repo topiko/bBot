@@ -8,13 +8,14 @@ import numpy as np
 from communication import talk, listen, \
         enable_legs, disable_all, initialize_state_dict
 from state import update_state, predict_theta, \
-        check_status, update_array, \
+        check_status, \
         update_cmd_vars, reset_location
 from control import react
-from params import UPRIGHT_THETA, PI, DT, CTRL_PARAMS_DICT, OPM_LOOP_TIME
+from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, OPM_LOOP_TIME
 from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize
+from report import report, store
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -36,38 +37,8 @@ else:
         timeout=.001
     )
 
-REPORT = True
+STORE_RUN = True
 PRINT_REPORT = False
-
-def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cmd_dict):
-    #    if i < n_report*2:
-    #            reset_location(state_dict)
-    #            cmd_dict['phidot'] = 0/180*PI
-    t_report = time.time()
-    if PRINT_REPORT:
-        print('Freq: ', n_report/(t_report-t_init))
-        print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
-        print('i = ', i)
-        print('theta = ', state_dict['theta'][0])
-        print('target_theta = ', cmd_dict['target_theta'])
-        print('v = ', cmd_dict['v'])
-        print('a = ', state_dict['a'][0])
-        print('a = ', state_dict['a'])
-        print('v = ', state_dict['v'])
-        print('cmd = ', cmd_dict['cmd'])
-        print('x,y = [{:.0f}mm, {:.0f}mm], phi = {:.1f}deg'.format(state_dict['x'][0]*1000,
-                                                                   state_dict['y'][0]*1000,
-                                                                   state_dict['phi'][0]/(2*PI)*360))
-        print('run_time = {:.1f} / {:.0f}'.format(run_time, run_time_max))
-        print()
-        wait_sum = 0
-        t_init = time.time()
-    if i != 0:
-        dt = np.diff(state_dict['times'][::-1]).mean()
-        if not MODE.startswith('simul'):
-            state_dict['dt'] = dt
-
-
 
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
@@ -80,7 +51,6 @@ def balance_loop(ser, run_time_max=10,
     i = 0
     wait_sum = 0
     n_report = 1 if MODE.startswith('simul') else 500
-    dt = DT if MODE.startswith('simul') else 0.016 ##.01
     t_init = 0
     status = 'upright'
     imax = 10000
@@ -112,6 +82,9 @@ def balance_loop(ser, run_time_max=10,
                       'thetadot_predict':0,
                       'target_theta':np.zeros(3),
                       'target_thetadot':np.zeros(3),
+                      'target_x':np.zeros(3),
+                      'target_y':np.zeros(3),
+                      'target_v':np.zeros(3),
                       'run_l': np.zeros(3),
                       'abs_run_l': np.zeros(3),
                       'v':np.zeros(3),
@@ -120,7 +93,7 @@ def balance_loop(ser, run_time_max=10,
                       'phidot':np.zeros(3),
                       'x':np.zeros(3),
                       'y':np.zeros(3),
-                      'dt':dt,
+                      'dt':DT,
                       'mode':MODE}
 
         initialize_state_dict(ser, state_dict)
@@ -128,17 +101,17 @@ def balance_loop(ser, run_time_max=10,
     if ctrl_params_dict is None:
         ctrl_params_dict = CTRL_PARAMS_DICT
 
-    # Report dict is for debugging and performance evaluation
-    report_dict = {'predict_times':np.zeros(3),
-                   'predict_thetas':np.zeros(3)}
-
     # store state:
-    store_arr = np.zeros((imax, 16))
+    if STORE_RUN:
+        # Report dict is for debugging and performance evaluation
+        report_dict = {'predict_times':np.zeros(3),
+                       'predict_thetas':np.zeros(3)}
+        store_arr = np.zeros((imax, 19))
 
     # Request the Kalman filter:
     if kl is None:
         kl = get_patric_kalman(np.array([state_dict['theta'][1],
-                                         state_dict['thetadot'][1]]), dt)
+                                         state_dict['thetadot'][1]]), DT)
 
     # enable the legs:
     enable_legs(ser, MODE)
@@ -161,7 +134,7 @@ def balance_loop(ser, run_time_max=10,
         theta, cur_time, wait = listen(ser, mode=MODE)
 
         # Update the state of the system with the input from serial:
-        update_state(state_dict, kl, theta, cur_time, dt)
+        update_state(state_dict, kl, theta, cur_time)
 
         # To see how much time has been spent
         # waiting for the arduino to respond:
@@ -171,34 +144,29 @@ def balance_loop(ser, run_time_max=10,
         status = check_status(state_dict)
 
         # report
-        if i%n_report == 0:
+        if PRINT_REPORT and (i%n_report == 0):
             report(i, n_report, t_init,
                    run_time, wait_sum,
                    run_time_max,
                    state_dict,
                    cmd_dict)
+        # store
+        if STORE_RUN:
+            store(i, store_arr, report_dict, state_dict)
 
-        if REPORT:
-            report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
-                                                         state_dict['theta_predict'])
-            report_dict['predict_times'] = update_array(report_dict['predict_times'],
-                                                        state_dict['times'][1] + dt)
-            for j, key in enumerate(['times', 'theta',
-                                     'thetadot', 'thetadotdot',
-                                     'theta_measured', 'thetadot_measured',
-                                     'thetadotdot_measured',
-                                     'target_theta', 'target_thetadot',
-                                     'v', 'a', 'x', 'y', 'phi']):
-                store_arr[i, j] = state_dict[key][1]
-            store_arr[i, j+1] = report_dict['predict_times'][1]
-            store_arr[i, j+2] = report_dict['predict_thetas'][1]
-
+        # Predict the theta and thetadot at next time instance
         predict_theta(state_dict, cmd_dict, kl)
+
+        # Extract current runtime
         run_time = cur_time - init_time
+
+        # Quick test of location updates
         cmd_dict['target_x'] = .1*np.sin(run_time/3*np.pi)
+
+        # Update i
         i += 1
 
-    print(status, i)
+    print(status, i, run_time)
     disable_all(ser, state_dict)
 
     return store_arr[3:i], ser, status, cmd_dict, state_dict, kl
@@ -212,15 +180,27 @@ def optimize_params():
     def params_to_dict_(params):
         ctrl_params_dict['kappa_theta'] = params[0]
         ctrl_params_dict['gamma_theta'] = params[1]*10
+        ctrl_params_dict['kappa_tilt_theta'] = params[2]
+        ctrl_params_dict['kappa_v'] = params[3]
+
         return ctrl_params_dict
     def dict_to_params_():
         return [ctrl_params_dict['kappa_theta'],
-                ctrl_params_dict['gamma_theta']/10]
+                ctrl_params_dict['gamma_theta']/10,
+                ctrl_params_dict['kappa_tilt_theta'],
+                ctrl_params_dict['kappa_v']]
 
     def opm_callback_(params): #, opm_state):
         print('Current params: ', params)
         np.save('ctrl_params.npy', params_to_dict_(params))
+        if MODE.startswith('simul'):
+            ser = simulate_patric(dt=DT)
+            run_array = run_balancing(ser,
+                                      ctrl_params_dict=params_to_dict_(params),
+                                      run_time_max=10)
 
+
+            plot_dynamics(run_array)
 
     def get_balance_score_from_params_(params):
         """
@@ -242,14 +222,13 @@ def optimize_params():
                                       ctrl_params_dict=ctrl_params_dict,
                                       run_time_max=OPM_LOOP_TIME)
 
-        #plot_dynamics(run_array)
         #print(ctrl_params_dict)
         return score_run(run_array)
 
     init_params = dict_to_params_()
     minimize(get_balance_score_from_params_, init_params,
              options={'eps':.1},
-             bounds=[(0, 5), (10, 500)],
+             bounds=[(0, 3), (10, 300), (0, 500), (0, 5)],
              method='L-BFGS-B', callback=opm_callback_)
     return
 
@@ -272,8 +251,8 @@ def run_balancing(ser,
     if abs(theta - UPRIGHT_THETA) < max_diff_theta:
         print('Run Loop')
         run_data, _, status = balance_loop(ser,
-                                    run_time_max=run_time_max,
-                                    ctrl_params_dict=ctrl_params_dict)[:3]
+                                           run_time_max=run_time_max,
+                                           ctrl_params_dict=ctrl_params_dict)[:3]
         np.save('orient.npy', run_data)
         disable_all(SER, {'mode':MODE})
         if status != 'fell':

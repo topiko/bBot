@@ -93,7 +93,7 @@ def get_second_deriv(times, values):
     return ((values[0] - values[1])/dt1 \
             - (values[1] - values[2])/dt2) / (dt1/2 + dt2/2)
 
-def update_state(state_dict, kl, theta, cur_time, dt):
+def update_state(state_dict, kl, theta, cur_time):
 
     times = state_dict['times']
     state_dict['times'] = update_array(times, cur_time)
@@ -125,7 +125,7 @@ def update_state(state_dict, kl, theta, cur_time, dt):
     # Update the theta array
     state_dict['theta'] = update_array(state_dict['theta'], theta)
     state_dict['thetadot'] = update_array(state_dict['thetadot'], thetadot)
-    state_dict['time_next'] = cur_time + dt
+    state_dict['time_next'] = cur_time + state_dict['dt']
 
     #for key in ['v', 'phidot']:
     #    # The command is one time step ahead

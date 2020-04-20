@@ -1,4 +1,6 @@
-"""Various physical parameters"""
+"""
+Various physical parameters
+"""
 import numpy as np
 
 UPRIGHT_THETA = 15.2
@@ -24,12 +26,12 @@ SIGMA_THETA = .02**2 # .015**2
 SIGMA_THETADOTDOT = .2
 
 
-SIMUL_LOOP_TIME = 3
+SIMUL_LOOP_TIME = 30
 OPM_LOOP_TIME = 5
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'kappa_v':3, # D x * kappa = v_target
-                        'kappa_tilt_theta':10, # D v * kappa = theta tilt
-                        'kappa_theta':5, # D theta = exp(-kappa * t)
+    CTRL_PARAMS_DICT = {'kappa_v':1, # D x * kappa = v_target
+                        'kappa_tilt_theta':GRAVITY_ACCEL, #1000, # D v * kappa = theta tilt
+                        'kappa_theta':3, # D theta = exp(-kappa * t)
                         'gamma_theta':2000} # D thetadot * gamma = thetadotdot
