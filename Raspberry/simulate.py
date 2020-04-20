@@ -69,9 +69,11 @@ def plot_dynamics(run_data): #, theta_test):
     thetadotdots = run_data[:, 3]
     target_thetas = run_data[:, 7]
     target_thetadot = run_data[:, 8]
-    xpos = run_data[:, 11]
-    vel = run_data[:, 9]
-    accel = run_data[:, 10]
+    target_x = run_data[:, 9]
+    target_v = run_data[:, 11]
+    xpos = run_data[:, 14]
+    vel = run_data[:, 12]
+    accel = run_data[:, 13]
 
     figh = 4
     figw = 10
@@ -96,6 +98,13 @@ def plot_dynamics(run_data): #, theta_test):
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
 
+    axarr[3].plot(times, target_x, label='target')
+    axarr[3].legend()
+
+    axarr[4].plot(times, target_v, label='target')
+    axarr[4].legend()
+
+
     plt.tight_layout()
     plt.show()
 
@@ -111,7 +120,7 @@ def display_simulation(ser, balance_loop):
     while True:
         run_array, ser, status, cmd_dict, state_dict, kl \
                 = balance_loop(ser,
-                               run_time_max=SIMUL_LOOP_TIME*(i+1),
+                               run_time_max=SIMUL_LOOP_TIME, #*(i+1),
                                cmd_dict=cmd_dict,
                                state_dict=state_dict,
                                kl=kl)
