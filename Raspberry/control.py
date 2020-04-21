@@ -56,14 +56,31 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     Delta v = v - target_v
     Again Delta v = exp(-kappa_til_theta*t) --> d (Delta v) / dt = -kappa_... * Delta v
     => a = -kappa... * Delta v
+    a should be from model a = kappa**2 * Delta x
     Thetadotdot == 0, see modelpatric
     a = GRAVITY_ACCEL*tan(theta_target - UPRIGHT_THETA)
     => arctan(a/GRAVITY_ACCEL) = theta_target - UPRIGHT_THETA
     => arctan(-kappa... * Delta v / GRAVITY_ACCEL) =: tilt_theta
     """
     kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
+    kappa_v = ctrl_params_dict['kappa_v']
+    kappa_v2 = ctrl_params_dict['kappa_v2']
+    delta_x = state_dict['x'][0] - cmd_dict['target_x']
     delta_v = state_dict['v'][0] - cmd_dict['target_v']
-    tilt_theta = np.arctan(-delta_v / GRAVITY_ACCEL * kappa_tilt_theta) #TILT_MLTP
+
+    update_v_a = -kappa_v * delta_v
+    a_model = kappa_v**2 * delta_x
+
+    #use_a = a_model * np.sign(delta_x) - delta_v * kappa_v2
+    #if abs(delta_v) < .1:
+    #    use_a = a_model
+    #else:
+
+    use_a = update_v_a
+    #use_a = a_model * (1 - 10*delta_x) + update_v_a * (10*delta_x)
+    tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
+    #tilt_theta = np.arctan(-delta_v / GRAVITY_ACCEL * kappa_v) #tilt_theta) #TILT_MLTP
+
     return UPRIGHT_THETA + tilt_theta/PI*180
 
 

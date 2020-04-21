@@ -32,6 +32,7 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'kappa_v':1, # D x * kappa = v_target
+                        'kappa_v2':1,
                         'kappa_tilt_theta':GRAVITY_ACCEL, #1000, # D v * kappa = theta tilt
                         'kappa_theta':3, # D theta = exp(-kappa * t)
                         'gamma_theta':2000} # D thetadot * gamma = thetadotdot
