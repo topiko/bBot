@@ -43,15 +43,15 @@ theta_measured = orient_arr[ndiscard:, 4]
 thetadot_measured = orient_arr[ndiscard:, 5]
 thetadotdot_measured = orient_arr[ndiscard:, 6]
 
-times_pred = orient_arr[ndiscard:, 14]
+times_pred = orient_arr[ndiscard:, 17]
 times_pred -= times_pred.min()
-theta_pred = orient_arr[ndiscard:, 15]
+theta_pred = orient_arr[ndiscard:, 18]
 
-x = orient_arr[ndiscard:, 11]
-y = orient_arr[ndiscard:, 12]
+x = orient_arr[ndiscard:, 14]
+y = orient_arr[ndiscard:, 15]
 
-v = orient_arr[ndiscard:, 9]
-a = orient_arr[ndiscard:, 10]
+v = orient_arr[ndiscard:, 12]
+a = orient_arr[ndiscard:, 13]
 
 
 def func(t, a, b, c):

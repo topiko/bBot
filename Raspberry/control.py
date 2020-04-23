@@ -62,24 +62,24 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     => arctan(a/GRAVITY_ACCEL) = theta_target - UPRIGHT_THETA
     => arctan(-kappa... * Delta v / GRAVITY_ACCEL) =: tilt_theta
     """
-    kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
+    #kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
     kappa_v = ctrl_params_dict['kappa_v']
     kappa_v2 = ctrl_params_dict['kappa_v2']
     delta_x = state_dict['x'][0] - cmd_dict['target_x']
-    delta_v = state_dict['v'][0] - cmd_dict['target_v']
+
+    target_v = cmd_dict['target_v']
+    x_correction_v = - kappa_v2 * delta_x
+    target_v_mod = target_v + x_correction_v
+
+    delta_v = state_dict['v'][0] - target_v_mod
 
     update_v_a = -kappa_v * delta_v
-    a_model = kappa_v**2 * delta_x
-
-    #use_a = a_model * np.sign(delta_x) - delta_v * kappa_v2
-    #if abs(delta_v) < .1:
-    #    use_a = a_model
-    #else:
+    #a_model = kappa_v**2 * delta_x
 
     use_a = update_v_a
-    #use_a = a_model * (1 - 10*delta_x) + update_v_a * (10*delta_x)
-    tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
-    #tilt_theta = np.arctan(-delta_v / GRAVITY_ACCEL * kappa_v) #tilt_theta) #TILT_MLTP
+    # tilt_theta1 = np.arctan(use_a / GRAVITY_ACCEL)
+    thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
+    tilt_theta = (thetadotdot_rad + use_a * ALPHA) / (ALPHA * GRAVITY_ACCEL)
 
     return UPRIGHT_THETA + tilt_theta/PI*180
 
@@ -150,7 +150,7 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
     React to the current state by updating the cmd_dictionary.
     """
     v_now = state_dict['v'][0]
-    cmd_dict['target_v'] = get_target_v(state_dict, cmd_dict, ctrl_params_dict)
+    #cmd_dict['target_v'] = get_target_v(state_dict, cmd_dict, ctrl_params_dict)
     cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict, ctrl_params_dict)
     state_dict['target_theta'] = update_array(state_dict['target_theta'], cmd_dict['target_theta'])
     state_dict['target_x'] = update_array(state_dict['target_x'], cmd_dict['target_x'])

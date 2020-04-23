@@ -161,7 +161,8 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_x'] = .1*np.sin(run_time/3*np.pi)
+        cmd_dict['target_x'] = .1*np.sin( run_time / 3 * np.pi)
+        cmd_dict['target_v'] = .1 / 3 *np.pi * np.cos( run_time / 3 * np.pi)
 
         # Update i
         i += 1
