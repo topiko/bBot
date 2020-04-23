@@ -38,7 +38,7 @@ else:
     )
 
 STORE_RUN = True
-PRINT_REPORT = False
+PRINT_REPORT = True #False
 
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
@@ -50,7 +50,7 @@ def balance_loop(ser, run_time_max=10,
     """
     i = 0
     wait_sum = 0
-    n_report = 1 if MODE.startswith('simul') else 500
+    n_report = 1 if MODE.startswith('simul') else 200
     t_init = 0
     status = 'upright'
     imax = 10000
@@ -161,8 +161,10 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_x'] = .1*np.sin( run_time / 3 * np.pi)
-        cmd_dict['target_v'] = .1 / 3 *np.pi * np.cos( run_time / 3 * np.pi)
+        period = 2
+        #if run_time > period:
+        #    cmd_dict['target_x'] = .1*np.sin( run_time / period * np.pi)
+        #    cmd_dict['target_v'] = .1 / period *np.pi * np.cos( run_time / period * np.pi)
 
         # Update i
         i += 1
@@ -270,7 +272,7 @@ if __name__ == '__main__':
     else:
         try:
             while True:
-                if run_balancing(SER, run_time_max=30) is not None:
+                if run_balancing(SER, run_time_max=60) is not None:
                     print('Sleeping')
                     time.sleep(5)
         except KeyboardInterrupt:

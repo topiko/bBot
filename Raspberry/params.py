@@ -17,7 +17,7 @@ DT = .016
 #A_MLTP2 = 0.010 #30.5
 
 # Dyn params
-ALPHA = 321 #422 #736
+ALPHA = 400 #736
 
 GRAVITY_ACCEL = 9.81
 
@@ -26,12 +26,12 @@ SIGMA_THETA = .02**2 # .015**2
 SIGMA_THETADOTDOT = .2
 
 
-SIMUL_LOOP_TIME = 30
+SIMUL_LOOP_TIME = 60
 OPM_LOOP_TIME = 5
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'kappa_v':4, # D x * kappa = v_target
+    CTRL_PARAMS_DICT = {'kappa_v':5, # D x * kappa = v_target
                         'kappa_v2':2,
                         'kappa_tilt_theta':.2*GRAVITY_ACCEL, #1000, # D v * kappa = theta tilt
                         'kappa_theta':3, # D theta = exp(-kappa * t)
