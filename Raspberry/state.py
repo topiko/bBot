@@ -10,7 +10,8 @@ def check_status(state_dict):
 
     if ((theta - UPRIGHT_THETA) < -30) or (30 < (theta-UPRIGHT_THETA)):
         print('FELL: {}'.format(theta-UPRIGHT_THETA))
-        print(state_dict)
+        for key, val in state_dict.items():
+            print(key, val)
         return 'fell'
     else:
         return 'upright'
@@ -183,7 +184,7 @@ def predict_theta(state_dict, cmd_dict, kl):
     theta = state_dict['theta'][0]
     accel = cmd_dict['a']
     thetadotdot = get_thetadotdot(theta, accel)
-
+    print('thetadotdot kalman = ', thetadotdot)
     state_dict['theta_predict'], state_dict['thetadot_predict'] \
             = kl.predict(control_input=thetadotdot) #control_input=get_thetadotdot(theta, accel))
 

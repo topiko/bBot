@@ -26,13 +26,13 @@ SIGMA_THETA = .02**2 # .015**2
 SIGMA_THETADOTDOT = .2
 
 
-SIMUL_LOOP_TIME = 60
+SIMUL_LOOP_TIME = 20
 OPM_LOOP_TIME = 5
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'kappa_v':5, # D x * kappa = v_target
-                        'kappa_v2':2,
+    CTRL_PARAMS_DICT = {'kappa_v':5, # 5 D x * kappa = v_target
+                        'kappa_v2':2, #2
                         'kappa_tilt_theta':.2*GRAVITY_ACCEL, #1000, # D v * kappa = theta tilt
                         'kappa_theta':3, # D theta = exp(-kappa * t)
                         'gamma_theta':2000} # D thetadot * gamma = thetadotdot

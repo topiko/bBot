@@ -25,7 +25,7 @@ class simulate_patric():
         self.dt = dt
         self.noise = True #False #True #False
         self.theta_noisy = self.theta
-        self.record_theta = np.zeros((int(SIMUL_LOOP_TIME//self.dt)+3, 4))
+        #self.record_theta = np.zeros((int(SIMUL_LOOP_TIME//self.dt)+3, 4))
         self.idx = 0
 
     def reset_idx(self):
@@ -36,7 +36,6 @@ class simulate_patric():
         Propagate the dynamics by amount dt
         """
         accel = cmd_dict['a']
-        self.dt = state_dict['dt']
         def theta_derivs(t, theta_vec):
             theta = theta_vec[0]
             thetadot = theta_vec[1]
@@ -58,8 +57,6 @@ class simulate_patric():
         self.thetadot = thetadots[-1]
         self.time += self.dt
 
-        #self.record_theta[self.idx] = [self.time, self.theta, self.thetadot, get_thetadotdot(self.theta, accel)]
-        #self.idx += 1
 
 def plot_dynamics(run_data): #, theta_test):
 
@@ -116,7 +113,6 @@ def display_simulation(ser, balance_loop):
     cmd_dict = None
     state_dict = None
     kl = None
-    dt = .01
     while True:
         run_array, ser, status, cmd_dict, state_dict, kl \
                 = balance_loop(ser,

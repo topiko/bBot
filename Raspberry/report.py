@@ -15,6 +15,7 @@ def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cm
     print('Freq: ', n_report/(t_report-t_init))
     print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
     print('i = ', i)
+    print('diff times = ', np.diff(state_dict['times']))
     print('theta = ', state_dict['theta'][0])
     print('target_theta = ', cmd_dict['target_theta'])
     print('v = ', cmd_dict['v'])
@@ -29,6 +30,7 @@ def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cm
     print()
     wait_sum = 0
     t_init = time.time()
+    print('times', state_dict['times'])
     state_dict['dt'] = np.diff(state_dict['times'][::-1]).mean()
 
 def store(i, store_arr, report_dict, state_dict):

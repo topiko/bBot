@@ -71,6 +71,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     x_correction_v = - kappa_v2 * delta_x
     target_v_mod = target_v + x_correction_v
 
+    #TODO: Thinkf about why would one have the kappas like this?
     delta_v = state_dict['v'][0] - target_v_mod
 
     update_v_a = -kappa_v * delta_v
@@ -78,8 +79,8 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
 
     use_a = update_v_a
     # tilt_theta1 = np.arctan(use_a / GRAVITY_ACCEL)
-    thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
-    tilt_theta = (thetadotdot_rad + use_a * ALPHA) / (ALPHA * GRAVITY_ACCEL)
+    #thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
+    tilt_theta = np.arctan( use_a / GRAVITY_ACCEL )
 
     return UPRIGHT_THETA + tilt_theta/PI*180
 

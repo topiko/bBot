@@ -88,20 +88,24 @@ def initialize_state_dict(ser, state_dict):
     Initialize the state dict arrays.
     """
     if state_dict['mode'].startswith('simul'):
-        state_dict['theta'][:] = ser.theta_noisy
-        state_dict['thetadot'][:] = ser.thetadot
-        state_dict['times'][:] = np.array([0, ser.dt, ser.dt*2])
-        state_dict['time_next'] = ser.dt*3
+        for i in range(len(state_dict['times'])):
+            ser.run(state_dict, {'a':0})
+            state_dict['theta'][-i-1] = ser.theta
+            state_dict['thetadot'][-i-1] = ser.thetadot
+            state_dict['times'][-i-1] = ser.time
+        state_dict['time_next'] = ser.time + state_dict['dt'] #ser.dt*3
     else:
         for i in range(len(state_dict['times'])):
             talk(ser, state_dict, {'cmd': [0, 0, 0]})
-            theta, t, _ = listen(ser, mode=state_dict['mode'])
-            state_dict['times'][-i] = t
-            state_dict['theta'][-i] = theta
-        state_dict['time_next'] = t + state_dict['dt'] #.016
+            theta, cur_time, _ = listen(ser, mode=state_dict['mode'])
+            state_dict['times'][-i-1] = cur_time
+            state_dict['theta'][-i-1] = theta
+        state_dict['time_next'] = cur_time + state_dict['dt'] #.016
 
 def disable_all(ser, state_dict):
-
+    """
+    Disable all msucles.
+    """
     if state_dict['mode'].startswith('simul'):
         return
     talk(ser, state_dict, {'cmd': [0, 0, 0]})
