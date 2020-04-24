@@ -39,6 +39,7 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
+AMPLITUDE = .1
 
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
@@ -91,7 +92,7 @@ def balance_loop(ser, run_time_max=10,
                       'a':np.zeros(3),
                       'phi':np.zeros(3),
                       'phidot':np.zeros(3),
-                      'x':np.zeros(3),
+                      'x':np.ones(3)*AMPLITUDE,
                       'y':np.zeros(3),
                       'dt':DT,
                       'mode':MODE}
@@ -131,11 +132,10 @@ def balance_loop(ser, run_time_max=10,
 
         # Listen to serial as a response to above talk:
         theta, cur_time, wait = listen(ser, mode=MODE)
-        print('THETA!!', theta)
+
         # Update the state of the system with the input from serial:
         update_state(state_dict, kl, theta, cur_time)
 
-        print(state_dict['theta'])
         # To see how much time has been spent
         # waiting for the arduino to respond:
         wait_sum += wait
@@ -161,11 +161,13 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        period = 2
-        #if run_time > period:
-        cmd_dict['target_x'] = .1*np.sin( run_time / period * np.pi)
-        cmd_dict['target_v'] = .1 / period *np.pi * np.cos( run_time / period * np.pi)
-
+        period = 4
+        if run_time > period:
+            cmd_dict['target_x'] = AMPLITUDE * np.cos( run_time / period * 2 * np.pi)
+            cmd_dict['target_v'] = -AMPLITUDE / period * 2 * np.pi \
+                    * np.sin( run_time / period * 2 * np.pi)
+        else:
+            print('STEDY')
         # Update i
         i += 1
 
