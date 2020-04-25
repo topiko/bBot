@@ -17,8 +17,8 @@ def score_run(run_array):
 
     tot_time = times[-1] - times[0]
     score = 0
-    for vals, target_vals in [(thetas, target_thetas)]: #,
-#                              (x, target_x)]:
+    for vals, target_vals in [#(thetas, target_thetas),
+                              (x, target_x)]:
         squared_diff = (vals - target_vals)**2
         score += trapz(squared_diff, times)/tot_time
 

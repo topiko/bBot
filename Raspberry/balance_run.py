@@ -16,6 +16,7 @@ from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize
 from report import report, store
+from goto import get_x_v_a
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -40,6 +41,7 @@ else:
 STORE_RUN = True
 PRINT_REPORT = True #False
 AMPLITUDE = .1
+N_REPORT = 1 if MODE.startswith('simulate') else 2000000
 
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
@@ -51,7 +53,6 @@ def balance_loop(ser, run_time_max=10,
     """
     i = 0
     wait_sum = 0
-    n_report = 1 if MODE.startswith('simul') else 200
     t_init = 0
     status = 'upright'
     imax = 10000
@@ -63,9 +64,11 @@ def balance_loop(ser, run_time_max=10,
                     'a':0,
                     'phidot':0,
                     'target_theta':UPRIGHT_THETA,
+                    'target_l':0,
                     'target_x':0,
                     'target_y':0,
                     'target_v':0,
+                    'target_a':0,
                     'target_R':np.zeros(2),
                     'cmd':[0, 0, 0]}
 
@@ -83,9 +86,11 @@ def balance_loop(ser, run_time_max=10,
                       'thetadot_predict':0,
                       'target_theta':np.zeros(3),
                       'target_thetadot':np.zeros(3),
+                      'target_l':np.zeros(3),
                       'target_x':np.zeros(3),
                       'target_y':np.zeros(3),
                       'target_v':np.zeros(3),
+                      'target_a':np.zeros(3),
                       'run_l': np.zeros(3),
                       'abs_run_l': np.zeros(3),
                       'v':np.zeros(3),
@@ -144,8 +149,8 @@ def balance_loop(ser, run_time_max=10,
         status = check_status(state_dict)
 
         # report
-        if PRINT_REPORT and (i%n_report == 0):
-            report(i, n_report, t_init,
+        if PRINT_REPORT and (i%N_REPORT == 0):
+            report(i, N_REPORT, t_init,
                    run_time, wait_sum,
                    run_time_max,
                    state_dict,
@@ -161,13 +166,8 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        period = 4
-        if run_time > period:
-            cmd_dict['target_x'] = AMPLITUDE * np.cos( run_time / period * 2 * np.pi)
-            cmd_dict['target_v'] = -AMPLITUDE / period * 2 * np.pi \
-                    * np.sin( run_time / period * 2 * np.pi)
-        else:
-            print('STEDY')
+        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] = get_x_v_a(run_time)
+
         # Update i
         i += 1
 
@@ -183,20 +183,15 @@ def optimize_params():
     """
     ctrl_params_dict = CTRL_PARAMS_DICT
     def params_to_dict_(params):
-        ctrl_params_dict['kappa_theta'] = params[0]
-        ctrl_params_dict['gamma_theta'] = params[1]*10
-        ctrl_params_dict['kappa_tilt_theta'] = params[2]
-        ctrl_params_dict['kappa_v'] = params[3]
+        ctrl_params_dict['kappa_v'] = params[0]
+        ctrl_params_dict['kappa_v2'] = params[1]
 
         return ctrl_params_dict
     def dict_to_params_():
-        return [ctrl_params_dict['kappa_theta'],
-                ctrl_params_dict['gamma_theta']/10,
-                ctrl_params_dict['kappa_tilt_theta'],
-                ctrl_params_dict['kappa_v']]
+        return [ctrl_params_dict['kappa_v'],
+                ctrl_params_dict['kappa_v2']]
 
     def opm_callback_(params): #, opm_state):
-        print('Current params: ', params)
         np.save('ctrl_params.npy', params_to_dict_(params))
         if MODE.startswith('simul'):
             ser = simulate_patric(dt=DT)
@@ -206,6 +201,8 @@ def optimize_params():
 
 
             plot_dynamics(run_array)
+
+        print('Current params: ', params)
 
     def get_balance_score_from_params_(params):
         """
@@ -231,10 +228,12 @@ def optimize_params():
         return score_run(run_array)
 
     init_params = dict_to_params_()
-    minimize(get_balance_score_from_params_, init_params,
-             options={'eps':.1},
-             bounds=[(0, 3), (10, 300), (0, 500), (0, 5)],
-             method='L-BFGS-B', callback=opm_callback_)
+    res = minimize(get_balance_score_from_params_, init_params,
+                   options={'eps':.1},
+                   bounds=[(0, 15), (0, 5)],
+                   method='L-BFGS-B', callback=opm_callback_)
+
+    print(res)
     return
 
 def run_balancing(ser,
