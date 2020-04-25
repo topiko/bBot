@@ -40,7 +40,7 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
-AMPLITUDE = .05
+AMPLITUDE = .10
 N_REPORT = 1 if MODE.startswith('simulate') else 200
 if MODE == 'simuloptimize':
     PRINT_REPORT = False
