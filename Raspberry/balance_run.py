@@ -40,8 +40,10 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
-AMPLITUDE = .1
-N_REPORT = 1 if MODE.startswith('simulate') else 2000000
+AMPLITUDE = .05
+N_REPORT = 1 if MODE.startswith('simulate') else 200
+if MODE == 'simuloptimize':
+    PRINT_REPORT = False
 
 def balance_loop(ser, run_time_max=10,
                  cmd_dict=None,
@@ -166,12 +168,12 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] = get_x_v_a(run_time)
+        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] = get_x_v_a(run_time, AMPLITUDE)
 
         # Update i
         i += 1
 
-    print(status, i, run_time)
+    print(status)
     disable_all(ser, state_dict)
 
     return store_arr[3:i], ser, status, cmd_dict, state_dict, kl
@@ -185,11 +187,15 @@ def optimize_params():
     def params_to_dict_(params):
         ctrl_params_dict['kappa_v'] = params[0]
         ctrl_params_dict['kappa_v2'] = params[1]
+        ctrl_params_dict['kappa_theta'] = params[2]
+        ctrl_params_dict['gamma_theta'] = params[3]*10
 
         return ctrl_params_dict
     def dict_to_params_():
         return [ctrl_params_dict['kappa_v'],
-                ctrl_params_dict['kappa_v2']]
+                ctrl_params_dict['kappa_v2'],
+                ctrl_params_dict['kappa_theta'],
+                ctrl_params_dict['gamma_theta']/10]
 
     def opm_callback_(params): #, opm_state):
         np.save('ctrl_params.npy', params_to_dict_(params))
@@ -229,8 +235,8 @@ def optimize_params():
 
     init_params = dict_to_params_()
     res = minimize(get_balance_score_from_params_, init_params,
-                   options={'eps':.1},
-                   bounds=[(0, 15), (0, 5)],
+                   options={'eps':.20},
+                   bounds=[(0, 15), (0, 5), (0, 5), (0, 500)],
                    method='L-BFGS-B', callback=opm_callback_)
 
     print(res)
