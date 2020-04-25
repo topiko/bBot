@@ -168,7 +168,8 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] = get_x_v_a(run_time, AMPLITUDE)
+        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] \
+                = get_x_v_a(run_time, AMPLITUDE)
 
         # Update i
         i += 1
