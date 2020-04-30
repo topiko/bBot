@@ -91,7 +91,10 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
     theta = deg_to_rad(state_dict['theta'][0])
     #print(theta, use_a)
-    tilt_theta = np.arcsin((-BETA*use_a + ALPHA*use_a*np.cos(theta))/(GRAVITY_ACCEL*ALPHA) )
+    denom = GRAVITY_ACCEL*ALPHA 
+    nom = -BETA*use_a + ALPHA*use_a*np.cos(theta)
+    nom = np.clip(nom, -denom/2, denom/2)
+    tilt_theta = np.arcsin(nom/denom)
     #tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
 
     return UPRIGHT_THETA + tilt_theta/PI*180
