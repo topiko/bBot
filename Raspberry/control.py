@@ -7,7 +7,7 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        PI, ALPHA
+        PI, ALPHA, BETA
 
 
 #CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
@@ -68,6 +68,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     delta_x = state_dict['x'][0] - cmd_dict['target_x']
 
     target_v = cmd_dict['target_v']
+    target_a = cmd_dict['target_a']
     #target_a = cmd_dict['target_a']
     #dt = state_dict['dt']
 
@@ -77,7 +78,8 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #TODO: Thinkf about why would one have the kappas like this?
     delta_v = state_dict['v'][0] - target_v_mod
 
-    update_v_a = -kappa_v * delta_v
+    update_v_a = target_a - kappa_v * delta_v
+
     #a_model = kappa_v**2 * delta_x
 
     use_a = update_v_a
@@ -87,7 +89,10 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
 
     # tilt_theta1 = np.arctan(use_a / GRAVITY_ACCEL)
     #thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
-    tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
+    theta = deg_to_rad(state_dict['theta'][0])
+    #print(theta, use_a)
+    tilt_theta = np.arcsin((-BETA*use_a + ALPHA*use_a*np.cos(theta))/(GRAVITY_ACCEL*ALPHA) )
+    #tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
 
     return UPRIGHT_THETA + tilt_theta/PI*180
 

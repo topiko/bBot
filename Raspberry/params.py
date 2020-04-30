@@ -17,7 +17,8 @@ DT = .016
 #A_MLTP2 = 0.010 #30.5
 
 # Dyn params
-ALPHA = 600 #400 #736
+ALPHA = 560 #400 #736
+BETA = -100
 
 GRAVITY_ACCEL = 9.81
 
