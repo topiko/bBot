@@ -68,16 +68,18 @@ def plot_dynamics(run_data): #, theta_test):
     target_thetadot = run_data[:, 8]
     target_x = run_data[:, 9]
     target_v = run_data[:, 11]
-    xpos = run_data[:, 14]
-    vel = run_data[:, 12]
-    accel = run_data[:, 13]
+    target_l = run_data[:, 12]
+    run_l = run_data[:, 13]
+    xpos = run_data[:, 16]
+    vel = run_data[:, 14]
+    accel = run_data[:, 15]
 
     figh = 4
     figw = 10
     _, axarr = plt.subplots(6, 1, figsize=(figw, figh*3), sharex = True)
     for ax, dat, title in zip(axarr.ravel(),
-                              [thetas, thetadots, thetadotdots, xpos, vel, accel],
-                              ['theta', 'thetadot', 'thetadotdot', 'xpos', 'vel', 'accel']):
+                              [thetas, thetadots, thetadotdots, run_l, vel, accel],
+                              ['theta', 'thetadot', 'thetadotdot', 'run_l', 'vel', 'accel']):
         ax.plot(times, dat, '-+')
         ax.set_title(title)
 
@@ -95,7 +97,7 @@ def plot_dynamics(run_data): #, theta_test):
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
 
-    axarr[3].plot(times, target_x, label='target')
+    axarr[3].plot(times, target_l, label='target')
     axarr[3].legend()
 
     axarr[4].plot(times, target_v, label='target')

@@ -65,7 +65,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
     kappa_v = ctrl_params_dict['kappa_v']
     kappa_v2 = ctrl_params_dict['kappa_v2']
-    delta_x = state_dict['x'][0] - cmd_dict['target_x']
+    delta_x = state_dict['run_l'][0] - cmd_dict['target_l']
 
     target_v = cmd_dict['target_v']
     target_a = cmd_dict['target_a']
@@ -91,7 +91,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
     theta = deg_to_rad(state_dict['theta'][0])
     #print(theta, use_a)
-    denom = GRAVITY_ACCEL*ALPHA 
+    denom = GRAVITY_ACCEL*ALPHA
     nom = -BETA*use_a + ALPHA*use_a*np.cos(theta)
     nom = np.clip(nom, -denom/2, denom/2)
     tilt_theta = np.arcsin(nom/denom)
@@ -170,6 +170,7 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
     cmd_dict['target_theta'] = get_target_theta(state_dict, cmd_dict, ctrl_params_dict)
     state_dict['target_theta'] = update_array(state_dict['target_theta'], cmd_dict['target_theta'])
     state_dict['target_x'] = update_array(state_dict['target_x'], cmd_dict['target_x'])
+    state_dict['target_l'] = update_array(state_dict['target_l'], cmd_dict['target_l'])
     state_dict['target_y'] = update_array(state_dict['target_y'], cmd_dict['target_y'])
     state_dict['target_v'] = update_array(state_dict['target_v'], cmd_dict['target_v'])
     #  accel = get_a_01(state_dict, cmd_dict)

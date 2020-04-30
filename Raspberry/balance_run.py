@@ -114,7 +114,7 @@ def balance_loop(ser, run_time_max=10,
         # Report dict is for debugging and performance evaluation
         report_dict = {'predict_times':np.zeros(3),
                        'predict_thetas':np.zeros(3)}
-        store_arr = np.zeros((imax, 19))
+        store_arr = np.zeros((imax, 21))
 
     # Request the Kalman filter:
     if kl is None:
@@ -168,8 +168,8 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_x'], cmd_dict['target_v'], cmd_dict['target_a'] \
-                = get_x_v_a(run_time, AMPLITUDE)
+        cmd_dict['target_l'], cmd_dict['target_v'], cmd_dict['target_a'] \
+                = get_x_v_a(run_time, AMPLITUDE, state_dict)
 
         # Update i
         i += 1

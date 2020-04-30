@@ -47,6 +47,8 @@ def store(i, store_arr, report_dict, state_dict):
                              'thetadotdot_measured',
                              'target_theta', 'target_thetadot',
                              'target_x', 'target_y', 'target_v',
+                             'target_l',
+                             'run_l',
                              'v', 'a', 'x', 'y', 'phi']):
         store_arr[i, j] = state_dict[key][1]
     store_arr[i, j+1] = report_dict['predict_times'][1]
