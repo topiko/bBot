@@ -73,6 +73,7 @@ def plot_dynamics(run_data): #, theta_test):
     xpos = run_data[:, 16]
     vel = run_data[:, 14]
     accel = run_data[:, 15]
+    target_a = run_data[:, 19]
 
     figh = 4
     figw = 10
@@ -103,6 +104,8 @@ def plot_dynamics(run_data): #, theta_test):
     axarr[4].plot(times, target_v, label='target')
     axarr[4].legend()
 
+    axarr[5].plot(times, target_a, label='target')
+    axarr[5].legend()
 
     plt.tight_layout()
     plt.show()

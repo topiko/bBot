@@ -11,7 +11,7 @@ from state import update_state, predict_theta, \
         check_status, \
         update_cmd_vars, reset_location
 from control import react
-from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, OPM_LOOP_TIME
+from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, OPM_LOOP_TIME, AMPLITUDE
 from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize
@@ -40,7 +40,6 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
-AMPLITUDE = .10
 N_REPORT = 1 if MODE.startswith('simulate') else 200
 if MODE == 'simuloptimize':
     PRINT_REPORT = False
@@ -93,7 +92,7 @@ def balance_loop(ser, run_time_max=10,
                       'target_y':np.zeros(3),
                       'target_v':np.zeros(3),
                       'target_a':np.zeros(3),
-                      'run_l': np.zeros(3),
+                      'run_l': np.ones(3)*AMPLITUDE,
                       'abs_run_l': np.zeros(3),
                       'v':np.zeros(3),
                       'a':np.zeros(3),
@@ -114,7 +113,7 @@ def balance_loop(ser, run_time_max=10,
         # Report dict is for debugging and performance evaluation
         report_dict = {'predict_times':np.zeros(3),
                        'predict_thetas':np.zeros(3)}
-        store_arr = np.zeros((imax, 21))
+        store_arr = np.zeros((imax, 22))
 
     # Request the Kalman filter:
     if kl is None:
@@ -187,16 +186,14 @@ def optimize_params():
     ctrl_params_dict = CTRL_PARAMS_DICT
     def params_to_dict_(params):
         ctrl_params_dict['kappa_v'] = params[0]
-        ctrl_params_dict['kappa_v2'] = params[1]
-        ctrl_params_dict['kappa_theta'] = params[2]
-        ctrl_params_dict['gamma_theta'] = params[3]*10
+        ctrl_params_dict['kappa_theta'] = params[1]
+        ctrl_params_dict['at_to_tilt_mltp'] = params[2]
 
         return ctrl_params_dict
     def dict_to_params_():
         return [ctrl_params_dict['kappa_v'],
-                ctrl_params_dict['kappa_v2'],
                 ctrl_params_dict['kappa_theta'],
-                ctrl_params_dict['gamma_theta']/10]
+                ctrl_params_dict['a_to_tilt_mltp']]
 
     def opm_callback_(params): #, opm_state):
         np.save('ctrl_params.npy', params_to_dict_(params))
@@ -236,8 +233,8 @@ def optimize_params():
 
     init_params = dict_to_params_()
     res = minimize(get_balance_score_from_params_, init_params,
-                   options={'eps':.20},
-                   bounds=[(0, 15), (0, 5), (0, 5), (0, 500)],
+                   options={'eps':.10},
+                   bounds=[(0, 10), (0, 10), (0, 10)],
                    method='L-BFGS-B', callback=opm_callback_)
 
     print(res)

@@ -7,7 +7,7 @@ def get_x_v_a(time, amp, state_dict):
     Sin step system.
     """
     sin_period = 4
-    hold_period = 4
+    hold_period = 2.0
     full_period = sin_period + hold_period * 2
 
     time = time % full_period

@@ -64,7 +64,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     """
     #kappa_tilt_theta = ctrl_params_dict['kappa_tilt_theta']
     kappa_v = ctrl_params_dict['kappa_v']
-    kappa_v2 = ctrl_params_dict['kappa_v2']
+    #kappa_v2 = ctrl_params_dict['kappa_v2']
     delta_x = state_dict['run_l'][0] - cmd_dict['target_l']
 
     target_v = cmd_dict['target_v']
@@ -72,9 +72,10 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #target_a = cmd_dict['target_a']
     #dt = state_dict['dt']
 
-    x_correction_v = - kappa_v2 * delta_x
+    x_correction_v = - kappa_v * delta_x
     target_v_mod = target_v + x_correction_v
 
+    cmd_dict['target_v'] = target_v_mod
     #TODO: Thinkf about why would one have the kappas like this?
     delta_v = state_dict['v'][0] - target_v_mod
 
@@ -82,22 +83,31 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
 
     #a_model = kappa_v**2 * delta_x
 
-    use_a = update_v_a
+    target_a = update_v_a
 
 
     # use_a = - (kappa_v * delta_x + kappa_v2 * delta_v) + target_a
 
     # tilt_theta1 = np.arctan(use_a / GRAVITY_ACCEL)
     #thetadotdot_rad = state_dict['thetadotdot'][0] / 180 * np.pi
-    theta = deg_to_rad(state_dict['theta'][0])
+
+    theta = deg_to_rad(state_dict['theta_predict']) #[0])
+
     #print(theta, use_a)
-    denom = GRAVITY_ACCEL*ALPHA
-    nom = -BETA*use_a + ALPHA*use_a*np.cos(theta)
-    nom = np.clip(nom, -denom/2, denom/2)
-    tilt_theta = np.arcsin(nom/denom)
+
+    #denom = GRAVITY_ACCEL*ALPHA
+    #nom = -BETA*target_a + ALPHA*target_a*np.cos(theta)
+    #nom = np.clip(nom, -denom/2, denom/2)
+    #tilt_theta = np.arcsin(nom / denom)
+
+    cmd_dict['target_a'] = target_a
+
+    kappa_tilt = ctrl_params_dict['a_to_tilt_mltp']
+
+    tilt_theta = target_a * kappa_tilt
     #tilt_theta = np.arctan(use_a / GRAVITY_ACCEL)
 
-    return UPRIGHT_THETA + tilt_theta/PI*180
+    return UPRIGHT_THETA + tilt_theta #/PI*180
 
 
 def deg_to_rad(degs):
@@ -127,7 +137,7 @@ def get_a_01(state_dict, cmd_dict):
     # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
     accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta -UPRIGHT_THETA)) \
              - deg_to_rad(delta_thetadot)*gamma) \
-            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)))
+            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
 
     return accel
 
@@ -152,11 +162,45 @@ def get_a_02(state_dict, cmd_dict, ctrl_params_dict):
     # How much we are off drom the desired thetadot
     delta_thetadot = thetadot_target - thetadot
 
+    #thetadotdot_target = - kappa * delta_thetadot
+
     # We want to update thetadot so that delta_thetadot gets smaller.
     # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
-    accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta -UPRIGHT_THETA)) \
+    accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
              - deg_to_rad(delta_thetadot)*gamma) \
-            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)))
+            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
+
+    return accel
+
+def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
+    """
+    Get the reaction a for given state.
+    This is based in driving along: Delta theta = exp^(-kappa/t)
+    --> thetadot_target = d Delta theta / dt  =  -kappa * Delta theta
+    """
+    kappa = ctrl_params_dict['kappa_theta'] #4.0
+    #gamma = ctrl_params_dict['gamma_theta'] #1000'
+    #kappa = 10
+
+    theta = state_dict['theta_predict']
+    thetadot = state_dict['thetadot_predict']
+    target_theta = cmd_dict['target_theta']
+
+    delta_theta = theta - target_theta
+    thetadot_target = - kappa * delta_theta #* np.sign(delta_theta)
+
+    state_dict['target_thetadot'] = update_array(state_dict['target_thetadot'],
+                                                 thetadot_target)
+    # How much we are off drom the desired thetadot
+    delta_thetadot = thetadot - thetadot_target
+
+    thetadotdot_target = - kappa * delta_thetadot
+
+    # We want to update thetadot so that delta_thetadot gets smaller.
+    # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
+    accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
+             - thetadotdot_target) \
+            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
 
     return accel
 
@@ -173,8 +217,9 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
     state_dict['target_l'] = update_array(state_dict['target_l'], cmd_dict['target_l'])
     state_dict['target_y'] = update_array(state_dict['target_y'], cmd_dict['target_y'])
     state_dict['target_v'] = update_array(state_dict['target_v'], cmd_dict['target_v'])
+    state_dict['target_a'] = update_array(state_dict['target_a'], cmd_dict['target_a'])
     #  accel = get_a_01(state_dict, cmd_dict)
-    accel = get_a_02(state_dict, cmd_dict, ctrl_params_dict)
+    accel = get_a_03(state_dict, cmd_dict, ctrl_params_dict)
 
     cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
     cmd_dict['a'] = accel
@@ -182,3 +227,4 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
 
     v_l, v_r = wheels_v_to_cmds(cmd_dict) #v, phidot)
     cmd_dict['cmd'] = [0, v_l, v_r]
+
