@@ -83,7 +83,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #update_v_a = kappa_v**2 * delta_x - kappa_v * delta_v + target_a
     #a_model = kappa_v**2 * delta_x
 
-    target_a = np.clip(pdate_v_a, -MAX_A, MAX_A)
+    target_a = np.clip(update_v_a, -MAX_A, MAX_A)
 
 
     # use_a = - (kappa_v * delta_x + kappa_v2 * delta_v) + target_a
