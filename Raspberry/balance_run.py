@@ -290,10 +290,10 @@ if __name__ == '__main__':
         optimize_params()
     else:
         try:
-            #while True:
-            run_balancing(SER, run_time_max=60) # is not None:
-            print('Sleeping')
-            time.sleep(5)
+            while True:
+                run_balancing(SER, run_time_max=60) # is not None:
+                print('Sleeping')
+                time.sleep(5)
         except KeyboardInterrupt:
             print('Disabling')
             disable_all(SER, {'mode':''})
