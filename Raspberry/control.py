@@ -80,7 +80,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     delta_v = state_dict['v'][0] - target_v_mod
 
     update_v_a = target_a - kappa_v * delta_v
-
+    #update_v_a = kappa_v**2 * delta_x - kappa_v * delta_v + target_a
     #a_model = kappa_v**2 * delta_x
 
     target_a = update_v_a

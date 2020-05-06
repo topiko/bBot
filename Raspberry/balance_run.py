@@ -11,10 +11,11 @@ from state import update_state, predict_theta, \
         check_status, \
         update_cmd_vars, reset_location
 from control import react
-from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, OPM_LOOP_TIME, AMPLITUDE
+from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, \
+        OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD
 from kalman import get_patric_kalman
 from score import score_run
-from scipy.optimize import minimize
+from scipy.optimize import minimize, brute
 from report import report, store
 from goto import get_x_v_a
 
@@ -201,7 +202,7 @@ def optimize_params():
             ser = simulate_patric(dt=DT)
             run_array = run_balancing(ser,
                                       ctrl_params_dict=params_to_dict_(params),
-                                      run_time_max=10)
+                                      run_time_max=OPM_LOOP_TIME)
 
 
             plot_dynamics(run_array)
@@ -219,24 +220,33 @@ def optimize_params():
             ser = simulate_patric(dt=DT)
         else:
             ser = SER
-
+        print(params)
         ctrl_params_dict = params_to_dict_(params)
         run_array = None
-        status = 'upright'
-        while (run_array is None) and (status != 'fell'):
-            run_array = run_balancing(ser,
-                                      ctrl_params_dict=ctrl_params_dict,
-                                      run_time_max=OPM_LOOP_TIME)
+        #status = 'upright'
+        #while (run_array is None): # and (status != 'fell'):
+        run_array = run_balancing(ser,
+                                  ctrl_params_dict=ctrl_params_dict,
+                                  run_time_max=OPM_LOOP_TIME)
 
         #print(ctrl_params_dict)
         return score_run(run_array)
 
     init_params = dict_to_params_()
-    res = minimize(get_balance_score_from_params_, init_params,
-                   options={'eps':.10},
-                   bounds=[(0, 10), (0, 10), (0, 10)],
-                   method='L-BFGS-B', callback=opm_callback_)
-
+    if OPM_METHOD == 'L-BFGS-B':
+        bounds = ((0, 10), (0, 20), (0, 10)),
+        res = minimize(get_balance_score_from_params_, init_params,
+                       options={'eps':.30},
+                       bounds=bounds,
+                       method='L-BFGS-B', callback=opm_callback_)
+    elif OPM_METHOD == 'brute':
+        step = 1
+        bounds = (slice(0, 10, step),
+                  slice(0, 10, step),
+                  slice(0, 10, step))
+        res = brute(get_balance_score_from_params_,
+                    ranges=bounds, finish=None) #, Ns=20)
+        opm_callback_(res)
     print(res)
     return
 
@@ -248,24 +258,28 @@ def run_balancing(ser,
     Starts the balancing whenever robot is
     at UPRIGHT angle.
     """
-    if MODE.startswith('simul'):
-        theta = UPRIGHT_THETA
-    else:
-        talk(SER, {'mode':MODE}, {'cmd': [0, 0, 0]})
-        theta, _, _ = listen(SER, mode=MODE)
+    while True:
+        if MODE.startswith('simul'):
+            theta = UPRIGHT_THETA
+        else:
+            talk(SER, {'mode':MODE}, {'cmd': [0, 0, 0]})
+            theta, _, _ = listen(SER, mode=MODE)
 
-    if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
-        print('theta = {:.2f}'.format(theta))
-    if abs(theta - UPRIGHT_THETA) < max_diff_theta:
-        print('Run Loop')
-        run_data, _, status = balance_loop(ser,
-                                           run_time_max=run_time_max,
-                                           ctrl_params_dict=ctrl_params_dict)[:3]
-        np.save('orient.npy', run_data)
-        disable_all(SER, {'mode':MODE})
-        if status != 'fell':
-            return run_data
-    return None
+        if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
+            print('theta = {:.2f}'.format(theta))
+        if abs(theta - UPRIGHT_THETA) < max_diff_theta:
+            break
+
+    print('Run Loop')
+    run_data, _, status = balance_loop(ser,
+                                       run_time_max=run_time_max,
+                                       ctrl_params_dict=ctrl_params_dict)[:3]
+    np.save('orient.npy', run_data)
+    disable_all(SER, {'mode':MODE})
+    if status != 'fell':
+        return run_data
+    else:
+        return None
 
 if __name__ == '__main__':
     if MODE == 'simulate':
@@ -276,10 +290,10 @@ if __name__ == '__main__':
         optimize_params()
     else:
         try:
-            while True:
-                if run_balancing(SER, run_time_max=60) is not None:
-                    print('Sleeping')
-                    time.sleep(5)
+            #while True:
+            run_balancing(SER, run_time_max=60) # is not None:
+            print('Sleeping')
+            time.sleep(5)
         except KeyboardInterrupt:
             print('Disabling')
             disable_all(SER, {'mode':''})

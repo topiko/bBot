@@ -9,6 +9,9 @@ def score_run(run_array):
     """
     Obtain a performance score given from run array.
     """
+    if run_array is None:
+        return np.inf
+
     times = run_array[:, 0]
     thetas = run_array[:, 1]
     target_thetas = run_array[:, 7]
