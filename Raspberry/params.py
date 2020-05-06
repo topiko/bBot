@@ -12,13 +12,13 @@ PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .0 #15
+AMPLITUDE = .1
 #TILT_MLTP = 10.
 #A_MLTP1 = 0.2 # 00 #.2
 #A_MLTP2 = 0.010 #30.5
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
-OPM_METHOD = 'brute'
+OPM_METHOD = 'brute' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
 MAX_A = 1
@@ -35,13 +35,15 @@ SIGMA_THETADOTDOT = .2
 
 
 SIMUL_LOOP_TIME = 22.5
-OPM_LOOP_TIME = 22.5
+OPM_LOOP_TIME = 7 #22.5
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'kappa_v':1, # 11.2 #5 D x * kappa = v_target
+    CTRL_PARAMS_DICT = {'damp_pos': 1,
+                        'omega_pos':200,
+                        # 11.2 #5 D x * kappa = v_target
                         #'kappa_v2':.250, # 0.9 #2
                         #'kappa_tilt_theta':.2*GRAVITY_ACCEL, #1000, # D v * kappa = theta tilt
-                        'kappa_theta':20,
-                        'a_to_tilt_mltp':10} #, # D theta = exp(-kappa * t)
+                        'damp_theta':1,
+                        'omega_theta':500} #, # D theta = exp(-kappa * t)
                         #'gamma_theta':2000} # D thetadot * gamma = thetadotdot

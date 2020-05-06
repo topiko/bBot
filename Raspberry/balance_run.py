@@ -186,15 +186,17 @@ def optimize_params():
     """
     ctrl_params_dict = CTRL_PARAMS_DICT
     def params_to_dict_(params):
-        ctrl_params_dict['kappa_v'] = params[0]
-        ctrl_params_dict['kappa_theta'] = params[1]
-        ctrl_params_dict['at_to_tilt_mltp'] = params[2]
+        ctrl_params_dict['damp_pos'] = params[0]
+        ctrl_params_dict['omega_pos'] = params[1]
+        ctrl_params_dict['damp_theta'] = params[2]
+        ctrl_params_dict['omega_theta'] = params[3]
 
         return ctrl_params_dict
     def dict_to_params_():
-        return [ctrl_params_dict['kappa_v'],
-                ctrl_params_dict['kappa_theta'],
-                ctrl_params_dict['a_to_tilt_mltp']]
+        return [ctrl_params_dict['damp_pos'],
+                ctrl_params_dict['omega_pos'],
+                ctrl_params_dict['damp_theta'],
+                ctrl_params_dict['omega_theta']]
 
     def opm_callback_(params): #, opm_state):
         np.save('ctrl_params.npy', params_to_dict_(params))
@@ -220,9 +222,10 @@ def optimize_params():
             ser = simulate_patric(dt=DT)
         else:
             ser = SER
-        print(params)
+
         ctrl_params_dict = params_to_dict_(params)
-        run_array = None
+
+        #run_array = None
         #status = 'upright'
         #while (run_array is None): # and (status != 'fell'):
         run_array = run_balancing(ser,
@@ -230,20 +233,24 @@ def optimize_params():
                                   run_time_max=OPM_LOOP_TIME)
 
         #print(ctrl_params_dict)
-        return score_run(run_array)
+        score = score_run(run_array)
+        print(params, score)
+        return score
 
     init_params = dict_to_params_()
     if OPM_METHOD == 'L-BFGS-B':
-        bounds = ((0, 10), (0, 20), (0, 10)),
+        bounds = ((0, 10), (0, 20), (0, 10), (0, 50))
         res = minimize(get_balance_score_from_params_, init_params,
-                       options={'eps':.30},
+                       options={'eps':.010, 'ftol':1e-12, 'gtol':1e-12},
                        bounds=bounds,
                        method='L-BFGS-B', callback=opm_callback_)
+
     elif OPM_METHOD == 'brute':
         step = 1
-        bounds = (slice(0, 10, step),
-                  slice(0, 10, step),
-                  slice(0, 10, step))
+        bounds = (slice(0.5, 3.5, .5),
+                  slice(0, 4, .5),
+                  slice(0.5, 3.5, .5),
+                  slice(0, 21, 2))
         res = brute(get_balance_score_from_params_,
                     ranges=bounds, finish=None) #, Ns=20)
         opm_callback_(res)
