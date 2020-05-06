@@ -63,7 +63,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     cmd_dict['target_a'] = target_a
 
     #tilt_theta = target_a * ctrl_params_dict['a_to_tilt_mltp']
-    tilt_theta = np.arctan(target_a / GRAVITY_ACCEL) / PI*180
+    tilt_theta = 4*np.arctan(target_a / GRAVITY_ACCEL) / PI*180
 
     return UPRIGHT_THETA + tilt_theta #/PI*180
 
@@ -99,14 +99,17 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     omega = ctrl_params_dict['omega_theta']
     damping_ratio = ctrl_params_dict['damp_theta']
 
-    thetadotdot_target = get_xdd_damp_osc(delta_theta, delta_thetadot, omega, damping_ratio)
+    thetadotdot_target = get_xdd_damp_osc(delta_theta,
+                                          delta_thetadot,
+                                          omega,
+                                          damping_ratio)
     # We want to update thetadot so that delta_thetadot gets smaller.
     # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
     accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
              - thetadotdot_target) \
             / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
 
-    return accel
+    return accel*2 #ctrl_params_dict['accel_multip']
 
 
 def react(state_dict, cmd_dict, ctrl_params_dict):

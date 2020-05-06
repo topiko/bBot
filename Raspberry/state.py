@@ -6,7 +6,7 @@ from modelpatric import get_thetadotdot
 
 def check_status(state_dict):
 
-    theta = state_dict['theta'][0]
+    theta = state_dict['theta_measured'][0]
 
     if ((theta - UPRIGHT_THETA) < -30) or (30 < (theta-UPRIGHT_THETA)):
         print('FELL: {}'.format(theta-UPRIGHT_THETA))

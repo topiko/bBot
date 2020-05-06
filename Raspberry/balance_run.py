@@ -12,7 +12,7 @@ from state import update_state, predict_theta, \
         update_cmd_vars, reset_location
 from control import react
 from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, \
-        OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD
+        OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD, RUN_LOOP_TIME
 from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize, brute
@@ -148,7 +148,8 @@ def balance_loop(ser, run_time_max=10,
         wait_sum += wait
 
         # Check the patric status:
-        status = check_status(state_dict)
+        if run_time > .5:
+            status = check_status(state_dict)
 
         # report
         if PRINT_REPORT and (i%N_REPORT == 0):
@@ -298,7 +299,9 @@ if __name__ == '__main__':
     else:
         try:
             while True:
-                run_balancing(SER, run_time_max=60) # is not None:
+                run_balancing(SER,
+                              run_time_max=RUN_LOOP_TIME,
+                              max_diff_theta=1) # is not None:
                 print('Sleeping')
                 time.sleep(5)
         except KeyboardInterrupt:
