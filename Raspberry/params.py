@@ -20,6 +20,9 @@ AMPLITUDE = .0 #15
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
 OPM_METHOD = 'brute'
 
+# maximum targeted accel:
+MAX_A = 1
+
 # Dyn params
 ALPHA = 560 #400 #736
 BETA = -160

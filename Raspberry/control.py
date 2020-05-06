@@ -7,7 +7,7 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        PI, ALPHA, BETA
+        PI, ALPHA, BETA, MAX_A
 
 
 #CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
@@ -83,7 +83,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     #update_v_a = kappa_v**2 * delta_x - kappa_v * delta_v + target_a
     #a_model = kappa_v**2 * delta_x
 
-    target_a = update_v_a
+    target_a = np.clip(pdate_v_a, -MAX_A, MAX_A)
 
 
     # use_a = - (kappa_v * delta_x + kappa_v2 * delta_v) + target_a
