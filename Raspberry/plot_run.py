@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from modelpatric import get_thetadotdot
+from score import score_run
+from scipy.optimize import curve_fit
 
 def plot_dynamics(run_data): #, theta_test):
 
@@ -21,7 +23,7 @@ def plot_dynamics(run_data): #, theta_test):
 
     figh = 4
     figw = 10
-    _, axarr = plt.subplots(6, 1, figsize=(figw, figh*3), sharex = True)
+    fig, axarr = plt.subplots(6, 1, figsize=(figw, figh*3), sharex = True)
     for ax, dat, title in zip(axarr.ravel(),
                               [thetas, thetadots, thetadotdots, run_l, vel, accel],
                               ['theta', 'thetadot', 'thetadotdot', 'run_l', 'vel', 'accel']):
@@ -39,6 +41,8 @@ def plot_dynamics(run_data): #, theta_test):
 
     axarr[2].plot(times, run_data[:, 6], label='measured')
     axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
+    alpha, beta = fit_model(run_data)
+    axarr[2].plot(times, get_thetadotdot(thetas, accel, alpha, beta), label='Fitted alpha={:.0f}, beta={:.0f}'.format(alpha, beta))
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
 
@@ -52,6 +56,24 @@ def plot_dynamics(run_data): #, theta_test):
     axarr[5].legend()
 
     plt.tight_layout()
+    fig.suptitle('Score {:.2f}'.format(score_run(run_data)))
     plt.show()
 
 
+def fit_model(run_data):
+
+    times = run_data[:, 0]
+    thetas = run_data[:, 1]
+    thetadots = run_data[:, 2]
+    thetadotdots = run_data[:, 3]
+    accel = run_data[:, 15]
+
+    def get_thetadotdot_wrap(xdat, alpha, beta):
+        thetas = xdat[:, 0]
+        accel = xdat[:, 1]
+        return get_thetadotdot(thetas, accel, alpha, beta)
+
+    xdat = np.vstack((thetas, accel)).T
+    alpha, beta = curve_fit(get_thetadotdot_wrap, xdat, thetadotdots, [500, -100])[0]
+
+    return alpha, beta

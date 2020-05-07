@@ -20,9 +20,9 @@ def score_run(run_array):
 
     tot_time = times[-1] - times[0]
     score = 0
-    for vals, target_vals in [#(thetas, target_thetas),
-                              (run_l, target_l)]:
-        squared_diff = (vals - target_vals)**2
+    for vals, target_vals, mlt in [(thetas, target_thetas, 1),
+                                   (run_l, target_l, 100)]:
+        squared_diff = (vals - target_vals)**2*mlt**2
         score += trapz(squared_diff, times)/tot_time
 
     return score

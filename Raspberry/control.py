@@ -24,6 +24,7 @@ def v_to_cmd_int(vel):
         cmd = 1023
     elif cmd < -1024:
         cmd = -1024
+
     return int(cmd)
 
 def wheels_v_to_cmds(cmd_dict):
@@ -38,6 +39,12 @@ def wheels_v_to_cmds(cmd_dict):
 
     return v_to_cmd_int(v_l), v_to_cmd_int(v_r)
 
+def get_PID(x, Int, xdot, P, I, D):
+    """
+    Simple PID, Int term needs to be evaulated outside.
+    """
+    return -P*x - Int*I - xdot*D
+
 def get_xdd_damp_osc(x, xdot, omega, khi):
     """
     Get the sexond time deriv d^2/dt^2 x for
@@ -51,19 +58,29 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     Updates the target theta based on current velocity.
     """
 
-    damping_ratio = ctrl_params_dict['damp_pos']
-    omega = ctrl_params_dict['omega_pos']
+    #damping_ratio = ctrl_params_dict['damp_pos']
+    #omega = ctrl_params_dict['omega_pos']
 
     delta_l = state_dict['run_l'][0] - cmd_dict['target_l']
     delta_l_dot = state_dict['v'][0] - cmd_dict['target_v']
 
-    target_a = get_xdd_damp_osc(delta_l, delta_l_dot, omega, damping_ratio)
-    #-omega**2*delta_l - 2*damping_ratio*omega*delta_l_dot # cmd_dict['target_a']
+    if np.sign(delta_l) != np.sign(state_dict['I_pos']):
+        state_dict['I_pos'] += delta_l * state_dict['dt']
+    else:
+        state_dict['I_pos'] = delta_l * state_dict['dt']
+
+    target_a = get_PID(delta_l,
+                       state_dict['I_pos'],
+                       delta_l_dot,
+                       ctrl_params_dict['P_pos'],
+                       ctrl_params_dict['I_pos'],
+                       ctrl_params_dict['D_pos'])
+
     target_a = np.clip(target_a, -MAX_A, MAX_A)
     cmd_dict['target_a'] = target_a
 
     #tilt_theta = target_a * ctrl_params_dict['a_to_tilt_mltp']
-    tilt_theta = 4*np.arctan(target_a / GRAVITY_ACCEL) / PI*180
+    tilt_theta = np.arctan(target_a / GRAVITY_ACCEL) / PI * 180
 
     return UPRIGHT_THETA + tilt_theta #/PI*180
 
@@ -87,29 +104,34 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     delta_theta = theta - target_theta
     delta_thetadot = thetadot
 
-    #thetadot_target = - kappa * delta_theta #* np.sign(delta_theta)
+    #omega = ctrl_params_dict['omega_theta']
+    #damping_ratio = ctrl_params_dict['damp_theta']
 
-    #state_dict['target_thetadot'] = update_array(state_dict['target_thetadot'],
-    #                                             thetadot_target)
-    # How much we are off drom the desired thetadot
-    #delta_thetadot = thetadot - thetadot_target
+    if np.sign(delta_theta) != np.sign(state_dict['I_theta']):
+        state_dict['I_theta'] += delta_theta * state_dict['dt']
+    else:
+        state_dict['I_theta'] = delta_theta * state_dict['dt']
 
-    #thetadotdot_target = - kappa * delta_thetadot
+    thetadotdot_target = get_PID(delta_theta,
+                                 state_dict['I_theta'],
+                                 delta_thetadot,
+                                 ctrl_params_dict['P_theta'],
+                                 ctrl_params_dict['I_theta'],
+                                 ctrl_params_dict['D_theta'])
 
-    omega = ctrl_params_dict['omega_theta']
-    damping_ratio = ctrl_params_dict['damp_theta']
 
-    thetadotdot_target = get_xdd_damp_osc(delta_theta,
-                                          delta_thetadot,
-                                          omega,
-                                          damping_ratio)
+    #thetadotdot_target = get_xdd_damp_osc(delta_theta,
+    #                                      delta_thetadot,
+    #                                      omega,
+    #                                      damping_ratio)
     # We want to update thetadot so that delta_thetadot gets smaller.
     # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
     accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
              - thetadotdot_target) \
             / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
 
-    return accel*2 #ctrl_params_dict['accel_multip']
+    return np.clip(accel, -10*MAX_A, 10*MAX_A)
+    #return accel #ctrl_params_dict['accel_multip']
 
 
 def react(state_dict, cmd_dict, ctrl_params_dict):
@@ -133,6 +155,6 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
     cmd_dict['a'] = accel
     state_dict['a'] = update_array(state_dict['a'], accel)
 
-    v_l, v_r = wheels_v_to_cmds(cmd_dict) #v, phidot)
+    v_l, v_r = wheels_v_to_cmds(cmd_dict) #, state_dict) #v, phidot)
     cmd_dict['cmd'] = [0, v_l, v_r]
 

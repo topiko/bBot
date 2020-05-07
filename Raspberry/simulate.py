@@ -8,7 +8,8 @@ and here we do simulations required.
 import numpy as np
 from scipy.integrate import solve_ivp
 from params import UPRIGHT_THETA, ALPHA, \
-        GRAVITY_ACCEL, SIGMA_THETA, SIMUL_LOOP_TIME
+        GRAVITY_ACCEL, SIGMA_THETA,\
+        SIMUL_LOOP_TIME, ALPHA_SIMUL, BETA_SIMUL
 import matplotlib.pyplot as plt
 from modelpatric import get_thetadotdot
 from score import score_run
@@ -41,7 +42,7 @@ class simulate_patric():
             theta = theta_vec[0]
             thetadot = theta_vec[1]
 
-            thetadotdot = get_thetadotdot(theta, accel)
+            thetadotdot = get_thetadotdot(theta, accel, alpha=ALPHA_SIMUL, beta=BETA_SIMUL)
             return thetadot, thetadotdot
 
         sol = solve_ivp(theta_derivs,
