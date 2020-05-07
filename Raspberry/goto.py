@@ -6,8 +6,8 @@ def get_x_v_a(time, amp, state_dict):
     Define position and vel for patric at given time. Currently simple
     Sin step system.
     """
-    sin_period = 4
-    hold_period = 2.0
+    sin_period = 6
+    hold_period = 4.0
     full_period = sin_period + hold_period * 2
 
     time = time % full_period
