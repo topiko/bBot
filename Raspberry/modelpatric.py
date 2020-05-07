@@ -7,5 +7,5 @@ def get_thetadotdot(theta, accel, alpha=ALPHA, beta=BETA):
     """
     theta = (theta - UPRIGHT_THETA)/180*np.pi
     #return ALPHA * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) # / np.pi * 180
-    return alpha * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) + beta * accel
+    return alpha * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) # + beta * accel
 

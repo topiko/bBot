@@ -128,7 +128,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     # Thetadotdot = gamma * delta_thetadot = thetadotdot(theta, a) (get_model_patric)
     accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
              - thetadotdot_target) \
-            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA)) - BETA)
+            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA))) # - BETA)
 
     return np.clip(accel, -10*MAX_A, 10*MAX_A)
     #return accel #ctrl_params_dict['accel_multip']
