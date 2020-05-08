@@ -44,16 +44,18 @@ def relocate(ser, run_l):
     Drive the fallen robot back to 0 pos.
     Assumes there are aids to hold the robot roughly upright.
     """
-    v = -.1 * np.sign(run_l)
+    v = -.01 * np.sign(run_l)
     vcmd = v_to_cmd_int(v)
     cmd = [0, vcmd, vcmd]
-    time = run_l / v
+    time = abs(run_l / v)
     dt = .1
-
+    print('Off by: {:.1f}cm'.format(run_l*100))
     enable_legs(ser, 'run')
-    for i in range(time//dt):
-        talk(ser, None, {'cmd':cmd})
+    print(time, dt, time//dt)
+    for i in range(int(time//dt)):
+        talk(ser, {'mode':'run'}, {'cmd':cmd})
         time.sleep(dt)
+        print('relocating')
     disable_all(ser, {'mode':'run'})
 
 def get_PID(x, Int, xdot, P, I, D):

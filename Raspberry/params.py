@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .12
+AMPLITUDE = .0 #12
 INIT_THETA_DEV = 0
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
