@@ -12,11 +12,12 @@ def score_run(run_array):
     if run_array is None:
         return np.inf
 
-    times = run_array[:, 0]
-    thetas = run_array[:, 1]
-    target_thetas = run_array[:, 7]
-    run_l = run_array[:, 13]
-    target_l = run_array[:, 12]
+    times = run_array['times']
+    thetas = run_array['theta']
+    target_thetas = run_array['target_theta']
+    run_l = run_array['run_l']
+    target_l = run_array['target_l']
+
 
     tot_time = times[-1] - times[0]
     score = 0

@@ -10,9 +10,10 @@ from communication import talk, listen, \
 from state import update_state, predict_theta, \
         check_status, \
         update_cmd_vars, reset_location
-from control import react
+from control import react, relocate
 from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, \
-        OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD, RUN_LOOP_TIME
+        OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD, RUN_LOOP_TIME, \
+        COLLECT_DATA
 from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize, brute, differential_evolution
@@ -88,6 +89,7 @@ def balance_loop(ser, run_time_max=10,
                       'thetadot_predict':0,
                       'target_theta':np.zeros(3),
                       'target_thetadot':np.zeros(3),
+                      'target_thetadotdot':np.zeros(3),
                       'target_l':np.zeros(3),
                       'target_x':np.zeros(3),
                       'target_y':np.zeros(3),
@@ -114,10 +116,8 @@ def balance_loop(ser, run_time_max=10,
     # store state:
     if STORE_RUN:
         # Report dict is for debugging and performance evaluation
-        report_dict = {'predict_times':np.zeros(3),
-                       'predict_thetas':np.zeros(3)}
-        store_arr = np.zeros((imax, 22))
-
+        dtypes = [(c, np.float32) for c in COLLECT_DATA]
+        store_arr = np.zeros(imax).astype(dtypes)
     # Request the Kalman filter:
     if kl is None:
         kl = get_patric_kalman(np.array([state_dict['theta'][1],
@@ -162,7 +162,7 @@ def balance_loop(ser, run_time_max=10,
                    cmd_dict)
         # store
         if STORE_RUN:
-            store(i, store_arr, report_dict, state_dict)
+            store(i, store_arr, state_dict)
 
         # Predict the theta and thetadot at next time instance
         predict_theta(state_dict, cmd_dict, kl)
@@ -241,7 +241,6 @@ def optimize_params():
                                   ctrl_params_dict=ctrl_params_dict,
                                   run_time_max=OPM_LOOP_TIME)
 
-        #print(ctrl_params_dict)
         score = score_run(run_array)
         print(params, score)
         return score
@@ -253,7 +252,7 @@ def optimize_params():
                        #bounds=bounds,
                        method='L-BFGS-B', callback=opm_callback_)
     elif OPM_METHOD == 'diff_evo':
-        bounds = [(0,100)]*3 + [(0,1000)]*3
+        bounds = [(0, 100)]*3 + [(0, 1000)]*3
         differential_evolution(get_balance_score_from_params_, bounds,
                                strategy='best1bin',
                                maxiter=1000,
@@ -277,7 +276,6 @@ def optimize_params():
         res = brute(get_balance_score_from_params_,
                     ranges=bounds, finish=None) #, Ns=20)
         opm_callback_(res)
-    print(res)
     return
 
 def run_balancing(ser,
@@ -301,11 +299,17 @@ def run_balancing(ser,
             break
 
     print('Run Loop')
-    run_data, _, status = balance_loop(ser,
-                                       run_time_max=run_time_max,
-                                       ctrl_params_dict=ctrl_params_dict)[:3]
+    run_data, _, status, _, state_dict = \
+            balance_loop(ser,
+                         run_time_max=run_time_max,
+                         ctrl_params_dict=ctrl_params_dict)[:5]
+
     np.save('orient.npy', run_data)
     disable_all(SER, {'mode':MODE})
+
+    if not MODE.startswith('simul'):
+        relocate(ser, state_dict['run_l'])
+
     if status != 'fell':
         return run_data
     else:

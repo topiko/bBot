@@ -9,7 +9,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 from params import UPRIGHT_THETA, ALPHA, \
         GRAVITY_ACCEL, SIGMA_THETA,\
-        SIMUL_LOOP_TIME, ALPHA_SIMUL, BETA_SIMUL
+        SIMUL_LOOP_TIME, ALPHA_SIMUL, \
+        BETA_SIMUL, INIT_THETA_DEV
 import matplotlib.pyplot as plt
 from modelpatric import get_thetadotdot
 from score import score_run
@@ -21,7 +22,7 @@ class simulate_patric():
         """
         Init.
         """
-        self.theta = theta + 0
+        self.theta = theta + INIT_THETA_DEV
         self.thetadot = thetadot
         self.time = 0
         self.dt = dt

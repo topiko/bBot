@@ -13,15 +13,14 @@ PI = 3.14159267
 DT = .016
 
 AMPLITUDE = .12
-#TILT_MLTP = 10.
-#A_MLTP1 = 0.2 # 00 #.2
-#A_MLTP2 = 0.010 #30.5
+INIT_THETA_DEV = 0
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
-OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'brute'
+OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_A = .5
+MAX_A = 2
+MAX_V = 1.
 
 # Dyn params
 ALPHA = 450 #400 #736
@@ -52,3 +51,15 @@ except FileNotFoundError:
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}
+COLLECT_DATA = ['times', 'theta',
+                'thetadot', 'thetadotdot',
+                'theta_measured', 'thetadot_measured',
+                'thetadotdot_measured',
+                'target_theta', 'target_thetadot',
+                'target_thetadotdot',
+                'target_x', 'target_y', 'target_v',
+                'target_l',
+                'run_l',
+                'v', 'a', 'x', 'y', 'phi',
+                'target_a'] #, 'theta_predict']
+

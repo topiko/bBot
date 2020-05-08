@@ -6,6 +6,7 @@ import time
 import numpy as np
 from state import update_array
 from params import PI
+from params import COLLECT_DATA
 
 def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cmd_dict):
     #    if i < n_report*2:
@@ -33,26 +34,16 @@ def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cm
     print('times', state_dict['times'])
     state_dict['dt'] = np.diff(state_dict['times'][::-1]).mean()
 
-def store(i, store_arr, report_dict, state_dict):
+def store(i, store_arr, state_dict):
     """
     Store the run results - these are used fo analysis later.
     """
-    report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
-                                                 state_dict['theta_predict'])
-    report_dict['predict_times'] = update_array(report_dict['predict_times'],
-                                                state_dict['times'][1] + state_dict['dt'])
-    for j, key in enumerate(['times', 'theta',
-                             'thetadot', 'thetadotdot',
-                             'theta_measured', 'thetadot_measured',
-                             'thetadotdot_measured',
-                             'target_theta', 'target_thetadot',
-                             'target_x', 'target_y', 'target_v',
-                             'target_l',
-                             'run_l',
-                             'v', 'a', 'x', 'y', 'phi', 'target_a']):
-        store_arr[i, j] = state_dict[key][1]
-    store_arr[i, j+1] = report_dict['predict_times'][1]
-    store_arr[i, j+2] = report_dict['predict_thetas'][1]
+    #report_dict['predict_thetas'] = update_array(report_dict['predict_thetas'],
+    #                                             state_dict['theta_predict'])
+    #report_dict['predict_times'] = update_array(report_dict['predict_times'],
+    #                                            state_dict['times'][1] + state_dict['dt'])
+    for j, key in enumerate(COLLECT_DATA):
+        store_arr[key][i] = state_dict[key][1]
 
-
-
+    #store_arr[i, j+1] = report_dict['predict_times'][1]
+    #store_arr[i, j+2] = report_dict['predict_thetas'][1]
