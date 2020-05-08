@@ -308,7 +308,7 @@ def run_balancing(ser,
     disable_all(SER, {'mode':MODE})
 
     if not MODE.startswith('simul'):
-        relocate(ser, state_dict['run_l'])
+        relocate(ser, state_dict['run_l'][0])
 
     if status != 'fell':
         return run_data
