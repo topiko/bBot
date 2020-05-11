@@ -19,11 +19,11 @@ INIT_THETA_DEV = 0
 OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_A = 2
+MAX_A = 1
 MAX_V = 1.
 
 # Dyn params
-ALPHA = 450 #400 #736
+ALPHA = 270 #400 #736
 BETA = -90
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -38,16 +38,17 @@ SIGMA_THETADOTDOT = .2
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 70
+RUN_LOOP_TIME = 20
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':6,
-                        'D_pos':5,
-                        'I_pos':3,
-                        'P_theta':30,
-                        'D_theta':20,
-                        'I_theta':2}
+    CTRL_PARAMS_DICT = {'P_pos':4,
+                        'D_pos':3,
+                        'I_pos':0.5,
+                        'P_theta':3,
+                        'D_theta':5,
+                        'I_theta':1.5,
+                        'accel_mltp':4}
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}

@@ -9,6 +9,7 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
         PI, ALPHA, BETA, MAX_A, MAX_V
 from communication import disable_all, enable_legs, talk
+import time
 
 #CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
@@ -44,18 +45,21 @@ def relocate(ser, run_l):
     Drive the fallen robot back to 0 pos.
     Assumes there are aids to hold the robot roughly upright.
     """
-    v = -.01 * np.sign(run_l)
+    v = -.05 * np.sign(run_l)
     vcmd = v_to_cmd_int(v)
     cmd = [0, vcmd, vcmd]
-    time = abs(run_l / v)
+    run_time = abs(run_l / v)
     dt = .1
     print('Off by: {:.1f}cm'.format(run_l*100))
+    time.sleep(dt)
     enable_legs(ser, 'run')
-    print(time, dt, time//dt)
-    for i in range(int(time//dt)):
+    print(run_time, dt, run_time//dt)
+
+    for i in range(int(run_time//dt)):
+        cmd = [0, vcmd, vcmd]
         talk(ser, {'mode':'run'}, {'cmd':cmd})
         time.sleep(dt)
-        print('relocating')
+        print('relocating', cmd, vcmd)
     disable_all(ser, {'mode':'run'})
 
 def get_PID(x, Int, xdot, P, I, D):
@@ -119,6 +123,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     theta = state_dict['theta_predict']
     thetadot = state_dict['thetadot_predict']
     target_theta = cmd_dict['target_theta']
+    accel_multip = ctrl_params_dict['accel_mltp']
 
     delta_theta = theta - target_theta
     delta_thetadot = thetadot
@@ -139,7 +144,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     state_dict['target_thetadotdot'] = \
             update_array(state_dict['target_thetadotdot'],
                          target_thetadotdot)
-    accel = (ALPHA*GRAVITY_ACCEL*np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
+    accel = accel_multip * (ALPHA * GRAVITY_ACCEL * np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
              - target_thetadotdot) \
             / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA))) # - BETA)
 
