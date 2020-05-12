@@ -154,28 +154,7 @@ def update_state(state_dict, kl, theta, cur_time):
 
     run_l_arr = state_dict['run_l']
     state_dict['a'][1] = get_second_deriv(times, run_l_arr)
-    #((run_l_arr[0] - run_l_arr[1])/dt1 \
-    #        - (run_l_arr[1] - run_l_arr[2])/dt2) / (dt1/2 + dt2/2)
-    #state_dict['a'][2] = state_dict['a'][1]
-    #state_dict['a'][1] = (state_dict['v'][1] - state_dict['v'][2])/dt
-"""
-def fit_parabel(times, points):
 
-    if (np.diff(times) == 0).all():
-        return 0, 0, 0
-
-    p1, p2, p3 = points
-    t1, t2, t3 = times
-
-    a = (p1*(t2 - t3) - p2*(t1 - t3) + p3*(t1 - t2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-    b = (-p1*(t2**2 - t3**2) + p2*(t1**2 - t3**2) - p3*(t1**2 - t2**2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-    c = (p1*t2*t3*(t2 - t3) - p2*t1*t3*(t1 - t3) + p3*t1*t2*(t1 - t2)) \
-        /(t1**2*t2 - t1**2*t3 - t1*t2**2 + t1*t3**2 + t2**2*t3 - t2*t3**2)
-
-    return a, b, c
-"""
 def predict_theta(state_dict, cmd_dict, kl):
     """
     Predict theta uusing the kalman filter.

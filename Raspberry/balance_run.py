@@ -62,6 +62,7 @@ def balance_loop(ser, run_time_max=10,
 
     # This dictionary handles the command
     if cmd_dict is None:
+        print('New cmd')
         cmd_dict = {'cmd_to':'wheels',
                     'v':0,
                     'a':0,
@@ -77,6 +78,7 @@ def balance_loop(ser, run_time_max=10,
 
     # State dictionary handles the state of the robot
     if state_dict is None:
+        print('New state')
         state_dict = {'times':np.zeros(3),
                       'time_next':0,
                       'theta_measured':np.zeros(3),
@@ -99,6 +101,7 @@ def balance_loop(ser, run_time_max=10,
                       'abs_run_l': np.zeros(3),
                       'I_pos':0,
                       'I_theta':0,
+                      'loop_idx':0,
                       'v':np.zeros(3),
                       'a':np.zeros(3),
                       'phi':np.zeros(3),
@@ -120,6 +123,7 @@ def balance_loop(ser, run_time_max=10,
         store_arr = np.zeros(imax).astype(dtypes)
     # Request the Kalman filter:
     if kl is None:
+        print('New KL')
         kl = get_patric_kalman(np.array([state_dict['theta'][1],
                                          state_dict['thetadot'][1]]), DT)
 
@@ -129,6 +133,7 @@ def balance_loop(ser, run_time_max=10,
     run_time = 0
     init_time = state_dict['times'][0]
     while (run_time < run_time_max) and (i < imax) and (status != 'fell'): # True:
+
         # Send the latest command to arduino
         talk(ser, state_dict, cmd_dict)
 
@@ -173,6 +178,9 @@ def balance_loop(ser, run_time_max=10,
         # Quick test of location updates
         cmd_dict['target_l'], cmd_dict['target_v'], cmd_dict['target_a'] \
                 = get_x_v_a(run_time, AMPLITUDE, state_dict)
+
+        #Debug:
+        state_dict['loop_idx'] = i
 
         # Update i
         i += 1
@@ -286,16 +294,22 @@ def run_balancing(ser,
     Starts the balancing whenever robot is
     at UPRIGHT angle.
     """
+
+    print('Waiting for theta to be close to upright.')
     while True:
         if MODE.startswith('simul'):
             theta = UPRIGHT_THETA
         else:
-            talk(SER, {'mode':MODE}, {'cmd': [0, 0, 0]})
-            theta, _, _ = listen(SER, mode=MODE)
-
+            talk(ser,
+                 {'mode':MODE},
+                 {'cmd': [0, 0, 0]})
+            time.sleep(.1)
+            theta, _, _ = listen(ser, mode=MODE)
+            print(theta)
         if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
             print('theta = {:.2f}'.format(theta))
         if abs(theta - UPRIGHT_THETA) < max_diff_theta:
+            print('Exiting wait: theta={:.2f}'.format(theta))
             break
 
     print('Run Loop')
@@ -305,10 +319,10 @@ def run_balancing(ser,
                          ctrl_params_dict=ctrl_params_dict)[:5]
 
     np.save('orient.npy', run_data)
-    disable_all(SER, {'mode':MODE})
+    disable_all(ser, {'mode':MODE})
 
-    if not MODE.startswith('simul'):
-        relocate(ser, state_dict['run_l'][0])
+    #if not MODE.startswith('simul'):
+    #    relocate(ser, state_dict['run_l'][0])
 
     if status != 'fell':
         return run_data
@@ -329,7 +343,7 @@ if __name__ == '__main__':
                               run_time_max=RUN_LOOP_TIME,
                               max_diff_theta=1) # is not None:
                 print('Sleeping')
-                time.sleep(5)
+                time.sleep(1)
         except KeyboardInterrupt:
             print('Disabling')
             disable_all(SER, {'mode':''})

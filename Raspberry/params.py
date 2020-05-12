@@ -21,7 +21,7 @@ OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 # maximum targeted accel:
 MAX_V = 1.0
 MAX_A = 1.0
-MAX_JERK = 4.0
+MAX_JERK = 40.0
 
 # Dyn params
 ALPHA = 270 #400 #736
@@ -44,12 +44,12 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':4,
-                        'D_pos':3,
-                        'I_pos':0.5,
+                        'D_pos':6,
+                        'I_pos':0.1,
                         'P_theta':3,
                         'D_theta':5,
                         'I_theta':1.5,
-                        'accel_mltp':4}
+                        'accel_mltp':2}
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}
