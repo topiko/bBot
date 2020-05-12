@@ -7,7 +7,7 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        PI, ALPHA, BETA, MAX_A, MAX_V
+        PI, ALPHA, BETA, MAX_A, MAX_V, MAX_JERK
 from communication import disable_all, enable_legs, talk
 import time
 
@@ -144,11 +144,23 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     state_dict['target_thetadotdot'] = \
             update_array(state_dict['target_thetadotdot'],
                          target_thetadotdot)
-    accel = accel_multip * (ALPHA * GRAVITY_ACCEL * np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
-             - target_thetadotdot) \
-            / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA))) # - BETA)
+    #accel = accel_multip * (ALPHA * GRAVITY_ACCEL * np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
+     #        - target_thetadotdot) \
+     #       / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA))) # - BETA)
+    accel = accel_multip * (\
+            GRAVITY_ACCEL * np.tan(deg_to_rad(theta - UPRIGHT_THETA)) \
+            - target_thetadotdot / (ALPHA * np.cos(deg_to_rad(theta - UPRIGHT_THETA))))
 
+    dt = state_dict['dt']
+    cur_accel = state_dict['a'][0]
+
+    if abs(accel - cur_accel) > MAX_JERK * dt:
+        print('MAX Jerk triggered: cur_a = {:.2f} --> {:.2f}'.format(cur_accel, accel))
+    accel = np.clip(accel,
+                    cur_accel - MAX_JERK * dt,
+                    cur_accel + MAX_JERK * dt)
     return np.clip(accel, -10*MAX_A, 10*MAX_A)
+
 
 
 def react(state_dict, cmd_dict, ctrl_params_dict):
@@ -161,15 +173,16 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
 
     state_dict['target_theta'] = update_array(state_dict['target_theta'], cmd_dict['target_theta'])
     state_dict['target_x'] = update_array(state_dict['target_x'], cmd_dict['target_x'])
-    state_dict['target_l'] = update_array(state_dict['target_l'], cmd_dict['target_l'])
     state_dict['target_y'] = update_array(state_dict['target_y'], cmd_dict['target_y'])
+    state_dict['target_l'] = update_array(state_dict['target_l'], cmd_dict['target_l'])
     state_dict['target_v'] = update_array(state_dict['target_v'], cmd_dict['target_v'])
-    state_dict['target_a'] = update_array(state_dict['target_a'], cmd_dict['target_a'])
-    #  accel = get_a_01(state_dict, cmd_dict)
+
     accel = get_a_03(state_dict, cmd_dict, ctrl_params_dict)
 
     cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
     cmd_dict['a'] = accel
+
+    state_dict['target_a'] = update_array(state_dict['target_a'], cmd_dict['target_a'])
     state_dict['a'] = update_array(state_dict['a'], accel)
 
     v_l, v_r = wheels_v_to_cmds(cmd_dict) #, state_dict) #v, phidot)

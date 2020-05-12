@@ -19,8 +19,9 @@ INIT_THETA_DEV = 0
 OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_A = 1
-MAX_V = 1.
+MAX_V = 1.0
+MAX_A = 1.0
+MAX_JERK = 4.0
 
 # Dyn params
 ALPHA = 270 #400 #736
