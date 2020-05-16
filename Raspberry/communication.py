@@ -66,12 +66,18 @@ def listen(ser, mode=None):
             print(init_byte) #, int(init_byte))
             raise ValueError('Communication issues')
 
-        s = ser.read(2)
-        cur_time = ser.read(4)
-        #time_pitch = ser.read(2)
+        orient_bytes = ser.read(2)
+        cur_time_bytes = ser.read(4)
 
-        orient_int = int.from_bytes(s, byteorder='big', signed=True)
-        cur_time = int.from_bytes(cur_time, byteorder='big', signed=False)/1e6 # from mus to s
+        if ser.in_waiting != 0:
+            print('You have some additional stuff in serial buffer. This should not happen!')
+
+        orient_int = int.from_bytes(orient_bytes,
+                                    byteorder='big',
+                                    signed=True)
+        cur_time = int.from_bytes(cur_time_bytes,
+                                  byteorder='big',
+                                  signed=False)/1e6 # from mus to s
         theta = from_orient_int_to_theta(orient_int)
 
         return theta, cur_time, t1 - t0
@@ -82,6 +88,7 @@ def enable_legs(ser, mode):
         return
     talk(ser, {'mode':'run'}, {'cmd': [3, 1, 0]})
     time.sleep(.1)
+    listen(ser, mode)
 
 def initialize_state_dict(ser, state_dict):
     """
@@ -97,6 +104,7 @@ def initialize_state_dict(ser, state_dict):
     else:
         for i in range(len(state_dict['times'])):
             talk(ser, state_dict, {'cmd': [0, 0, 0]})
+            time.sleep(.02)
             theta, cur_time, _ = listen(ser, mode=state_dict['mode'])
             state_dict['times'][-i-1] = cur_time
             state_dict['theta'][-i-1] = theta
@@ -115,3 +123,9 @@ def disable_all(ser, state_dict):
     talk(ser, state_dict, {'cmd': [2, 0, 0]})
     time.sleep(.1)
     talk(ser, state_dict, {'cmd': [3, 0, 0]})
+    time.sleep(.02)
+
+    # Empty the serial buffer.
+    if ser.in_waiting != 0:
+        print('Emptying serial buffer after motor disable.')
+        ser.read(ser.in_waiting)
