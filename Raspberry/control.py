@@ -7,7 +7,8 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        PI, ALPHA, BETA, MAX_A, MAX_V, MAX_JERK
+        PI, ALPHA, BETA, MAX_A, MAX_A_CTRL, \
+        MAX_V, MAX_JERK
 from communication import disable_all, enable_legs, talk
 import time
 
@@ -159,7 +160,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     accel = np.clip(accel,
                     cur_accel - MAX_JERK * dt,
                     cur_accel + MAX_JERK * dt)
-    return np.clip(accel, -10*MAX_A, 10*MAX_A)
+    return np.clip(accel, -MAX_A_CTRL, MAX_A_CTRL)
 
 
 

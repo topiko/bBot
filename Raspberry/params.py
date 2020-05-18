@@ -19,12 +19,13 @@ INIT_THETA_DEV = 1
 OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_V = 1.0
-MAX_A = 1.0
-MAX_JERK = 40.0
+MAX_V = 0.2
+MAX_A = .5
+MAX_A_CTRL = 3
+MAX_JERK = 20.0
 
 # Dyn params
-ALPHA = 270 #400 #736
+ALPHA = 350 #736
 BETA = -90
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -34,7 +35,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .02**2 # .015**2
-SIGMA_THETADOTDOT = .2
+SIGMA_THETADOTDOT = .005 #.2
 
 
 SIMUL_LOOP_TIME = 22.5
@@ -44,13 +45,13 @@ RUN_LOOP_TIME = 20
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':4,
+    CTRL_PARAMS_DICT = {'P_pos':6,
                         'D_pos':6,
-                        'I_pos':0.1,
-                        'P_theta':3,
-                        'D_theta':5,
-                        'I_theta':1.5,
-                        'accel_mltp':2}
+                        'I_pos':1.0,
+                        'P_theta':2.00,
+                        'D_theta':4,
+                        'I_theta':0.05, #1.5,
+                        'accel_mltp':1.2}
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}
