@@ -98,6 +98,7 @@ def update_state(state_dict, kl, theta, cur_time):
 
     times = state_dict['times']
     state_dict['times'] = update_array(times, cur_time)
+    state_dict['dt'] = np.diff(times[::-1]).mean()
 
     # Update measurements
     #===========================================
