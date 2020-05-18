@@ -32,13 +32,28 @@ class KLFilter():
         n = len(x)
         self.n = n
         self.x = x.reshape(-1, 1)
+        try:
+            kl_matrx = np.load('kl_mats.npy').item()
+            P = kl_matrx['P']
+            K = kl_matrx['K']
+            Q = kl_matrx['Q']
+            R = kl_matrx['R']
+            F = kl_matrx['F']
+        except FileNotFoundError:
+            K = np.eye(n)
+            pass
+
         self.P = P #if P is not None else np.eye(n)*1000
         self.Q = Q #np.array([[.25, .5], [.5, .1]]) if Q is None else Q
         self.F = F #if F is not None else np.eye(n)
-        self.K = np.eye(n)
+        self.K = K
         self.R = R #np.diag([.1, .1*np.sqrt(2)]) if R is None else R
         self.H = np.eye(2) #np.array([[1, 0], [0, 1]])
         self.B = B #np.zeros(self.x.shape) if B is None else B
+ 
+    def store(self):
+        kl_matrx = {'P':self.P, 'K':self.K, 'Q':self.Q, 'R':self.R, 'F':self.F}
+        np.save('kl_mats.npy', kl_matrx)
 
     def predict(self, control_input=None):
         """
