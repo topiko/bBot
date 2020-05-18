@@ -104,7 +104,6 @@ def initialize_state_dict(ser, state_dict):
     else:
         for i in range(len(state_dict['times'])):
             talk(ser, state_dict, {'cmd': [0, 0, 0]})
-            time.sleep(.02)
             theta, cur_time, _ = listen(ser, mode=state_dict['mode'])
             state_dict['times'][-i-1] = cur_time
             state_dict['theta'][-i-1] = theta

@@ -42,7 +42,7 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
-N_REPORT = 1 if MODE.startswith('simulate') else 200
+N_REPORT = 1 if MODE.startswith('simulate') else 2000
 if MODE == 'simuloptimize':
     PRINT_REPORT = False
 
@@ -303,9 +303,8 @@ def run_balancing(ser,
             talk(ser,
                  {'mode':MODE},
                  {'cmd': [0, 0, 0]})
-            time.sleep(.1)
+            time.sleep(.01)
             theta, _, _ = listen(ser, mode=MODE)
-            print(theta)
         if (np.round(time.time(), 1) - int(time.time())) % .5 == 0:
             print('theta = {:.2f}'.format(theta))
         if abs(theta - UPRIGHT_THETA) < max_diff_theta:
@@ -313,10 +312,13 @@ def run_balancing(ser,
             break
 
     print('Run Loop')
-    run_data, _, status, _, state_dict = \
+    run_data, _, status, _, state_dict, kl = \
             balance_loop(ser,
                          run_time_max=run_time_max,
-                         ctrl_params_dict=ctrl_params_dict)[:5]
+                         ctrl_params_dict=ctrl_params_dict)
+
+    if status == 'upright':
+        kl.store()
 
     np.save('orient.npy', run_data)
     disable_all(ser, {'mode':MODE})
@@ -341,7 +343,7 @@ if __name__ == '__main__':
             while True:
                 run_balancing(SER,
                               run_time_max=RUN_LOOP_TIME,
-                              max_diff_theta=1) # is not None:
+                              max_diff_theta=.05) # is not None:
                 print('Sleeping')
                 time.sleep(1)
         except KeyboardInterrupt:

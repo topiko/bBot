@@ -14,6 +14,7 @@ def report(i, n_report, t_init, run_time, wait_sum, run_time_max, state_dict, cm
     #            cmd_dict['phidot'] = 0/180*PI
     t_report = time.time()
     print('Freq: ', n_report/(t_report-t_init))
+    print('DT = ', state_dict['dt'])
     print('Fraction time waiting serial: {:.3f}'.format(wait_sum/(t_report-t_init)))
     print('i = ', i)
     print('diff times = ', np.diff(state_dict['times']))
