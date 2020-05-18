@@ -139,18 +139,8 @@ def update_state(state_dict, kl, theta, cur_time):
     state_dict['thetadotdot'][1] = get_second_deriv(state_dict['times'],
                                                     state_dict['theta'])
 
-    #a, b, _ = fit_parabel(times, state_dict['theta'])
-    #state_dict['thetadot'][1] = 2*a*times[1] + b
-    #state_dict['thetadotdot'][1] = 2*a
-
-    # wheel v and a
-    # a, b, _ = fit_parabel(times, state_dict['v'])
 
     update_location(state_dict)
-
-    # The run_l in sonly avail after update_location has been ran.
-    dt1 = state_dict['times'][0] - state_dict['times'][1]
-    dt2 = state_dict['times'][1] - state_dict['times'][2]
 
     run_l_arr = state_dict['run_l']
     state_dict['a'][1] = get_second_deriv(times, run_l_arr)

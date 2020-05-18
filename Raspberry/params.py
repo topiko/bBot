@@ -13,7 +13,7 @@ PI = 3.14159267
 DT = .016
 
 AMPLITUDE = .0 #12
-INIT_THETA_DEV = 0
+INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
 OPM_METHOD = 'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
@@ -40,6 +40,7 @@ SIGMA_THETADOTDOT = .2
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
 RUN_LOOP_TIME = 20
+
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
