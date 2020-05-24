@@ -12,20 +12,20 @@ PI = 3.14159267
 
 DT = .067
 
-AMPLITUDE = .0 #1 #12
+AMPLITUDE = .08 #1 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
 OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_V = 0.5
+MAX_V = 1.0
 MAX_A = .5
 MAX_A_CTRL = 3 #3
 MAX_JERK = 20.0 #20
 
 # Dyn params
-ALPHA = 200 #736
+ALPHA = 90 #736
 BETA = -90
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -40,17 +40,17 @@ SIGMA_THETADOTDOT = .10 #.005 #.2
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 20
+RUN_LOOP_TIME = 40
 
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':2,
-                        'D_pos':4,
-                        'I_pos':0.5,
-                        'P_theta':1.50,
+                        'D_pos':25,
+                        'I_pos':1.0,
+                        'P_theta':7.00,
                         'D_theta':10,
-                        'I_theta':1.0, #1.5,
+                        'I_theta':4, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
