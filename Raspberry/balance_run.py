@@ -125,7 +125,8 @@ def balance_loop(ser, run_time_max=10,
     if kl is None:
         print('New KL')
         kl = get_patric_kalman(np.array([state_dict['theta'][1],
-                                         state_dict['thetadot'][1]]), DT)
+                                         state_dict['thetadot'][1]]),
+                               state_dict['dt'])
 
     # enable the legs:
     enable_legs(ser, MODE)
