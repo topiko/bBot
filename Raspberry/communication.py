@@ -1,6 +1,7 @@
 import time
 from params import PI
 import numpy as np
+
 BITS_RESERVED = [2, 11, 11]
 NBYTES = 3
 ANGLE_FACTOR = -20860.

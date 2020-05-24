@@ -33,7 +33,7 @@ class KLFilter():
         self.n = n
         self.x = x.reshape(-1, 1)
         try:
-            kl_matrx = np.load('kl_mats.npy').item()
+            kl_matrx = np.load('kl_mats.npy', allow_pickle=True).item()
             P = kl_matrx['P']
             K = kl_matrx['K']
             Q = kl_matrx['Q']
@@ -50,9 +50,9 @@ class KLFilter():
         self.R = R #np.diag([.1, .1*np.sqrt(2)]) if R is None else R
         self.H = np.eye(2) #np.array([[1, 0], [0, 1]])
         self.B = B #np.zeros(self.x.shape) if B is None else B
- 
+
     def store(self):
-        kl_matrx = {'P':self.P, 'K':self.K, 'Q':self.Q, 'R':self.R, 'F':self.F}
+        kl_matrx = {'P':self.P, 'F':self.F}
         np.save('kl_mats.npy', kl_matrx)
 
     def predict(self, control_input=None):

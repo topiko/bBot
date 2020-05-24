@@ -195,6 +195,7 @@ def optimize_params():
     """
     Optimizes various parameters using some optimization...
     """
+    show = False
     ctrl_params_dict = CTRL_PARAMS_DICT
     def params_to_dict_(params):
         ctrl_params_dict['P_pos'] = params[0]
@@ -216,7 +217,7 @@ def optimize_params():
 
     def opm_callback_(params, convergence=None): #, opm_state):
         np.save('ctrl_params.npy', params_to_dict_(params))
-        if MODE.startswith('simul'):
+        if MODE.startswith('simul') and show:
             ser = simulate_patric(dt=DT)
             run_array = run_balancing(ser,
                                       ctrl_params_dict=params_to_dict_(params),
