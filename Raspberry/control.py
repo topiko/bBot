@@ -129,11 +129,11 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     delta_theta = theta - target_theta
     delta_thetadot = thetadot
 
-    #if np.sign(delta_theta) != np.sign(state_dict['I_theta']):
-    #    state_dict['I_theta'] += delta_theta * state_dict['dt']
-    #else:
-    #    state_dict['I_theta'] = delta_theta * state_dict['dt']
-    state_dict['I_theta'] += delta_theta * state_dict['dt']
+    if np.sign(delta_theta) != np.sign(state_dict['I_theta']):
+        state_dict['I_theta'] += delta_theta * state_dict['dt']
+    else:
+        state_dict['I_theta'] = delta_theta * state_dict['dt']
+    #state_dict['I_theta'] += delta_theta * state_dict['dt']
 
     target_thetadotdot = get_PID(delta_theta,
                                  state_dict['I_theta'],
