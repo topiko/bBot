@@ -88,7 +88,7 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     delta_l = state_dict['run_l'][0] - cmd_dict['target_l']
     delta_l_dot = state_dict['v'][0] - cmd_dict['target_v']
 
-    if np.sign(delta_l) != np.sign(state_dict['I_pos']):
+    if np.sign(delta_l) == np.sign(state_dict['I_pos']):
         state_dict['I_pos'] += delta_l * state_dict['dt']
     else:
         state_dict['I_pos'] = delta_l * state_dict['dt']
@@ -129,7 +129,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     delta_theta = theta - target_theta
     delta_thetadot = thetadot
 
-    if np.sign(delta_theta) != np.sign(state_dict['I_theta']):
+    if np.sign(delta_theta) == np.sign(state_dict['I_theta']):
         state_dict['I_theta'] += delta_theta * state_dict['dt']
     else:
         state_dict['I_theta'] = delta_theta * state_dict['dt']
@@ -145,9 +145,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     state_dict['target_thetadotdot'] = \
             update_array(state_dict['target_thetadotdot'],
                          target_thetadotdot)
-    #accel = accel_multip * (ALPHA * GRAVITY_ACCEL * np.sin(deg_to_rad(theta - UPRIGHT_THETA)) \
-     #        - target_thetadotdot) \
-     #       / (ALPHA*np.cos(deg_to_rad(theta - UPRIGHT_THETA))) # - BETA)
+
     accel = accel_multip * (GRAVITY_ACCEL * np.tan(deg_to_rad(theta - UPRIGHT_THETA)) \
           - target_thetadotdot / (ALPHA * np.cos(deg_to_rad(theta - UPRIGHT_THETA))))
 
