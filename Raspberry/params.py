@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .067
 
-AMPLITUDE = .08 #1 #12
+AMPLITUDE = .00 #1 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
@@ -26,8 +26,8 @@ MAX_JERK = 15.0 #20
 
 # Dyn params
 LCM = 0.05 # Distance of center of mass from wheel axle
-MASS = 1.5 # mass of the robot
-J = MASS * LCM**2  # moment of inertia
+MASS = 1.0 # mass of the robot
+J = 0.12**2 #MASS * LCM**2  # moment of inertia
 
 ALPHA = (MASS * LCM / J) * (180 / PI) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
@@ -51,9 +51,9 @@ except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':2,
                         'D_pos':25,
                         'I_pos':1.0,
-                        'P_theta':1.00,
-                        'D_theta':3,
-                        'I_theta':.1, #1.5,
+                        'P_theta':10.00,
+                        'D_theta':40,
+                        'I_theta':2, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
