@@ -22,10 +22,10 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 MAX_V = 1.0
 MAX_A = .5
 MAX_A_CTRL = 3 #3
-MAX_JERK = 20.0 #20
+MAX_JERK = 15.0 #20
 
 # Dyn params
-ALPHA = 90 #736
+ALPHA = 40 #736
 BETA = -90
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -48,9 +48,9 @@ except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':2,
                         'D_pos':25,
                         'I_pos':1.0,
-                        'P_theta':7.00,
-                        'D_theta':10,
-                        'I_theta':4, #1.5,
+                        'P_theta':1.00,
+                        'D_theta':3,
+                        'I_theta':.1, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
