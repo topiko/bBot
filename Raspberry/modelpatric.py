@@ -1,7 +1,7 @@
-from params import ALPHA, GRAVITY_ACCEL, UPRIGHT_THETA, BETA
+from params import ALPHA, GRAVITY_ACCEL, UPRIGHT_THETA
 import numpy as np
 
-def get_thetadotdot(theta, accel, alpha=ALPHA, beta=BETA):
+def get_thetadotdot(theta, accel, alpha=ALPHA):
     """
     Get the reaction in thetadotdot for given theta and accel
     """

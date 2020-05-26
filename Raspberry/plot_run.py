@@ -46,7 +46,7 @@ def plot_dynamics(run_data): #, theta_test):
 
     alpha, beta = fit_model(run_data)
     axarr[2].plot(times,
-                  get_thetadotdot(thetas, accel, alpha, beta),
+                  get_thetadotdot(thetas, accel, alpha),
                   label='Fitted alpha={:.0f}, beta={:.0f}'.format(alpha, beta))
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
     axarr[2].legend()
@@ -76,7 +76,7 @@ def fit_model(run_data):
     def get_thetadotdot_wrap(xdat, alpha, beta):
         thetas = xdat[:, 0]
         accel = xdat[:, 1]
-        return get_thetadotdot(thetas, accel, alpha, beta)
+        return get_thetadotdot(thetas, accel, alpha) #, beta)
 
     xdat = np.vstack((thetas, accel)).T
     alpha, beta = curve_fit(get_thetadotdot_wrap, xdat, thetadotdots, [500, -100])[0]

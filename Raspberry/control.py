@@ -7,7 +7,7 @@ from state import update_array
 from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
-        PI, ALPHA, BETA, MAX_A, MAX_A_CTRL, \
+        PI, ALPHA, MAX_A, MAX_A_CTRL, \
         MAX_V, MAX_JERK
 from communication import disable_all, enable_legs, talk
 import time

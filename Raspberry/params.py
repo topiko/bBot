@@ -25,11 +25,14 @@ MAX_A_CTRL = 3 #3
 MAX_JERK = 15.0 #20
 
 # Dyn params
-ALPHA = 40 #736
-BETA = -90
+LCM = 0.05 # Distance of center of mass from wheel axle
+MASS = 1.5 # mass of the robot
+J = MASS * LCM**2  # moment of inertia
+
+ALPHA = (MASS * LCM / J) * (180 / PI) #40 #736
+print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
-BETA_SIMUL = BETA #- 20
 
 GRAVITY_ACCEL = 9.81
 
