@@ -1,4 +1,4 @@
-from params import ALPHA, GRAVITY_ACCEL, UPRIGHT_THETA
+from params import ALPHA, GRAVITY_ACCEL, UPRIGHT_THETA, PI
 import numpy as np
 
 def get_thetadotdot(theta, accel, alpha=ALPHA):
@@ -7,5 +7,5 @@ def get_thetadotdot(theta, accel, alpha=ALPHA):
     """
     theta = (theta - UPRIGHT_THETA)/180*np.pi
     #return ALPHA * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) # / np.pi * 180
-    return alpha * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) # + beta * accel
+    return alpha * (GRAVITY_ACCEL * np.sin(theta) - np.cos(theta) * accel) / PI * 180 # + beta * accel
 

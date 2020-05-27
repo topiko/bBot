@@ -2,7 +2,7 @@
 Implement simple Kalman filter.
 """
 import numpy as np
-from params import SIGMA_THETA, SIGMA_THETADOTDOT
+from params import SIGMA_THETA, SIGMA_THETADOTDOT, KL_USE_INPUT
 
 def get_patric_kalman(init_state, dt):
     """
@@ -27,7 +27,7 @@ class KLFilter():
     """
     Very simple Kalman filter.
     """
-    def __init__(self, x, F=None, P=None, R=None, Q=None, B=None):
+    def __init__(self, x, F=None, P=None, R=None, Q=None, B=None, use_input=KL_USE_INPUT):
 
         n = len(x)
         self.n = n
@@ -39,7 +39,7 @@ class KLFilter():
         except FileNotFoundError:
             pass
 
-
+        self.use_input = use_input
         self.P = P #if P is not None else np.eye(n)*1000
         self.Q = Q #np.array([[.25, .5], [.5, .1]]) if Q is None else Q
         self.F = F #if F is not None else np.eye(n)
@@ -57,8 +57,7 @@ class KLFilter():
         """
         Predict the state.
         """
-
-        if control_input is not None:
+        if self.use_input and (control_input is not None):
             control_effect = self.B*control_input
         else:
             control_effect = np.zeros(self.x.shape)

@@ -29,7 +29,7 @@ LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.12**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = (MASS * LCM / J) * (180 / PI) #40 #736
+ALPHA = (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -39,7 +39,7 @@ GRAVITY_ACCEL = 9.81
 # Uncertainty in theta measurement
 SIGMA_THETA = .025**2 # .015**2
 SIGMA_THETADOTDOT = .10 #.005 #.2
-
+KL_USE_INPUT = False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5

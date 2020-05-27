@@ -63,11 +63,16 @@ def relocate(ser, run_l):
         print('relocating', cmd, vcmd)
     disable_all(ser, {'mode':'run'})
 
-def get_PID(x, Int, xdot, P, I, D):
+def get_PID(x, int_x, xdot, P, I, D, dt):
     """
     Simple PID, Int term needs to be evaulated outside.
     """
-    return -P*x - Int*I - xdot*D
+    if np.sign(x) == np.sign(int_x):
+        int_x += x * dt
+    else:
+        int_x = x * dt
+
+    return -P*x - int_x * I - xdot*D, int_x
 
 def get_xdd_damp_osc(x, xdot, omega, khi):
     """
@@ -88,17 +93,18 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     delta_l = state_dict['run_l'][0] - cmd_dict['target_l']
     delta_l_dot = state_dict['v'][0] - cmd_dict['target_v']
 
-    if np.sign(delta_l) == np.sign(state_dict['I_pos']):
-        state_dict['I_pos'] += delta_l * state_dict['dt']
-    else:
-        state_dict['I_pos'] = delta_l * state_dict['dt']
+    #if np.sign(delta_l) == np.sign(state_dict['I_pos']):
+    #    state_dict['I_pos'] += delta_l * state_dict['dt']
+    #else:
+    #    state_dict['I_pos'] = delta_l * state_dict['dt']
 
-    target_a = get_PID(delta_l,
-                       state_dict['I_pos'],
-                       delta_l_dot,
-                       ctrl_params_dict['P_pos'],
-                       ctrl_params_dict['I_pos'],
-                       ctrl_params_dict['D_pos'])
+    target_a, state_dict['I_pos'] = get_PID(delta_l,
+                                            state_dict['I_pos'],
+                                            delta_l_dot,
+                                            ctrl_params_dict['P_pos'],
+                                            ctrl_params_dict['I_pos'],
+                                            ctrl_params_dict['D_pos'],
+                                            state_dict['dt'])
 
     target_a = np.clip(target_a, -MAX_A, MAX_A)
     if ((state_dict['v'][0] < -MAX_V) & (delta_l > MAX_A / 2 * 2**2)) or \
@@ -129,25 +135,21 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     delta_theta = theta - target_theta
     delta_thetadot = thetadot
 
-    if np.sign(delta_theta) == np.sign(state_dict['I_theta']):
-        state_dict['I_theta'] += delta_theta * state_dict['dt']
-    else:
-        state_dict['I_theta'] = delta_theta * state_dict['dt']
-    #state_dict['I_theta'] += delta_theta * state_dict['dt']
-
-    target_thetadotdot = get_PID(delta_theta,
-                                 state_dict['I_theta'],
-                                 delta_thetadot,
-                                 ctrl_params_dict['P_theta'],
-                                 ctrl_params_dict['I_theta'],
-                                 ctrl_params_dict['D_theta'])
+    target_thetadotdot, state_dict['I_theta'] \
+            = get_PID(delta_theta,
+                      state_dict['I_theta'],
+                      delta_thetadot,
+                      ctrl_params_dict['P_theta'],
+                      ctrl_params_dict['I_theta'],
+                      ctrl_params_dict['D_theta'],
+                      state_dict['dt'])
 
     state_dict['target_thetadotdot'] = \
             update_array(state_dict['target_thetadotdot'],
                          target_thetadotdot)
 
     accel = accel_multip * (GRAVITY_ACCEL * np.tan(deg_to_rad(theta - UPRIGHT_THETA)) \
-          - target_thetadotdot / (ALPHA * np.cos(deg_to_rad(theta - UPRIGHT_THETA))))
+        - (target_thetadotdot / 180 * PI) / (ALPHA * np.cos(deg_to_rad(theta - UPRIGHT_THETA))))
 
     dt = state_dict['dt']
     cur_accel = state_dict['a'][0]
