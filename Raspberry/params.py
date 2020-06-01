@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .067
 
-AMPLITUDE = .00 #1 #12
+AMPLITUDE = .0 #1 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
@@ -20,16 +20,16 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
 MAX_V = 0.3
-MAX_A = 0.5
-MAX_A_CTRL = 3 #3
-MAX_JERK = 10.0 #20
+MAX_A = 0.2
+MAX_A_CTRL = 2 #3
+MAX_JERK = 100.0 #20
 
 # Dyn params
 LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = (MASS * LCM / J) #40 #736
+ALPHA = 6.5 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -49,11 +49,11 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':5,
-                        'D_pos':25,
+                        'D_pos':5,
                         'I_pos':0.0,
-                        'P_theta':3.00,
-                        'D_theta':12,
-                        'I_theta':.5, #1.5,
+                        'P_theta':25,
+                        'D_theta':20,
+                        'I_theta':1, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
