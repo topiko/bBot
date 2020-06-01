@@ -154,10 +154,10 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
     dt = state_dict['dt']
     cur_accel = state_dict['a'][0]
 
-    if (not state_dict['mode'].startswith('simul')) \
-       and (abs(accel - cur_accel) > MAX_JERK * dt):
-        print('MAX Jerk triggered: cur_a = {:.2f} --> {:.2f}'.format(cur_accel,
-                                                                     accel))
+    #if (not state_dict['mode'].startswith('simul')) \
+    #   and (abs(accel - cur_accel) > MAX_JERK * dt):
+    #    print('MAX Jerk triggered: cur_a = {:.2f} --> {:.2f}'.format(cur_accel,
+    #                                                                 accel))
     accel = np.clip(accel,
                     cur_accel - MAX_JERK * dt,
                     cur_accel + MAX_JERK * dt)
