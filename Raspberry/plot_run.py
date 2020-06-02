@@ -3,6 +3,7 @@ import numpy as np
 from modelpatric import get_thetadotdot
 from score import score_run
 from scipy.optimize import curve_fit
+from params import ALPHA
 import os
 
 def plot_dynamics(run_data): #, theta_test):
@@ -31,24 +32,28 @@ def plot_dynamics(run_data): #, theta_test):
                               ['theta', 'thetadot', 'thetadotdot', 'run_l', 'vel', 'accel']):
         ax.plot(times, dat, '-+')
         ax.set_title(title)
+        ax.grid(True)
 
-
-    axarr[0].plot(times, run_data['theta_measured'], label='measured')
+    axarr[0].plot(times, run_data['theta_measured'], label='measured', lw=.5, alpha=.5)
     axarr[0].plot(times, target_thetas, label='targeted')
     axarr[0].legend()
 
-    axarr[1].plot(times, run_data['thetadot_measured'], label='measured')
+    axarr[1].plot(times, run_data['thetadot_measured'], label='measured', lw=.5, alpha=.5)
     axarr[1].legend()
 
-    axarr[2].plot(times, run_data['thetadotdot_measured'], label='measured')
+    axarr[2].plot(times, run_data['thetadotdot_measured'], label='measured', lw=.5, alpha=.5)
     #axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
     axarr[2].plot(times, target_thetadotdot, label='targeted')
 
     alpha, beta = fit_model(run_data)
     axarr[2].plot(times,
                   get_thetadotdot(thetas, accel, alpha),
-                  label='Fitted alpha={:.0f}, beta={:.0f}'.format(alpha, beta))
+                  label='Fitted alpha={:.1f}'.format(alpha))
     # axarr[2].plot(theta_test[:, 0], theta_test[:, 3], label='model_2')
+    axarr[2].plot(times,
+                  get_thetadotdot(thetas, accel, ALPHA),
+                  label='CUR alpha={:.1f}'.format(ALPHA))
+
     axarr[2].legend()
 
     axarr[3].plot(times, target_l, label='target')
