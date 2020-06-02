@@ -8,7 +8,7 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
         PI, ALPHA, MAX_A, MAX_A_CTRL, \
-        MAX_V, MAX_JERK
+        MAX_V, MAX_JERK, KAPPA_D_THETA
 from communication import disable_all, enable_legs, talk
 import time
 
@@ -63,10 +63,13 @@ def relocate(ser, run_l):
         print('relocating', cmd, vcmd)
     disable_all(ser, {'mode':'run'})
 
-def get_PID(x, int_x, xdot, P, I, D, dt):
+def get_PID(x, int_x, xdot, P, I, D, dt, kappa_D=None):
     """
     Simple PID, Int term needs to be evaulated outside.
     """
+    if kappa_D is not None:
+        D = D * np.exp(-kappa_D * x)
+
     if np.sign(x) == np.sign(int_x):
         int_x += x * dt
     else:
@@ -87,16 +90,8 @@ def get_target_theta(state_dict, cmd_dict, ctrl_params_dict):
     Updates the target theta based on current velocity.
     """
 
-    #damping_ratio = ctrl_params_dict['damp_pos']
-    #omega = ctrl_params_dict['omega_pos']
-
     delta_l = state_dict['run_l'][0] - cmd_dict['target_l']
     delta_l_dot = state_dict['v'][0] - cmd_dict['target_v']
-
-    #if np.sign(delta_l) == np.sign(state_dict['I_pos']):
-    #    state_dict['I_pos'] += delta_l * state_dict['dt']
-    #else:
-    #    state_dict['I_pos'] = delta_l * state_dict['dt']
 
     target_a, state_dict['I_pos'] = get_PID(delta_l,
                                             state_dict['I_pos'],
@@ -142,7 +137,8 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
                       ctrl_params_dict['P_theta'],
                       ctrl_params_dict['I_theta'],
                       ctrl_params_dict['D_theta'],
-                      state_dict['dt'])
+                      state_dict['dt'],
+                      kappa_D=KAPPA_D_THETA)
 
     state_dict['target_thetadotdot'] = \
             update_array(state_dict['target_thetadotdot'],
