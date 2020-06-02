@@ -4,7 +4,9 @@ Implement simple Kalman filter.
 import numpy as np
 from params import SIGMA_THETA, SIGMA_THETADOTDOT, KL_USE_INPUT
 
-def get_patric_kalman(init_state, dt):
+def get_patric_kalman(init_state, dt,
+                      sigma_theta=SIGMA_THETA,
+                      sigma_thetadotdot=SIGMA_THETADOTDOT):
     """
     Get kalman filter object that is tuned for patric
     """
@@ -13,11 +15,11 @@ def get_patric_kalman(init_state, dt):
 
     P = np.eye(2)*1000
     R = np.array([[1, 1/dt],
-                  [1/dt, 2/dt**2]])*SIGMA_THETA**2
+                  [1/dt, 2/dt**2]])*sigma_theta**2
     B = np.array([[1./2*dt**2],
                   [dt]]) #None
     Q = np.array([[1/4*dt**4, 1/2*dt**3],
-                  [1/2*dt**3, dt**2]])*SIGMA_THETADOTDOT**2
+                  [1/2*dt**3, dt**2]])*sigma_thetadotdot**2
 
 
     return  KLFilter(init_state, F=F, P=P, R=R, Q=Q, B=B)

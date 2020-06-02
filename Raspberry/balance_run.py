@@ -123,10 +123,17 @@ def balance_loop(ser, run_time_max=10,
         store_arr = np.zeros(imax).astype(dtypes)
     # Request the Kalman filter:
     if kl is None:
-        print('New KL')
-        kl = get_patric_kalman(np.array([state_dict['theta'][1],
-                                         state_dict['thetadot'][1]]),
-                               state_dict['dt'])
+        if not MODE.startswith('simul'):
+            print('New KL')
+            kl = get_patric_kalman(np.array([state_dict['theta'][1],
+                                             state_dict['thetadot'][1]]),
+                                             state_dict['dt'])
+        else:
+            print('WARNING: kl-filter modified since simulation.')
+            kl = get_patric_kalman(np.array([state_dict['theta'][1],
+                                             state_dict['thetadot'][1]]),
+                                             state_dict['dt'],
+                                             sigma_thetadotdot=1.00)
 
     # enable the legs:
     enable_legs(ser, MODE)
@@ -262,7 +269,7 @@ def optimize_params():
                        #bounds=bounds,
                        method='L-BFGS-B', callback=opm_callback_)
     elif OPM_METHOD == 'diff_evo':
-        bounds = [(0, 100)]*3 + [(0, 1000)]*3
+        bounds = [(0, 10)]*3 + [(0, 100)]*3
         differential_evolution(get_balance_score_from_params_, bounds,
                                strategy='best1bin',
                                maxiter=1000,
@@ -319,7 +326,7 @@ def run_balancing(ser,
                          run_time_max=run_time_max,
                          ctrl_params_dict=ctrl_params_dict)
 
-    if status == 'upright':
+    if (status == 'upright') and (kl is not None):
         kl.store()
 
     np.save('orient.npy', run_data)
