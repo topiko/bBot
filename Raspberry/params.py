@@ -43,19 +43,19 @@ KL_USE_INPUT = False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 40
+RUN_LOOP_TIME = 10
 
-KAPPA_D_THETA = 1/2
+KAPPA_D_THETA = None #1/2
 
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':5,
-                        'D_pos':10,
+    CTRL_PARAMS_DICT = {'P_pos':0,
+                        'D_pos':0,
                         'I_pos':0.0,
-                        'P_theta':35,
-                        'D_theta':45,
-                        'I_theta':7, #1.5,
+                        'P_theta':2,
+                        'D_theta':7,
+                        'I_theta':.2, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
