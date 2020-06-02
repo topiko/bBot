@@ -10,9 +10,9 @@ WHEEL_DIA = .09
 RAIL_W = .078
 PI = 3.14159267
 
-DT = .067
+DT = .016
 
-AMPLITUDE = .0 #1 #12
+AMPLITUDE = .05 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
@@ -21,7 +21,7 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 # maximum targeted accel:
 MAX_V = 0.3
 MAX_A = 0.2
-MAX_A_CTRL = 2 #3
+MAX_A_CTRL = 3
 MAX_JERK = 100.0 #20
 
 # Dyn params
@@ -44,6 +44,8 @@ KL_USE_INPUT = False
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
 RUN_LOOP_TIME = 40
+
+KAPPA_D_THETA = 1/2
 
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
