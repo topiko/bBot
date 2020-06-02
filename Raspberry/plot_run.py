@@ -63,6 +63,7 @@ def plot_dynamics(run_data): #, theta_test):
     axarr[4].legend()
 
     axarr[5].plot(times, target_a, label='target')
+    axarr[5].plot(times, np.gradient(vel, times), label='grad_v')
     axarr[5].legend()
 
     plt.tight_layout()

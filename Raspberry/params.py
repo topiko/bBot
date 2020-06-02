@@ -22,7 +22,7 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 MAX_V = 0.3
 MAX_A = 0.2
 MAX_A_CTRL = 3
-MAX_JERK = 50.0 #20
+MAX_JERK = 150.0 #20
 
 # Dyn params
 LCM = 0.05 # Distance of center of mass from wheel axle
