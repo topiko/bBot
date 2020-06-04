@@ -68,7 +68,7 @@ def get_PID(x, int_x, xdot, P, I, D, dt, kappa_D=None):
     Simple PID, Int term needs to be evaulated outside.
     """
     if kappa_D is not None:
-        D = D * np.exp(-kappa_D * x)
+        D = D * np.exp(-kappa_D * np.absolute(x))
 
     if np.sign(x) == np.sign(int_x):
         int_x += x * dt
