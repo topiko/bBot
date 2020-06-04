@@ -21,7 +21,7 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 # maximum targeted accel:
 MAX_V = 0.3
 MAX_A = 0.2
-MAX_A_CTRL = 3
+MAX_A_CTRL = 9
 MAX_JERK = 150.0 #20
 
 # Dyn params
@@ -29,7 +29,7 @@ LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = 4.5 # (MASS * LCM / J) #40 #736
+ALPHA = 5.5 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -38,7 +38,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .15 #.005 #.2
+SIGMA_THETADOTDOT = .20 #.005 #.2
 KL_USE_INPUT = False
 
 SIMUL_LOOP_TIME = 22.5
@@ -50,11 +50,11 @@ KAPPA_D_THETA = None #1/2
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':0,
+    CTRL_PARAMS_DICT = {'P_pos':5,
                         'D_pos':0,
                         'I_pos':0.0,
-                        'P_theta':2,
-                        'D_theta':7,
+                        'P_theta':4,
+                        'D_theta':10,
                         'I_theta':.2, #1.5,
                         'accel_mltp':1.0}
 
