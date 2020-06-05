@@ -23,10 +23,10 @@ def v_to_cmd_int(vel):
     cmd = steps_per_sec / ARDUINO_STEP_MULTIP
 
     if cmd > 1023:
-        print('Warning: reducinf vint')
+        print('Warning: reducinf vint, v={}'.format(vel))
         cmd = 1023
     elif cmd < -1024:
-        print('Warning: reducinf vint')
+        print('Warning: reducinf vint, v={}'.format(vel))
         cmd = -1024
 
     return int(cmd)

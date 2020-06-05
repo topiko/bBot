@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .1 #12
+AMPLITUDE = .0 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
@@ -22,7 +22,8 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 MAX_V = 0.3
 MAX_A = 0.5
 MAX_A_CTRL = 30
-MAX_V_CTRL = (STEPS_PER_REV*ARDUINO_STEP_MULTIP / 1024)*PI*WHEEL_DIA
+MAX_V_CTRL = (1024 * ARDUINO_STEP_MULTIP / STEPS_PER_REV) * PI*WHEEL_DIA
+
 MAX_JERK = 50.0 #20
 
 # Dyn params
