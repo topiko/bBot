@@ -3,7 +3,7 @@ Various physical parameters
 """
 import numpy as np
 
-UPRIGHT_THETA = 15.2
+UPRIGHT_THETA = 14.5 #15.2 Usuakky
 STEPS_PER_REV = 1600 # used to be 400 This would then be 200*8...
 ARDUINO_STEP_MULTIP = 4 # Maybe 3 is better...
 WHEEL_DIA = .09
@@ -20,10 +20,10 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
 MAX_V = 0.3
-MAX_A = 0.2
-MAX_A_CTRL = 9
+MAX_A = 0.5
+MAX_A_CTRL = 30
 MAX_V_CTRL = (STEPS_PER_REV*ARDUINO_STEP_MULTIP / 1024)*PI*WHEEL_DIA
-MAX_JERK = 150.0 #20
+MAX_JERK = 50.0 #20
 
 # Dyn params
 LCM = 0.05 # Distance of center of mass from wheel axle
@@ -40,11 +40,11 @@ GRAVITY_ACCEL = 9.81
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
 SIGMA_THETADOTDOT = .17 # 0.15 is a good value
-KL_USE_INPUT = False
+KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 10
+RUN_LOOP_TIME = 30
 
 KAPPA_D_THETA = None #1/2
 
@@ -52,12 +52,12 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':5,
-                        'D_pos':0,
+                        'D_pos':5,
                         'I_pos':0.0,
-                        'P_theta':4,
-                        'D_theta':10,
-                        'I_theta':.2, #1.5,
-                        'accel_mltp':1.0}
+                        'P_theta':8,
+                        'D_theta':20,
+                        'I_theta':2, #1.5,
+                        'accel_mltp':1.5}
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}
