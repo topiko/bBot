@@ -22,6 +22,7 @@ OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 MAX_V = 0.3
 MAX_A = 0.2
 MAX_A_CTRL = 9
+MAX_V_CTRL = (STEPS_PER_REV*ARDUINO_STEP_MULTIP / 1024)*PI*WHEEL_DIA
 MAX_JERK = 150.0 #20
 
 # Dyn params
@@ -38,7 +39,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .20 #.005 #.2
+SIGMA_THETADOTDOT = .17 # 0.15 is a good value
 KL_USE_INPUT = False
 
 SIMUL_LOOP_TIME = 22.5

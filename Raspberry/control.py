@@ -1,6 +1,7 @@
 """
 This is the control packag
 """
+import time
 import numpy as np
 #from simple_pid import PID
 from state import update_array
@@ -8,9 +9,8 @@ from params import WHEEL_DIA, UPRIGHT_THETA, \
         ARDUINO_STEP_MULTIP, RAIL_W, \
         STEPS_PER_REV, GRAVITY_ACCEL, \
         PI, ALPHA, MAX_A, MAX_A_CTRL, \
-        MAX_V, MAX_JERK, KAPPA_D_THETA
+        MAX_V, MAX_JERK, KAPPA_D_THETA, MAX_V_CTRL
 from communication import disable_all, enable_legs, talk
-import time
 
 #CTRL_PID = PID(PID_P, PID_I, PID_D, setpoint=UPRIGHT_THETA)
 
@@ -177,7 +177,12 @@ def react(state_dict, cmd_dict, ctrl_params_dict):
 
     accel = get_a_03(state_dict, cmd_dict, ctrl_params_dict)
 
-    cmd_dict['v'] = v_now + accel*state_dict['dt'] #delta_t
+    v_next = v_now + accel*state_dict['dt'] #delta_t
+    if np.absolute(v_next) > MAX_V_CTRL:
+        accel = 0
+        v_next = v_now
+        print('Warning: Suggested v (={:.2f}m/s) is larger than max possible ({:.2f}m/s)'.format(v_next, MAX_V_CTRL))
+    cmd_dict['v'] = v_next
     cmd_dict['a'] = accel
 
     state_dict['target_a'] = update_array(state_dict['target_a'], cmd_dict['target_a'])
