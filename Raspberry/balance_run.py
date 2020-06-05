@@ -340,6 +340,18 @@ def run_balancing(ser,
     else:
         return None
 
+def move_distance(ser):
+    enable_motors(ser)
+    T0 = time.now()
+    DT = 1
+    vint = 10
+    while t < T0 + DT:
+        talk(ser, {'mode':MODE}, {'cmd':[0, vint, vint]})
+        time.sleep(.2)
+        listen(ser)
+        t = time.now()
+    disable_all(ser, {'mode':MODE})
+
 if __name__ == '__main__':
     if MODE == 'simulate':
         display_simulation(SER, balance_loop)
@@ -347,6 +359,8 @@ if __name__ == '__main__':
         optimize_params()
     elif MODE == 'optimize':
         optimize_params()
+    elif MODE == 'move':
+        move_distance(SER)
     else:
         try:
             while True:
