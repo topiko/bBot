@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .0 #12
+AMPLITUDE = .1 #12
 INIT_THETA_DEV = 1
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
@@ -39,7 +39,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .17 # 0.15 is a good value
+SIGMA_THETADOTDOT = .10 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
@@ -55,7 +55,7 @@ except FileNotFoundError:
                         'D_pos':5,
                         'I_pos':0.0,
                         'P_theta':8,
-                        'D_theta':20,
+                        'D_theta':25,
                         'I_theta':2, #1.5,
                         'accel_mltp':1.5}
 
