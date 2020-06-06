@@ -5,7 +5,7 @@ import numpy as np
 
 UPRIGHT_THETA = 14.5 #15.2 Usuakky
 STEPS_PER_REV = 1600 # used to be 400 This would then be 200*8...
-ARDUINO_STEP_MULTIP = 4 # Maybe 3 is better...
+ARDUINO_STEP_MULTIP = 12 # 4 Maybe 3 is better...
 WHEEL_DIA = .09
 RAIL_W = .078
 PI = 3.14159267
@@ -31,7 +31,7 @@ LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = 5.5 # (MASS * LCM / J) #40 #736
+ALPHA = 3.3 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -40,7 +40,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .10 # 0.15 is a good value
+SIGMA_THETADOTDOT = .15 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
@@ -52,13 +52,13 @@ KAPPA_D_THETA = None #1/2
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':5,
-                        'D_pos':5,
+    CTRL_PARAMS_DICT = {'P_pos':10,
+                        'D_pos':20,
                         'I_pos':0.0,
-                        'P_theta':8,
-                        'D_theta':25,
-                        'I_theta':2, #1.5,
-                        'accel_mltp':1.5}
+                        'P_theta':30,
+                        'D_theta':55,
+                        'I_theta':5, #1.5,
+                        'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
 #                        'omega_theta':1/(.015*2*np.pi)}
