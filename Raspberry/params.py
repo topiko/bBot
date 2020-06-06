@@ -24,14 +24,14 @@ MAX_A = 0.5
 MAX_A_CTRL = 30
 MAX_V_CTRL = (1024 * ARDUINO_STEP_MULTIP / STEPS_PER_REV) * PI*WHEEL_DIA
 
-MAX_JERK = 50.0 #20
+MAX_JERK = 500 #20
 
 # Dyn params
 LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = 3.3 # (MASS * LCM / J) #40 #736
+ALPHA = 2.7 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -40,7 +40,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .15 # 0.15 is a good value
+SIGMA_THETADOTDOT = .10 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
@@ -55,8 +55,8 @@ except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':10,
                         'D_pos':20,
                         'I_pos':0.0,
-                        'P_theta':30,
-                        'D_theta':55,
+                        'P_theta':25,
+                        'D_theta':35,
                         'I_theta':5, #1.5,
                         'accel_mltp':1.0}
 
