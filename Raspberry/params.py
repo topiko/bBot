@@ -71,6 +71,6 @@ COLLECT_DATA = ['times', 'theta',
                 'target_x', 'target_y', 'target_v',
                 'target_l',
                 'run_l',
-                'v', 'a', 'x', 'y', 'phi',
+                'v', 'a', 'x', 'y', 'phi', 'a1', 'a2',
                 'target_a'] #, 'theta_predict']
 

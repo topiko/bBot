@@ -22,6 +22,8 @@ def plot_dynamics(run_data): #, theta_test):
     xpos = run_data['x']
     vel = run_data['v']
     accel = run_data['a']
+    a1 = run_data['a1']
+    a2 = run_data['a2']
     target_a = run_data['target_a']
 
     figh = 4
@@ -63,13 +65,19 @@ def plot_dynamics(run_data): #, theta_test):
     axarr[4].legend()
 
     axarr[5].plot(times, target_a, label='target')
-    axarr[5].plot(times, np.gradient(vel, times), label='grad_v')
+    #axarr[5].plot(times, np.gradient(vel, times), label='grad_v')
+    axarr[5].plot(times, a1, label='a1')
+    axarr[5].plot(times, a2, label='a2')
+    axarr[5].plot(times, a1+a2, label='a1+a2')
+
     axarr[5].legend()
 
     plt.tight_layout()
     fig.suptitle('Score {:.2f}'.format(score_run(run_data)))
     plt.show()
 
+    print('Time')
+    print(np.diff(times).mean(), np.diff(times).std())
 
 def fit_model(run_data):
 
