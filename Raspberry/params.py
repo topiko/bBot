@@ -52,7 +52,7 @@ KAPPA_D_THETA = None #1/2
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':5,
+    CTRL_PARAMS_DICT = {'P_pos':5.1,
                         'D_pos':5,
                         'I_pos':0.0,
                         'P_theta':8,
