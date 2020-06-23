@@ -40,7 +40,7 @@ GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
 SIGMA_THETA = .0070**2 # .015**2
-SIGMA_THETADOTDOT = .07 # 0.15 is a good value
+SIGMA_THETADOTDOT = .06 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
