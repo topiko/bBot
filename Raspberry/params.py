@@ -39,13 +39,13 @@ ALPHA_SIMUL = ALPHA # - 30
 GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
-SIGMA_THETA = .020**2 # .015**2
-SIGMA_THETADOTDOT = .10 # 0.15 is a good value
+SIGMA_THETA = .015**2 # .015**2
+SIGMA_THETADOTDOT = .15 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 30
+RUN_LOOP_TIME = 10
 
 KAPPA_D_THETA = None #1/2
 
