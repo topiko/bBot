@@ -39,25 +39,25 @@ ALPHA_SIMUL = ALPHA # - 30
 GRAVITY_ACCEL = 9.81
 
 # Uncertainty in theta measurement
-SIGMA_THETA = .015**2 # .015**2
-SIGMA_THETADOTDOT = .15 # 0.15 is a good value
+SIGMA_THETA = .0070**2 # .015**2
+SIGMA_THETADOTDOT = .07 # 0.15 is a good value
 KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 10
+RUN_LOOP_TIME = 20
 
 KAPPA_D_THETA = None #1/2
 
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':10,
-                        'D_pos':20,
+    CTRL_PARAMS_DICT = {'P_pos':1,
+                        'D_pos':1,
                         'I_pos':0.0,
-                        'P_theta':25,
-                        'D_theta':35,
-                        'I_theta':5, #1.5,
+                        'P_theta':9,
+                        'D_theta':15,
+                        'I_theta':1, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
