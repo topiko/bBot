@@ -26,8 +26,8 @@ def plot_dynamics(run_data): #, theta_test):
     a2 = run_data['a2']
     target_a = run_data['target_a']
 
-    figh = 4
-    figw = 10
+    figh = 8
+    figw = 6
     fig, axarr = plt.subplots(6, 1, figsize=(figw, figh*3), sharex = True)
     for ax, dat, title in zip(axarr.ravel(),
                               [thetas, thetadots, thetadotdots, run_l, vel, accel],
@@ -36,14 +36,14 @@ def plot_dynamics(run_data): #, theta_test):
         ax.set_title(title)
         ax.grid(True)
 
-    axarr[0].plot(times, run_data['theta_measured'], label='measured', lw=.5, alpha=.5)
+    axarr[0].plot(times, run_data['theta_measured'], label='measured', lw=1, alpha=.5)
     axarr[0].plot(times, target_thetas, label='targeted')
     axarr[0].legend()
 
-    axarr[1].plot(times, run_data['thetadot_measured'], label='measured', lw=.5, alpha=.5)
+    axarr[1].plot(times, run_data['thetadot_measured'], label='measured', lw=1, alpha=.5)
     axarr[1].legend()
 
-    axarr[2].plot(times, run_data['thetadotdot_measured'], label='measured', lw=.5, alpha=.5)
+    axarr[2].plot(times, run_data['thetadotdot_measured'], label='measured', lw=1, alpha=.5)
     #axarr[2].plot(times, get_thetadotdot(thetas, accel), label='model')
     axarr[2].plot(times, target_thetadotdot, label='targeted')
 
@@ -68,11 +68,12 @@ def plot_dynamics(run_data): #, theta_test):
     #axarr[5].plot(times, np.gradient(vel, times), label='grad_v')
     axarr[5].plot(times, a1, label='a1')
     axarr[5].plot(times, a2, label='a2')
+    print(a1 - a2)
     axarr[5].plot(times, a1+a2, label='a1+a2')
 
     axarr[5].legend()
 
-    plt.tight_layout()
+    #plt.tight_layout()
     fig.suptitle('Score {:.2f}'.format(score_run(run_data)))
     plt.show()
 
