@@ -150,7 +150,7 @@ def get_a_03(state_dict, cmd_dict, ctrl_params_dict):
 
     # used for debugging:
     state_dict['a1'] = update_array(state_dict['a1'], a1)
-    state_dict['a2'] = update_array(state_dict['a1'], a2)
+    state_dict['a2'] = update_array(state_dict['a2'], a2)
 
     accel = accel_multip * (a1 + a2)
     #accel = accel_multip * (GRAVITY_ACCEL * np.tan(deg_to_rad(theta - UPRIGHT_THETA)) \
