@@ -31,7 +31,7 @@ LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = 3.7 # (MASS * LCM / J) #40 #736
+ALPHA = 5.0 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -53,11 +53,11 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':5,
-                        'D_pos':20,
+                        'D_pos':1,
                         'I_pos':0.0,
-                        'P_theta':9,
-                        'D_theta':15,
-                        'I_theta':1, #1.5,
+                        'P_theta':85,
+                        'D_theta':20,
+                        'I_theta':10, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
