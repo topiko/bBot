@@ -343,13 +343,18 @@ def run_balancing(ser,
         return None
 
 def move_distance(ser):
+
+    from params import ARDUINO_STEP_MULTIP, STEPS_PER_REV, DT
+
     enable_motors(ser)
+    DT = 2
+    steps_per_sec = 1 / DT * STEPS_PER_REV
+    vint = steps_per_sec / ARDUINO_STEP_MULTIP
+
     T0 = time.now()
-    DT = 1
-    vint = 10
     while t < T0 + DT:
         talk(ser, {'mode':MODE}, {'cmd':[0, vint, vint]})
-        time.sleep(.2)
+        time.sleep(.02)
         listen(ser)
         t = time.now()
     disable_all(ser, {'mode':MODE})
