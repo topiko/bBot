@@ -20,6 +20,7 @@ def plot_dynamics(run_data): #, theta_test):
     target_l = run_data['target_l']
     run_l = run_data['run_l']
     xpos = run_data['x']
+    ypos = run_data['y']
     vel = run_data['v']
     accel = run_data['a']
     a1 = run_data['a1']
@@ -79,6 +80,13 @@ def plot_dynamics(run_data): #, theta_test):
 
     print('Time')
     print(np.diff(times).mean(), np.diff(times).std())
+
+    _, ax = plt.subplots(figsize=(12, 12))
+    ax.plot(xpos, ypos, '-x', lw=.5, ms=1)
+    ax.set_aspect('equal', 'box')
+    #plt.axes('equal')
+    plt.show()
+
 
 def fit_model(run_data):
 
