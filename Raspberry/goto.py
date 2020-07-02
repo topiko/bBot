@@ -18,15 +18,18 @@ def get_x_v_a(time, amp, state_dict):
         xpos = amp * np.cos(time / sin_period * np.pi * 2)
         vval = -amp * np.sin(time / sin_period * np.pi * 2) * 2 * np.pi / sin_period
         aval = amp * np.cos(time / sin_period * np.pi * 2) * (2 * np.pi / sin_period)**2
+        phidot = 0
     elif (sin_period / 2 < time) and (time < hold_period + sin_period / 2):
         xpos = -amp
         vval = 0
         aval = 0
+        phidot = 90/hold_period
     else:
         xpos = amp
         vval = 0
         aval = 0
-    return xpos, vval, aval
+        phidot = 90/hold_period
+    return xpos, vval, aval, phidot
 
 def get_x_v_a_2(time, amp, state_dict):
     """
