@@ -1,5 +1,5 @@
 import numpy as np
-
+from params import PHIDOT
 
 def get_x_v_a(time, amp, state_dict):
     """

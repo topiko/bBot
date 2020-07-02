@@ -3,10 +3,10 @@ Various physical parameters
 """
 import numpy as np
 
-UPRIGHT_THETA = 14.5 #15.2 Usuakky
+UPRIGHT_THETA = 15.5 #15.2 Usuakky
 STEPS_PER_REV = 1600 # used to be 400 This would then be 200*8...
-ARDUINO_STEP_MULTIP = 12 # 4 Maybe 3 is better...
-WHEEL_DIA = .09
+ARDUINO_STEP_MULTIP = 12 # 
+WHEEL_DIA = .092
 RAIL_W = .078
 PI = 3.14159267
 
@@ -14,6 +14,7 @@ DT = .016
 
 AMPLITUDE = .10 #12
 INIT_THETA_DEV = 1
+PHIDOT = 90
 
 # Method for optimizing the ctrl parameters: ('L-BFGS-B', 'brute')
 OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'

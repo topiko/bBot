@@ -1,5 +1,5 @@
 import numpy as np
-from params import UPRIGHT_THETA
+from params import UPRIGHT_THETA, PI
 from modelpatric import get_thetadotdot
 
 
@@ -41,13 +41,13 @@ def update_location(state_dict):
     """
 
     dt = state_dict['times'][0] - state_dict['times'][1]
-    dphi = state_dict['phidot'][1] * dt
+    dphi = state_dict['phidot'][1] / 180 * PI * dt
     dl = state_dict['v'][1] * dt
-    phi = state_dict['phi'][0]
+    phi = state_dict['phi'][0] / 180 * PI
 
     # update the turn angle:
     phi_now = phi + dphi
-    state_dict['phi'] = update_array(state_dict['phi'], phi_now)
+    state_dict['phi'] = update_array(state_dict['phi'], phi_now / PI * 180)
 
     # Update run length
     l_now = state_dict['run_l'][0] + dl
