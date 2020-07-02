@@ -29,7 +29,7 @@ def v_to_cmd_int(vel):
         print('Warning: reducinf vint, v={}'.format(vel))
         cmd = -1024
 
-    return int(cmd)
+    return int(round(cmd))
 
 def wheels_v_to_cmds(cmd_dict):
     """
