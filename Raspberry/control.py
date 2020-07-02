@@ -36,7 +36,7 @@ def wheels_v_to_cmds(cmd_dict):
     Get the individual wheel cmds from desired v and phidot.
     """
     vel = cmd_dict['v']
-    phidot = cmd_dict['phidot']
+    phidot = cmd_dict['phidot'] / 180 * PI
 
     v_l = vel - phidot * RAIL_W / 2
     v_r = vel + phidot * RAIL_W / 2
