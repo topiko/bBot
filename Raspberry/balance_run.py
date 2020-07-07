@@ -346,17 +346,24 @@ def move_distance(ser):
 
     from params import ARDUINO_STEP_MULTIP, STEPS_PER_REV, DT
 
-    enable_motors(ser)
-    DT = 2
-    steps_per_sec = 1 / DT * STEPS_PER_REV
-    vint = steps_per_sec / ARDUINO_STEP_MULTIP
+    enable_legs(ser, MODE)
+    DT = 5. #0
 
-    T0 = time.now()
-    while t < T0 + DT:
+    STEPS_PER_REV = 2400 #2201
+    steps_per_sec = STEPS_PER_REV / DT
+    vint = int(round(steps_per_sec / ARDUINO_STEP_MULTIP))
+    print('vint = ', vint)
+    print('steps per sec = ', vint * ARDUINO_STEP_MULTIP)
+    print('tot rounds = ', vint*ARDUINO_STEP_MULTIP / STEPS_PER_REV*DT)
+    T0 = time.time()
+    run_t = 0
+
+    while run_t <= DT:
         talk(ser, {'mode':MODE}, {'cmd':[0, vint, vint]})
-        time.sleep(.02)
-        listen(ser)
-        t = time.now()
+        time.sleep(.10)
+        listen(ser, mode=MODE)
+        run_t = time.time() - T0
+    print('run time = ', run_t)
     disable_all(ser, {'mode':MODE})
 
 if __name__ == '__main__':
