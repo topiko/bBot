@@ -1,4 +1,4 @@
-import sys, tty, termios
+import sys, tty, termios, time
 
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
@@ -11,19 +11,16 @@ print(host)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
 
-#s.sendall(b'Hello, world')
-#data = s.recv(1024)
-#s.close()
-#print('Received', repr(data))
-
 while True:
     try:
         tty.setraw(sys.stdin.fileno())
         ch = sys.stdin.read(1)
+        time.sleep(.04)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
     if ord(ch) == 3:
         sys.exit()
 
     s.sendall(bytes(ch, 'utf-8'))
-    print(ord(ch))
+
