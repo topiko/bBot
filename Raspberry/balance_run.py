@@ -213,13 +213,13 @@ def balance_loop(ser, run_time_max=10,
                 pass
 
             if data == b'a':
-                cmd_dict['phi'] += 1
+                cmd_dict['phi'] += 4
             elif data == b'd':
-                cmd_dict['phi'] -= 1
+                cmd_dict['phi'] -= 4
             elif data == b'w':
-                cmd_dict['target_l'] += .01
+                cmd_dict['target_l'] += .02
             elif data == b's':
-                cmd_dict['target_l'] -= .01
+                cmd_dict['target_l'] -= .02
 
             cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
             cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])

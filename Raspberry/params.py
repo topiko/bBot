@@ -54,8 +54,8 @@ try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':10,
-                        'D_pos':3,
-                        'I_pos':1.0,
+                        'D_pos':10,
+                        'I_pos':.0,
                         'P_theta':150,
                         'D_theta':20,
                         'I_theta':5, #1.5,
