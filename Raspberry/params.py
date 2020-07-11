@@ -12,7 +12,7 @@ PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .12 #12
+AMPLITUDE = .00 ##12 #12
 INIT_THETA_DEV = 1
 PHIDOT = 90
 
@@ -20,8 +20,8 @@ PHIDOT = 90
 OPM_METHOD = 'diff_evo' #'L-BFGS-B' #'diff_evo' #'L-BFGS-B' #'brute'
 
 # maximum targeted accel:
-MAX_V = 0.5
-MAX_A = 1.0
+MAX_V = 1.0
+MAX_A = 2.0
 MAX_A_CTRL = 30
 MAX_V_CTRL = (1024 * ARDUINO_STEP_MULTIP / STEPS_PER_REV) * PI*WHEEL_DIA
 
@@ -32,7 +32,7 @@ LCM = 0.05 # Distance of center of mass from wheel axle
 MASS = 1.0 # mass of the robot
 J = 0.14**2 #MASS * LCM**2  # moment of inertia
 
-ALPHA = 5.0 # (MASS * LCM / J) #40 #736
+ALPHA = 4.7 # (MASS * LCM / J) #40 #736
 print('ALPHA = {:.2f}'.format(ALPHA))
 
 ALPHA_SIMUL = ALPHA # - 30
@@ -46,18 +46,18 @@ KL_USE_INPUT = True #False #True #False
 
 SIMUL_LOOP_TIME = 22.5
 OPM_LOOP_TIME = 7 #22.5
-RUN_LOOP_TIME = 60
+RUN_LOOP_TIME = 120
 
 KAPPA_D_THETA = None #1/2
 
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':10,
-                        'D_pos':10,
+    CTRL_PARAMS_DICT = {'P_pos':15,
+                        'D_pos':3,
                         'I_pos':.0,
-                        'P_theta':150,
-                        'D_theta':20,
+                        'P_theta':250, #150
+                        'D_theta':40, # 20
                         'I_theta':5, #1.5,
                         'accel_mltp':1.0}
 

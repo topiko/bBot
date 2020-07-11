@@ -213,16 +213,17 @@ def balance_loop(ser, run_time_max=10,
                 pass
 
             if data == b'a':
-                cmd_dict['phi'] += 4
+                cmd_dict['phi'] += 5
             elif data == b'd':
-                cmd_dict['phi'] -= 4
+                cmd_dict['phi'] -= 5
             elif data == b'w':
-                cmd_dict['target_l'] += .02
+                cmd_dict['target_l'] += .01
             elif data == b's':
-                cmd_dict['target_l'] -= .02
+                cmd_dict['target_l'] -= .01
 
             cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
-            cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
+            # This should be handled by PID?
+            #cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
 
         #Debug:
         state_dict['loop_idx'] = i
@@ -415,7 +416,7 @@ if __name__ == '__main__':
             while True:
                 run_balancing(SER,
                               run_time_max=RUN_LOOP_TIME,
-                              max_diff_theta=.05) # is not None:
+                              max_diff_theta=.25) # is not None:
                 print('Sleeping')
                 time.sleep(1)
         except KeyboardInterrupt:
