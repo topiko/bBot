@@ -4,15 +4,15 @@ Various physical parameters
 import numpy as np
 
 UPRIGHT_THETA = 15.5 #15.2 Usuakky
-STEPS_PER_REV = 1600 # used to be 400 This would then be 200*8...
-ARDUINO_STEP_MULTIP = 12 # 
+STEPS_PER_REV = 1600 #1600 # used to be 400 This would then be 200*8...
+ARDUINO_STEP_MULTIP = 8 # 
 WHEEL_DIA = .092
 RAIL_W = .078
 PI = 3.14159267
 
 DT = .016
 
-AMPLITUDE = .10 #12
+AMPLITUDE = .12 #12
 INIT_THETA_DEV = 1
 PHIDOT = 90
 
@@ -58,7 +58,7 @@ except FileNotFoundError:
                         'I_pos':1.0,
                         'P_theta':150,
                         'D_theta':20,
-                        'I_theta':10, #1.5,
+                        'I_theta':5, #1.5,
                         'accel_mltp':1.0}
 
 #                        'damp_theta':1.0,
