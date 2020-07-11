@@ -42,7 +42,7 @@ else:
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
         timeout=.05
-
+    )
 
     if REMOTE:
         # Open connection for remote
@@ -53,7 +53,7 @@ else:
         CONN, addr = SOCKET.accept()
         print ('connection from', addr)
         CONN.setblocking(0)
-    )
+
 
 STORE_RUN = True
 PRINT_REPORT = True #False
@@ -82,6 +82,7 @@ def balance_loop(ser, run_time_max=10,
                     'v':0,
                     'a':0,
                     'phidot':0,
+                    'phi':0,
                     'target_theta':UPRIGHT_THETA,
                     'target_l':0,
                     'target_x':0,
@@ -201,19 +202,27 @@ def balance_loop(ser, run_time_max=10,
         run_time = cur_time - init_time
 
         # Quick test of location updates
-        cmd_dict['target_l'], cmd_dict['target_v'], cmd_dict['target_a'], cmd_dict['phidot'] \
-                = get_x_v_a(run_time, AMPLITUDE, state_dict)
+        #cmd_dict['target_l'], cmd_dict['target_v'], cmd_dict['target_a'], _ \
+        #        = get_x_v_a(run_time, AMPLITUDE, state_dict)
 
         if REMOTE:
+            data = None
             try:
                 data=CONN.recv(1)
             except Exception as e:
                 pass
 
-            if str(data) == 'a':
-                cmd_dict['phidot'] += 1
-            elif str(data) == 'b':
-                cmd_dict['phidot'] -= 1
+            if data == b'a':
+                cmd_dict['phi'] += 1
+            elif data == b'd':
+                cmd_dict['phi'] -= 1
+            elif data == b'w':
+                cmd_dict['target_l'] += .01
+            elif data == b's':
+                cmd_dict['target_l'] -= .01
+
+            cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
+            cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
 
         #Debug:
         state_dict['loop_idx'] = i
