@@ -23,12 +23,12 @@ def get_x_v_a(time, amp, state_dict):
         xpos = -amp
         vval = 0
         aval = 0
-        phidot = 90/hold_period
+        phidot = 0/hold_period
     else:
         xpos = amp
         vval = 0
         aval = 0
-        phidot = 90/hold_period
+        phidot = 0/hold_period
     return xpos, vval, aval, phidot
 
 def get_x_v_a_2(time, amp, state_dict):
