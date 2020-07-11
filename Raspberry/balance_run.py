@@ -3,8 +3,10 @@ This is the main balancing loop.
 """
 import sys
 import time
+import socket
 
 import numpy as np
+
 from communication import talk, listen, \
         enable_legs, disable_all, initialize_state_dict
 from state import update_state, predict_theta, \
@@ -19,6 +21,8 @@ from score import score_run
 from scipy.optimize import minimize, brute, differential_evolution
 from report import report, store
 from goto import get_x_v_a
+
+REMOTE = True
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -38,6 +42,17 @@ else:
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
         timeout=.05
+
+
+    if REMOTE:
+        # Open connection for remote
+
+        SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        SOCKET.bind(('192.168.43.32', 8000))
+        SOCKET.listen(5)
+        CONN, addr = SOCKET.accept()
+        print ('connection from', addr)
+        CONN.setblocking(0)
     )
 
 STORE_RUN = True
@@ -188,6 +203,17 @@ def balance_loop(ser, run_time_max=10,
         # Quick test of location updates
         cmd_dict['target_l'], cmd_dict['target_v'], cmd_dict['target_a'], cmd_dict['phidot'] \
                 = get_x_v_a(run_time, AMPLITUDE, state_dict)
+
+        if REMOTE:
+            try:
+                data=CONN.recv(1)
+            except Exception as e:
+                pass
+
+            if str(data) == 'a':
+                cmd_dict['phidot'] += 1
+            elif str(data) == 'b':
+                cmd_dict['phidot'] -= 1
 
         #Debug:
         state_dict['loop_idx'] = i
