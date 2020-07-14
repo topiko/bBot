@@ -77,7 +77,7 @@ def get_PID(x, int_x, xdot, P, I, D, dt, kappa_D=None):
     else:
         int_x = x * dt
 
-    return -P*x - int_x * I - xdot*D, int_x
+    return -P*x - int_x*I - xdot*D, int_x
 
 def get_xdd_damp_osc(x, xdot, omega, khi):
     """
