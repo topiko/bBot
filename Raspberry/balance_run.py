@@ -15,7 +15,7 @@ from state import update_state, predict_theta, \
 from control import react, relocate
 from params import UPRIGHT_THETA, DT, CTRL_PARAMS_DICT, \
         OPM_LOOP_TIME, AMPLITUDE, OPM_METHOD, RUN_LOOP_TIME, \
-        COLLECT_DATA
+        COLLECT_DATA, REMOTE_DX
 from kalman import get_patric_kalman
 from score import score_run
 from scipy.optimize import minimize, brute, differential_evolution
@@ -57,7 +57,7 @@ else:
 
 STORE_RUN = True
 PRINT_REPORT = True #False
-N_REPORT = 1 if MODE.startswith('simulate') else 2000
+N_REPORT = 1 if MODE.startswith('simulate') else 20000
 if MODE == 'simuloptimize':
     PRINT_REPORT = False
 
@@ -185,7 +185,7 @@ def balance_loop(ser, run_time_max=10,
             status = check_status(state_dict)
 
         # report
-        if PRINT_REPORT and (i%N_REPORT == 0):
+        if PRINT_REPORT and (i%N_REPORT == 0) and (i != 0):
             report(i, N_REPORT, t_init,
                    run_time, wait_sum,
                    run_time_max,
@@ -211,15 +211,15 @@ def balance_loop(ser, run_time_max=10,
                 data=CONN.recv(1)
             except Exception as e:
                 pass
-
+                    
             if data == b'a':
                 cmd_dict['phi'] += 5
             elif data == b'd':
                 cmd_dict['phi'] -= 5
             elif data == b'w':
-                cmd_dict['target_l'] = state_dict['run_l'] + 0.01
+                cmd_dict['target_l'] += REMOTE_DX
             elif data == b's':
-                cmd_dict['target_l'] = state_dict['run_l'] - 0.01
+                cmd_dict['target_l'] -= REMOTE_DX
 
             cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
             # This should be handled by PID?
