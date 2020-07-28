@@ -208,20 +208,14 @@ def balance_loop(ser, run_time_max=10,
         if REMOTE:
             data = None
             try:
-                data=CONN.recv(1)
+                data=CONN.recv(2**4)
+                add_x, phidot = data.decode('utf-8').split(',')
             except Exception as e:
                 pass
-                    
-            if data == b'a':
-                cmd_dict['phi'] += 5
-            elif data == b'd':
-                cmd_dict['phi'] -= 5
-            elif data == b'w':
-                cmd_dict['target_l'] += REMOTE_DX
-            elif data == b's':
-                cmd_dict['target_l'] -= REMOTE_DX
 
-            cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
+            cmd_dict['target_l'] += float(add_x)
+            cmd_dict['phidot'] = float(phidot) # (cmd_dict['phi'] - state_dict['phi'][1])
+
             # This should be handled by PID?
             cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
 
