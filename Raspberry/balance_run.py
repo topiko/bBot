@@ -22,11 +22,13 @@ from scipy.optimize import minimize, brute, differential_evolution
 from report import report, store
 from goto import get_x_v_a
 
-REMOTE = True
+REMOTE = True 
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
+    REMOTE = True
 else:
+    REMOTE = False
     MODE = 'test_mpu'
 
 if MODE.startswith('simul'):
@@ -206,17 +208,21 @@ def balance_loop(ser, run_time_max=10,
         #        = get_x_v_a(run_time, AMPLITUDE, state_dict)
 
         if REMOTE:
-            data = None
+            add_x = 0
+            add_phi = 0
             try:
-                data=CONN.recv(2**4)
-                add_x, phidot = data.decode('utf-8').split(',')
+                data=CONN.recv(2**5)
+                add_phi, add_x = data.decode('utf-8').split(',')
+                print(add_x, phidot)
             except Exception as e:
                 pass
 
             cmd_dict['target_l'] += float(add_x)
-            cmd_dict['phidot'] = float(phidot) # (cmd_dict['phi'] - state_dict['phi'][1])
+            cmd_dict['phi'] += float(add_phi)
+
 
             # This should be handled by PID?
+            cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
             cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
 
         #Debug:
