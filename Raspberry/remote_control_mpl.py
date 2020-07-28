@@ -29,7 +29,7 @@ class Cursor(object):
         # update the line positions
         print(x, y)
 
-        s.sendall(bytes('{:.02f},{:.02f}'.format(x,y), 'utf-8'))
+        s.sendall(bytes('{:.02f},{:.02f}'.format(-x,y), 'utf-8'))
         self.lx.set_ydata(y)
         self.ly.set_xdata(x)
 
