@@ -22,7 +22,7 @@ from scipy.optimize import minimize, brute, differential_evolution
 from report import report, store
 from goto import get_x_v_a
 
-REMOTE = True 
+REMOTE = True
 
 if len(sys.argv) == 2:
     MODE = sys.argv[1]
@@ -50,12 +50,16 @@ else:
         # Open connection for remote
         # TODO: transfer this to paho-mqtt based. Also
         # on use ps4 remote.
+        from utils import makemqttclient
+        q, client = makemqttclient(["niilo/imu", "niilo/testarea"])
+        '''
         SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         SOCKET.bind(('192.168.43.32', 8000))
         SOCKET.listen(5)
         CONN, addr = SOCKET.accept()
         print ('connection from', addr)
         CONN.setblocking(0)
+        '''
 
 
 STORE_RUN = True
@@ -211,6 +215,20 @@ def balance_loop(ser, run_time_max=10,
         if REMOTE:
             #TODO: here we call client.loop to read the possible control
             #input from mqtt server.
+            a = client.loop(timeout=looptimeout)
+            while not q.empty():
+                if q.qsize()!=1: print("LONG QUEUE")
+                message = q.get()
+
+                msg_topic = message[0]
+                message = message[1]
+                message = message.decode("utf-8")
+
+
+                if msg_topic=="patric/control":
+
+                    add_phi, add_x = message.split(',')
+            '''
             add_x = 0
             add_phi = 0
             try:
@@ -219,7 +237,7 @@ def balance_loop(ser, run_time_max=10,
                 print(add_x, phidot)
             except Exception as e:
                 pass
-
+            '''
             cmd_dict['target_l'] += float(add_x)
             cmd_dict['phi'] += float(add_phi)
 
