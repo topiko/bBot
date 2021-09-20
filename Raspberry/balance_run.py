@@ -48,7 +48,8 @@ else:
 
     if REMOTE:
         # Open connection for remote
-
+        # TODO: transfer this to paho-mqtt based. Also
+        # on use ps4 remote.
         SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         SOCKET.bind(('192.168.43.32', 8000))
         SOCKET.listen(5)
@@ -208,6 +209,8 @@ def balance_loop(ser, run_time_max=10,
         #        = get_x_v_a(run_time, AMPLITUDE, state_dict)
 
         if REMOTE:
+            #TODO: here we call client.loop to read the possible control
+            #input from mqtt server.
             add_x = 0
             add_phi = 0
             try:
