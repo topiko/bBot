@@ -215,7 +215,7 @@ def balance_loop(ser, run_time_max=10,
         if REMOTE:
             #TODO: here we call client.loop to read the possible control
             #input from mqtt server.
-            a = client.loop(timeout=looptimeout)
+            a = client.loop(timeout=0.01)
             while not q.empty():
                 if q.qsize()!=1: print("LONG QUEUE")
                 message = q.get()
