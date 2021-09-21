@@ -51,7 +51,7 @@ else:
         # TODO: transfer this to paho-mqtt based. Also
         # on use ps4 remote.
         from utils import makemqttclient
-        q, client = makemqttclient(["niilo/imu", "niilo/testarea"])
+        q, client = makemqttclient(["niilo/imu", "niilo/testarea"], host="192.168.0.13")
         '''
         SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         SOCKET.bind(('192.168.43.32', 8000))
