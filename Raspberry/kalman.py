@@ -55,6 +55,11 @@ class KLFilter():
         kl_matrx = {'P':self.P, 'F':self.F}
         np.save('kl_mats.npy', kl_matrx)
 
+    def load(self):
+
+        np.load('kl_mats.npy')
+        raise NotImplementedError
+
     def predict(self, control_input=None):
         """
         Predict the state.

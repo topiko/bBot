@@ -15,7 +15,7 @@ else:
 
 
 if MODE == 'read_rpi':
-    subprocess.call(['scp', 'sexybot:bBot/Raspberry/orient.npy', '.'])
+    subprocess.call(['scp', 'topi@sexybot.local:bBot/Raspberry/orient.npy', '.'])
     orient_arr = np.load('orient.npy')
 elif MODE == 'latest':
     orient_arr = np.load('orient.npy')

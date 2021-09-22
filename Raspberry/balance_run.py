@@ -51,7 +51,7 @@ else:
         # TODO: transfer this to paho-mqtt based. Also
         # on use ps4 remote.
         from utils import makemqttclient
-        q, client = makemqttclient(["niilo/imu", "niilo/testarea"], host="192.168.0.13")
+        q, client = makemqttclient(["patric/control"], host="192.168.0.13")
         '''
         SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         SOCKET.bind(('192.168.43.32', 8000))
@@ -213,7 +213,6 @@ def balance_loop(ser, run_time_max=10,
         #        = get_x_v_a(run_time, AMPLITUDE, state_dict)
 
         if REMOTE:
-            #TODO: here we call client.loop to read the possible control
             #input from mqtt server.
             a = client.loop(timeout=0.01)
             add_x = 0
@@ -232,6 +231,7 @@ def balance_loop(ser, run_time_max=10,
                     add_phi, add_x = message.split(',')
                     add_phi = float(add_phi)*10
                     add_x = float(add_x)/100
+                    print("mqtt input")
             '''
             add_x = 0
             add_phi = 0
