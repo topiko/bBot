@@ -53,8 +53,8 @@ REMOTE_DX = 0.005
 try:
     CTRL_PARAMS_DICT = np.load('ctrl_params.npy', allow_pickle=True).item()
 except FileNotFoundError:
-    CTRL_PARAMS_DICT = {'P_pos':4,
-                        'D_pos':2,
+    CTRL_PARAMS_DICT = {'P_pos':0, #4,
+                        'D_pos':0, #2,
                         'I_pos':.0,
                         'P_theta':150, #350, #150
                         'D_theta':20, #55, # 20
