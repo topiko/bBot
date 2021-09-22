@@ -441,7 +441,7 @@ if __name__ == '__main__':
             while True:
                 run_balancing(SER,
                               run_time_max=RUN_LOOP_TIME,
-                              max_diff_theta=.25) # is not None:
+                              max_diff_theta=.10) # is not None:
                 print('Sleeping')
                 time.sleep(1)
         except KeyboardInterrupt:
