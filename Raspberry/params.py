@@ -5,7 +5,7 @@ import numpy as np
 
 UPRIGHT_THETA = 15.5 #15.2 Usuakky
 STEPS_PER_REV = 1600 #1600 # used to be 400 This would then be 200*8...
-ARDUINO_STEP_MULTIP = 8 # 
+ARDUINO_STEP_MULTIP = 8 #
 WHEEL_DIA = .092
 RAIL_W = .078
 PI = 3.14159267
@@ -56,8 +56,8 @@ except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':4,
                         'D_pos':2,
                         'I_pos':.0,
-                        'P_theta':350, #150
-                        'D_theta':55, # 20
+                        'P_theta':150 #350, #150
+                        'D_theta':20 #55, # 20
                         'I_theta':0, #1.5,
                         'accel_mltp':1.0}
 
