@@ -230,6 +230,8 @@ def balance_loop(ser, run_time_max=10,
                 if msg_topic=="patric/control":
 
                     add_phi, add_x = message.split(',')
+                    add_phi = float(add_phi)*10
+                    add_x = float(add_x)/100
             '''
             add_x = 0
             add_phi = 0
@@ -240,8 +242,8 @@ def balance_loop(ser, run_time_max=10,
             except Exception as e:
                 pass
             '''
-            cmd_dict['target_l'] += float(add_x)
-            cmd_dict['phi'] += float(add_phi)
+            cmd_dict['target_l'] += add_x
+            cmd_dict['phi'] += add_phi
 
 
             # This should be handled by PID?
