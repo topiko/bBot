@@ -56,8 +56,8 @@ except FileNotFoundError:
     CTRL_PARAMS_DICT = {'P_pos':0, #4,
                         'D_pos':0, #2,
                         'I_pos':.0,
-                        'P_theta':150, #350, #150
-                        'D_theta':20, #55, # 20
+                        'P_theta':50, #350, #150
+                        'D_theta':10, #55, # 20
                         'I_theta':0, #1.5,
                         'accel_mltp':1.0}
 
