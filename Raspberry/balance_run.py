@@ -231,7 +231,6 @@ def balance_loop(ser, run_time_max=10,
                     add_x, add_phi = message.split(',')
                     add_phi = float(add_phi)*10
                     add_x = float(add_x)/100
-                    print("mqtt input")
             '''
             add_x = 0
             add_phi = 0
