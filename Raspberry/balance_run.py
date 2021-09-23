@@ -214,7 +214,7 @@ def balance_loop(ser, run_time_max=10,
 
         if REMOTE:
             #input from mqtt server.
-            a = client.loop(timeout=0.01)
+            a = client.loop(timeout=0.001)
             add_x = 0
             add_phi = 0
             while not q.empty():
