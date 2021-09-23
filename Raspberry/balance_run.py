@@ -228,7 +228,7 @@ def balance_loop(ser, run_time_max=10,
 
                 if msg_topic=="patric/control":
 
-                    add_phi, add_x = message.split(',')
+                    add_x, add_phi = message.split(',')
                     add_phi = float(add_phi)*10
                     add_x = float(add_x)/100
                     print("mqtt input")
