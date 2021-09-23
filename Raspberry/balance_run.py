@@ -229,8 +229,8 @@ def balance_loop(ser, run_time_max=10,
                 if msg_topic=="patric/control":
 
                     add_x, add_phi = message.split(',')
-                    add_phi = float(add_phi)*4
-                    add_x = float(add_x)/300
+                    add_phi = float(add_phi)*5
+                    add_x = float(add_x)/200
             '''
             add_x = 0
             add_phi = 0
