@@ -152,6 +152,8 @@ def balance_loop(ser, run_time_max=10,
     # enable the legs:
     enable_legs(ser, MODE)
 
+    v = 0
+    phidot = 0
     run_time = 0
     init_time = state_dict['times'][0]
     while (run_time < run_time_max) and (i < imax) and (status != 'fell'): # True:
@@ -204,8 +206,6 @@ def balance_loop(ser, run_time_max=10,
         if REMOTE:
             #input from mqtt server.
             a = client.loop(timeout=0.001)
-            add_x = 0
-            add_phi = 0
             while not q.empty():
                 if q.qsize()!=1: print("LONG QUEUE")
                 message = q.get()
@@ -218,16 +218,16 @@ def balance_loop(ser, run_time_max=10,
                 if msg_topic=="patric/remote":
                     #TODO: use velocity instead of position here.
                     v, phidot = message.split(',')
-                    add_phi = float(add_phi)*5
-                    add_x = float(add_x)/200
+                    phidot = float(phidot)*5
+                    v = float(v)/200
                 elif msg_topic=="patric/params":
                     ctrl_params_dict = update_control_params(message)
                 elif msg_topic=="patric/cmd":
-                    if cmd=="saverun":
+                    if message=="saverun":
                         np.save('orient.npy', run_array[3:i])
-                    elif cmd=="startrun":
+                    elif message=="startrun":
                         store_arr = init_run_array()
-                    elif cmd=="saveparams":
+                    elif message=="saveparams":
                         np.save("ctrl_params.npy", ctrl_params_dict)
 
 
