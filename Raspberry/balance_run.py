@@ -231,8 +231,19 @@ def balance_loop(ser, run_time_max=10,
                         np.save("ctrl_params.npy", ctrl_params_dict)
 
 
-            cmd_dict['target_l'] = state_dict['run_l'][1] + v*state_dict['dt']*10 #add_x
-            cmd_dict['phi'] = state_dict['phi'][1] + phidot*state_dict['dt']*10
+            if v==0:
+                add_x = 0
+            else:
+                add_x = v*state_dict['dt']*10 #add_x
+
+            if phidot==0:
+                add_phi = 0
+            else:
+                add_phi = phidot*state_dict['dt']*10
+
+
+            cmd_dict['target_l'] += add_x
+            cmd_dict['phi'] += add_phi
 
 
             # This should be handled by PID?
