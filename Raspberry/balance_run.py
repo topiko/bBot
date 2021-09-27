@@ -3,7 +3,6 @@ This is the main balancing loop.
 """
 import sys
 import time
-import socket
 
 import numpy as np
 
@@ -46,20 +45,10 @@ else:
         timeout=.05
     )
 
-    if REMOTE:
-        # Open connection for remote
-        # TODO: transfer this to paho-mqtt based. Also
-        # on use ps4 remote.
-        from utils import makemqttclient
-        q, client = makemqttclient(["patric/control"], host="192.168.0.13")
-        '''
-        SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        SOCKET.bind(('192.168.43.32', 8000))
-        SOCKET.listen(5)
-        CONN, addr = SOCKET.accept()
-        print ('connection from', addr)
-        CONN.setblocking(0)
-        '''
+    # Open connection for remote
+    from utils import makemqttclient
+    q, client = makemqttclient(["patric/remote", "patric/params", "patric/cmd"],
+                               host="192.168.0.13")
 
 
 STORE_RUN = True
@@ -226,28 +215,31 @@ def balance_loop(ser, run_time_max=10,
                 message = message.decode("utf-8")
 
 
-                if msg_topic=="patric/control":
-
-                    add_x, add_phi = message.split(',')
+                if msg_topic=="patric/remote":
+                    #TODO: use velocity instead of position here.
+                    v, phidot = message.split(',')
                     add_phi = float(add_phi)*5
                     add_x = float(add_x)/200
-            '''
-            add_x = 0
-            add_phi = 0
-            try:
-                data=CONN.recv(2**5)
-                add_phi, add_x = data.decode('utf-8').split(',')
-                print(add_x, phidot)
-            except Exception as e:
-                pass
-            '''
-            cmd_dict['target_l'] += add_x
-            cmd_dict['phi'] += add_phi
+                elif msg_topic=="patric/params":
+                    ctrl_params_dict = update_control_params(message)
+                elif msg_topic=="patric/cmd":
+                    if cmd=="saverun":
+                        np.save('orient.npy', run_array[3:i])
+                    elif cmd=="startrun":
+                        store_arr = init_run_array()
+                    elif cmd=="saveparams":
+                        np.save("ctrl_params.npy", ctrl_params_dict)
+
+
+            cmd_dict['target_l'] = state_dict['run_l'][1] + v*state_dict['dt']*10 #add_x
+            cmd_dict['phi'] = state_dict['phi'][1] + phidot*state_dict['dt']*10
 
 
             # This should be handled by PID?
-            cmd_dict['phidot'] = (cmd_dict['phi'] - state_dict['phi'][1])
-            cmd_dict['target_v'] = (cmd_dict['target_l'] - state_dict['run_l'][1])
+            cmd_dict['phidot'] = phidot # (cmd_dict['phi'] - state_dict['phi'][1])
+            cmd_dict['target_v'] = v #(cmd_dict['target_l'] - state_dict['run_l'][1])
+
+
 
         #Debug:
         state_dict['loop_idx'] = i
@@ -259,6 +251,25 @@ def balance_loop(ser, run_time_max=10,
     disable_all(ser, state_dict)
 
     return store_arr[3:i], ser, status, cmd_dict, state_dict, kl
+
+
+def update_control_params(params_str):
+    """
+    Create new control params dict from comma separated control params string.
+    """
+    params_str = [keyval.split(':') for keyval in params_str.split(',')]
+    return {key:float(val) for key, val in params_str}
+
+
+
+
+def init_run_array(imax=50000):
+    """
+    Initialize an run array where the run data is stored as function of time.
+    """
+    dtypes = [(c, np.float32) for c in COLLECT_DATA]
+    return np.zeros(imax).astype(dtypes)
+
 
 
 def optimize_params():
