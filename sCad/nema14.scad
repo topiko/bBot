@@ -1,8 +1,23 @@
-include <design.scad>;
+use <utils.scad>;
+
+// NEMA
+nema_spacing = .3;
+nema14_x = 35.2 + nema_spacing;
+nema14_y = 35.2 + nema_spacing;
+nema14_z = 23.0 + nema_spacing;
+corner_cut = 2  + nema_spacing;
+nema_L_axle = 17;
+nema_r_axle = 5/2  + nema_spacing;
+nema_bolt_d = d3bolt;
+nema_L_bolt = 5;
+
+middle_cyl_r = 11  + nema_spacing;
+middle_cyl_h = 2  + nema_spacing;
+
 
 build = 0;
 
-module nema14(a){
+module nema14(){
     module corner(){
         linear_extrude(height = nema14_z) polygon(points = [[0,0],[nema14_x/2, 0], [nema14_x/2, nema14_y/2 - corner_cut], [nema14_x/2-corner_cut, nema14_y/2], [0, nema14_y/2]]);
     }
@@ -15,11 +30,10 @@ module nema14(a){
         mirror([0,1,0]) corner();
     }
     
-    a = 40;
     // TOP RING
-    cylinder(r = middle_cyl_r, h = nema14_z +  middle_cyl_h, $fn = 2*a);
+    cylinder(r = middle_cyl_r, h = nema14_z +  middle_cyl_h);
     // AXLE
-    cylinder(r = nema_r_axle, h = nema14_z +  nema_L_axle, $fn = a);
+    cylinder(r = nema_r_axle, h = nema14_z +  nema_L_axle);
     }
 }
 
@@ -73,4 +87,4 @@ module nema14_mount(t, a){
 //L_bolt = 5;
 //r_bolt = 3/2;
 //nema_bolts(L_bolt, r_bolt, 10);
-nema14_mount(4, 20);
+nema14();

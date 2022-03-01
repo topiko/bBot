@@ -16,7 +16,8 @@ else: MODE = 'read_rpi'
 PREDICT = True
 
 if MODE == 'read_rpi':
-    subprocess.call(['scp', 'sexybot:bBot/Raspberry/orient.npy', '.'])
+    print("Read from rpi")
+    subprocess.call(['scp', 'topi@sexybot.local:bBot/Raspberry/orient.npy', '.'])
     orient_arr = np.load('orient.npy')
 elif MODE == 'latest':
     orient_arr = np.load('orient.npy')
@@ -28,6 +29,7 @@ else:
         print('Invalid fname: {}'.format(MODE))
         orient_arr = np.load('datas/' + files[0])
 
+print(orient_arr)
 # start of predictions suck...
 ndiscard = 10
 nconv = np.ones(5)/5
